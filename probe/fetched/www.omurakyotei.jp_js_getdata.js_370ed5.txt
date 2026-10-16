@@ -1,0 +1,43 @@
+/*---------------------------------------------------------------------------
+Ajax
+---------------------------------------------------------------------------*/
+function getHttpResponse(url) {
+	var httpObject = getHttpObject();
+
+	var dd = new Date();
+	httpObject.open("GET", url + "&dummy=" + dd + "&ajaxaccess", false);
+	httpObject.send("");
+	
+	return httpObject.responseText;
+}
+
+
+function getHttpObject() {
+	var httpObject = false;
+
+	// IE以外
+	if(window.XMLHttpRequest) {
+		httpObject = new XMLHttpRequest();
+	// IE用
+	} else if(window.ActiveXObject) {
+		try {
+			httpObject = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch(e) {
+			httpObject = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+	}
+
+	//httpObject.overrideMimeType('text/plain; charset=utf-8');
+	return httpObject;
+}
+
+function GetLiveContents(dspkbn, day, race) {
+	url = "/include/iframe_live.php?dspkbn=" + dspkbn + "&liveday=" + day + "&liverace=" + race;
+	document.getElementById("livemenu").innerHTML = getHttpResponse(url);
+	//document.getElementById("livemenu1").innerHTML = getHttpResponse(url);
+        }
+function GetLiveContents2(dspkbn, day, race) {
+	url = "/yosou/include/new_top_iframe_" + dspkbn + ".php?day=" + day + "&race=" + race;
+	 location.href = url;
+}
+

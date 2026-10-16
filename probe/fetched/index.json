@@ -100,5 +100,53 @@
   "file": "www.boatrace-miyajima.com__96b628.txt",
   "bytes": 87805,
   "mawari": false
+ },
+ "https://www.boatrace-toda.jp/xml/kaisai/20261015/race_table_original_01.xml": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_xml_kaisai_20261015_race_table_original_01.xml_dad0c8.txt",
+  "bytes": 2030,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/xml/kaisai/20251015/race_table_original_01.xml": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_xml_kaisai_20251015_race_table_original_01.xml_300ec1.txt",
+  "bytes": 2031,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/xml/kaisai/20241013/race_table_original_01.xml": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_xml_kaisai_20241013_race_table_original_01.xml_4146ba.txt",
+  "bytes": 2032,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/xml/kaisai/20221015/race_table_original_01.xml": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_xml_kaisai_20221015_race_table_original_01.xml_db4f0d.txt",
+  "bytes": 2032,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/yosou/chokuzen.php?day=20261015&race=1": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_yosou_chokuzen.php_day_20261015_race_1_ca27d1.txt",
+  "bytes": 61652,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/yosou/chokuzen.php": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_yosou_chokuzen.php_f0d2be.txt",
+  "bytes": 57117,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/yosou/chokuzen.php?day=20251015&race=1": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_yosou_chokuzen.php_day_20251015_race_1_cdf4c9.txt",
+  "bytes": 57765,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/js/getdata.js": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_js_getdata.js_370ed5.txt",
+  "bytes": 1233,
+  "mawari": false
  }
 }

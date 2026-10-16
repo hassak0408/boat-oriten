@@ -1,0 +1,92 @@
+<table>
+  <record>
+    <teiban>1</teiban>
+    <name>山下　　拓巳</name>
+    <tiltc>-0.5</tiltc>
+    <taiju>52.0</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.77</ttime>
+    <str>7.06</str>
+    <cnr>5.53</cnr>
+    <rnd>37.12</rnd>
+    <ttm_rank>2</ttm_rank>
+    <str_rank>0</str_rank>
+    <cnr_rank>0</cnr_rank>
+    <rnd_rank>1</rnd_rank>
+  </record>
+  <record>
+    <teiban>2</teiban>
+    <name>篠原　　飛翔</name>
+    <tiltc>0.0</tiltc>
+    <taiju>52.0</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.83</ttime>
+    <str>7.05</str>
+    <cnr>5.42</cnr>
+    <rnd>37.51</rnd>
+    <ttm_rank>0</ttm_rank>
+    <str_rank>0</str_rank>
+    <cnr_rank>1</cnr_rank>
+    <rnd_rank>0</rnd_rank>
+  </record>
+  <record>
+    <teiban>3</teiban>
+    <name>本村　　　大</name>
+    <tiltc>-0.5</tiltc>
+    <taiju>52.4</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.83</ttime>
+    <str>7.07</str>
+    <cnr>5.43</cnr>
+    <rnd>37.36</rnd>
+    <ttm_rank>0</ttm_rank>
+    <str_rank>0</str_rank>
+    <cnr_rank>2</cnr_rank>
+    <rnd_rank>2</rnd_rank>
+  </record>
+  <record>
+    <teiban>4</teiban>
+    <name>藤原　　孝斗</name>
+    <tiltc>-0.5</tiltc>
+    <taiju>55.0</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.74</ttime>
+    <str>7.00</str>
+    <cnr>5.97</cnr>
+    <rnd>37.63</rnd>
+    <ttm_rank>1</ttm_rank>
+    <str_rank>1</str_rank>
+    <cnr_rank>0</cnr_rank>
+    <rnd_rank>0</rnd_rank>
+  </record>
+  <record>
+    <teiban>5</teiban>
+    <name>荒木　　颯斗</name>
+    <tiltc>-0.5</tiltc>
+    <taiju>52.5</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.78</ttime>
+    <str>7.03</str>
+    <cnr>5.73</cnr>
+    <rnd>37.93</rnd>
+    <ttm_rank>0</ttm_rank>
+    <str_rank>2</str_rank>
+    <cnr_rank>0</cnr_rank>
+    <rnd_rank>0</rnd_rank>
+  </record>
+  <record>
+    <teiban>6</teiban>
+    <name>田中　　勇輔</name>
+    <tiltc>-0.5</tiltc>
+    <taiju>52.0</taiju>
+    <ctaiju>0.0</ctaiju>
+    <ttime>6.84</ttime>
+    <str>7.15</str>
+    <cnr>5.90</cnr>
+    <rnd>37.60</rnd>
+    <ttm_rank>0</ttm_rank>
+    <str_rank>0</str_rank>
+    <cnr_rank>0</cnr_rank>
+    <rnd_rank>0</rnd_rank>
+  </record>
+</table>
