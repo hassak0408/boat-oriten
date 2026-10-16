@@ -1,0 +1,104 @@
+{
+ "https://www.boatrace-toda.jp/assets/js/race_table_original.js": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_assets_js_race_table_original.js_95fc24.txt",
+  "bytes": 4900,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/assets/js/race_table_before.js": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_assets_js_race_table_before.js_a77a0d.txt",
+  "bytes": 5716,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/assets/js/race_table.js?ver=20260921_1": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_assets_js_race_table.js_ver_20260921_1_d86964.txt",
+  "bytes": 8967,
+  "mawari": false
+ },
+ "https://www.boatrace-toda.jp/news/news.html?id=16688": {
+  "code": 200,
+  "file": "www.boatrace-toda.jp_news_news.html_id_16688_b9e07a.txt",
+  "bytes": 4435,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/yosou/": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_yosou__b6c686.txt",
+  "bytes": 72054,
+  "mawari": false
+ },
+ "https://www.omurakyotei.jp/js/getdata2.js?v1": {
+  "code": 200,
+  "file": "www.omurakyotei.jp_js_getdata2.js_v1_ba8806.txt",
+  "bytes": 2180,
+  "mawari": false
+ },
+ "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/jumper.htm": {
+  "code": 200,
+  "file": "www.marugameboat.jp_asp_htmlmade_Race_Tenbo_15_PC_jumper.htm_87b91c.txt",
+  "bytes": 1081,
+  "mawari": false
+ },
+ "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/jumper.htm": {
+  "code": 200,
+  "file": "www.kojimaboat.jp_asp_htmlmade_Race_Tenbo_16_jumper.htm_209c21.txt",
+  "bytes": 5526,
+  "mawari": false
+ },
+ "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=16&yd=20261012": {
+  "code": 200,
+  "file": "www.kojimaboat.jp_jump_official_raceindex.html_jyo_16_yd_20261012_0a5618.txt",
+  "bytes": 244,
+  "mawari": false
+ },
+ "https://hj.kojima-yosou.com/hjpc/index/20261012/01": {
+  "code": null,
+  "file": null,
+  "bytes": 21,
+  "mawari": false
+ },
+ "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=437": {
+  "code": 200,
+  "file": "www.gamagori-kyotei.com_asp_gamagori_contents_01race_01race.php_id_437_6c76ca.txt",
+  "bytes": 35594,
+  "mawari": false
+ },
+ "https://www.gamagori-kyotei.com/00help/00help.htm": {
+  "code": 200,
+  "file": "www.gamagori-kyotei.com_00help_00help.htm_33f883.txt",
+  "bytes": 17672,
+  "mawari": true
+ },
+ "https://www.heiwajima.gr.jp/help/help.htm": {
+  "code": 200,
+  "file": "www.heiwajima.gr.jp_help_help.htm_60550a.txt",
+  "bytes": 30629,
+  "mawari": false
+ },
+ "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php?page=2": {
+  "code": 200,
+  "file": "www.boatrace-suminoe.jp_asp_suminoe_00info_info.php_page_2_a34656.txt",
+  "bytes": 34351,
+  "mawari": false
+ },
+ "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Tenbo/12/PC/jumper.htm": {
+  "code": 200,
+  "file": "www.boatrace-suminoe.jp_asp_htmlmade_Race_Tenbo_12_PC_jumper.htm_a6da5c.txt",
+  "bytes": 499,
+  "mawari": false
+ },
+ "https://www.boatrace-miyajima.com/race.html": {
+  "code": 404,
+  "file": null,
+  "bytes": 1270,
+  "mawari": false
+ },
+ "https://www.boatrace-miyajima.com/": {
+  "code": 200,
+  "file": "www.boatrace-miyajima.com__96b628.txt",
+  "bytes": 87805,
+  "mawari": false
+ }
+}

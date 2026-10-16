@@ -1,0 +1,60 @@
+/*---------------------------------------------------------------------------
+Ajax
+---------------------------------------------------------------------------*/
+function getHttpResponse(url) {
+	var httpObject = getHttpObject();
+
+	var dd = new Date();
+	httpObject.open("GET", url + "&dummy=" + dd + "&ajaxaccess", false);
+	httpObject.send("");
+	
+	return httpObject.responseText;
+}
+
+
+function getHttpObject() {
+	var httpObject = false;
+
+	// IE以外
+	if(window.XMLHttpRequest) {
+		httpObject = new XMLHttpRequest();
+	// IE用
+	} else if(window.ActiveXObject) {
+		try {
+			httpObject = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch(e) {
+			httpObject = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+	}
+
+	//httpObject.overrideMimeType('text/plain; charset=utf-8');
+	return httpObject;
+}
+
+function GetLiveContents(dspkbn, day, race) {
+	url = "/include2/iframe_live.php?dspkbn=" + dspkbn + "&liveday=" + day + "&liverace=" + race;
+	//document.getElementById("livemenu").innerHTML = getHttpResponse(url);
+        url2 = "/include2/iframe_live_tab.php?dspkbn=" + dspkbn + "&liveday=" + day + "&liverace=" + race;
+	document.getElementById("livemenu1").innerHTML = getHttpResponse(url);
+        document.getElementById("race_cf").innerHTML = getHttpResponse(url2);
+        }
+function GetLiveContents_test(dspkbn, day, race) {
+	url = "/include2/iframe_live_test.php?dspkbn=" + dspkbn + "&liveday=" + day + "&liverace=" + race;
+	//document.getElementById("livemenu").innerHTML = getHttpResponse(url);
+	document.getElementById("livemenu1").innerHTML = getHttpResponse(url);
+        }        
+function GetLiveContents2(dspkbn, day, race) {
+	url = "/yosou/include/new_top_iframe_" + dspkbn + ".php?day=" + day + "&race=" + race;
+	 location.href = url;
+}
+function GetLiveContents_swtest(dspkbn, day, race) {
+	url = "/include2/iframe_live_swtest.php?dspkbn=" + dspkbn + "&liveday=" + day + "&liverace=" + race;
+	document.getElementById("livemenu1").innerHTML = getHttpResponse(url);
+}
+
+// SPサイト トップ 出走表
+function GetTopSyussouSp(day, race) {
+	url = "/include2/iframe_top_syussou_sp.php?liveday=" + day + "&liverace=" + race;
+	document.getElementById("player_list_sp").innerHTML = getHttpResponse(url);
+}
+

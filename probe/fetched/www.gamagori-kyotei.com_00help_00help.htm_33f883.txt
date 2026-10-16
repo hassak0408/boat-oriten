@@ -1,0 +1,446 @@
+<!doctype html>
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0Y4BHS8LMX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "G-0Y4BHS8LMX");
+  </script>
+  <meta charset="utf-8" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+
+  <title>ヘルプ｜BOAT RACE蒲郡オフィシャルサイト</title>
+
+  <meta name="viewport" content="width=640px" />
+
+  <link rel="stylesheet" href="../css/reset.css" />
+  <link rel="stylesheet" href="../css/00help.css" />
+
+  <script type="text/javascript" src="../js/jquery-1.8.3.min.js"></script>
+
+  <!--共通-->
+  <script type="text/javascript" src="../js/common.js"></script>
+
+  <!--スクロール固定メニュー
+<script type="text/javascript" src="../js/jquery.stickymenu.js"></script>-->
+<script async src='https://www.googletagmanager.com/gtag/js?id=G-SG021VEQJM'></script><script>if(!window.dataLayer) { window.dataLayer=[]};function gtag() { dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-SG021VEQJM');</script> </head>
+
+<body>
+  <div id="wrapper">
+    <!--▼▼▼ヘッダー▼▼▼-->
+    <div id="header_wrapper">
+      <div id="header">
+        <h1>ヘルプ for PCサイト</h1>
+      </div>
+    </div>
+    <!--header end-->
+
+    <!--▼▼▼コンテンツ▼▼▼-->
+    <div id="contents">
+      <!--▼推奨環境▼-->
+      <div id="recomend">
+        <h2><img src="images/header01.gif" /></h2>
+
+        <table>
+          <tr>
+            <th scope="col">　</th>
+            <th class="OS" scope="col">Windows</th>
+            <th class="OS" scope="col">Macintosh</th>
+          </tr>
+          <tr>
+            <th class="category" scope="row">OS</th>
+            <td>Microsoft　Windows 11</td>
+            <td>Mac OS X 12~15、26</td>
+          </tr>
+          <tr>
+            <th class="category" scope="row">ブラウザ</th>
+            <td>Microsoft Edge（最新版）、<br />Google Chrome（最新版）</td>
+            <td>Safari （最新版）、<br />Google Chrome（最新版）</td>
+          </tr>
+          <tr>
+            <th class="category" scope="row">CPU</th>
+            <td>2.33GHz以上のx86互換プロセッサー</td>
+            <td>
+              Intel Core Duo 1.33GHz以上の<br />
+              プロセッサー
+            </td>
+          </tr>
+          <tr>
+            <th class="category" scope="row">メモリ</th>
+            <td>128MB以上</td>
+            <td>256MB以上</td>
+          </tr>
+          <tr>
+            <th class="category" scope="row">画面サイズ</th>
+            <td>1920&times;1080ピクセル以上</td>
+            <td>1920&times;1080ピクセル以上</td>
+          </tr>
+        </table>
+
+        <ul>
+          <li>→ 正常にご覧いただけない場合は<a href="javascript:MultiOpen('/trouble/trouble.htm','ts','650','630');">こちら</a></li>
+        </ul>
+        <ul class="cookie">
+          <li>※当サイトではCookie（クッキー）を使用しています。ご利用のブラウザでCookieの設定を有効にしてください。なお、設定によって生じたトラブルおよび損害等については一切責任を負いません。</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!--▼映像について▼-->
+      <div id="movie">
+        <h2><img src="images/header02.gif" /></h2>
+
+        <h3>■レースライブ</h3>
+        <ul>
+          <li>ご覧いただいているレースライブはボートレース場内で放送されているものですが、中継システムの都合で約1～2分遅れて配信されます。</li>
+          <li>快適にご覧いただくためには高速インターネットへの接続が必要です。映像は512Kbps配信ですので、512Kbps以上の実効ビットレートがないとご覧いただけない場合があります。</li>
+        </ul>
+
+        <h3>■リプレイ動画</h3>
+        <ul>
+          <li>快適にご覧いただくためには高速インターネットへの接続が必要です。512Kbps配信ですので、512Kbps以上の実効ビットレートがないとご覧いただけない場合があります。</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!--▼情報サイトデータについて▼-->
+      <div id="joho">
+        <div id="lead">
+          <h2><img src="images/header03.gif" /></h2>
+
+          <p>「レースライブ＆情報サイト」の各種データ集計期間および詳細は以下の通りです。</p>
+
+          <div id="select"><img src="images/select.gif" /></div>
+        </div>
+
+        <div id="map">
+          <img src="images/map.png" border="0" usemap="#Map" />
+          <map name="Map">
+            <area shape="rect" coords="123,44,209,134" href="#area_A" />
+            <area shape="rect" coords="39,140,209,170" href="#area_B" />
+            <area shape="rect" coords="6,142,35,276" href="#area_C" />
+          </map>
+
+          <div class="clear"></div>
+        </div>
+
+        <!--▼エリアA▼-->
+        <div id="area_A">
+          <h3><img src="images/header_A.gif" /></h3>
+          <div class="come">※内容については主催者発表のものとご照合ください。</div>
+          <h4>■出走表</h4>
+          <ul>
+            <li><span>選手　勝率/2連率</span>・・・全国近況成績（開催初日の月を含む過去6カ月/今節含まず）</li>
+            <li><span>モーター・ボート　勝率/2連率</span>・・・通算成績（初使用～直近節）</li>
+          </ul>
+
+          <h4>■節間成績</h4>
+          <ul>
+            <li class="disc">着からレースリプレイを再生できます。</li>
+          </ul>
+
+          <h4>■スタ展＆直前情報</h4>
+          <ul>
+            <li><span>今節平均ST/S順</span>・・・（今節1走目～直近走のSTの合計）÷出走回数　※F/Lは含まない</li>
+            <li><span>S/D</span>・・・Sはスロー、Dはダッシュ</li>
+            <li><span>プロペラ「新」</span>・・・新しいプロペラに交換</li>
+            <li><span>チルト</span>・・・□は前走から変更された場合表示</li>
+          </ul>
+
+          <h4>■オッズ</h4>
+          <ul>
+            <li class="disc">原則として開催日午前8時30分頃より表示します。</li>
+            <li class="disc">発売締め切り後に表示されているオッズは、確定オッズではありません。</li>
+          </ul>
+
+          <h4>■選手個別データ</h4>
+          <ul>
+            <li>
+              <span>枠番別直近10走</span>・・・当節の前走を含みます。進入コースが枠と異なった場合はそのコースを表示します。「着」の□はSG、○はGⅠとGⅡ、数字のみはGⅢ以下を表し、4着以下はグレーです。当地は2014年以降のデータです。
+            </li>
+            <li><span>過去3節</span>・・・前検日以前の直近3節。○は準優勝戦、●は優勝戦です。</li>
+            <li><span>当地過去5年優勝回数</span>・・・集計期間は前検日から過去5年です。</li>
+            <li><span>通算優勝回数</span>・・・集計期間は初出走から前検日です。</li>
+          </ul>
+        </div>
+        <!--area_A end-->
+
+        <!--▼エリアB▼-->
+        <div id="area_B">
+          <h3><img src="images/header_B.gif" /></h3>
+
+          <h4>■出走表</h4>
+          <ul>
+            <li><span>平均ST</span>・・・今期成績</li>
+            <li><span>期別　勝率/2連率</span>・・・今期成績</li>
+            <li><span>近況　勝率/2連率</span>・・・開催初日の月を含む過去6カ月（今節含まず）</li>
+            <li><span>当地　勝率/2連率</span>・・・開催初日を含む月の24カ月前の年の1月1日～前検日前日まで（今節含まず）</li>
+            <li><span>全国過去3節</span>・・・前検日以前の直近3節。○は準優勝戦、<span class="MS">●</span>は優勝戦</li>
+            <li>
+              <span>当地過去3節</span>・・・2004年1月1日～前検日の直近3節。○は準優勝戦、<span class="MS">●</span>は優勝戦<br />
+              <span class="gray2">※内容については主催者発表のものとご照合ください。</span>
+            </li>
+          </ul>
+
+          <h4>■フォーカス</h4>
+          <ul>
+            <li><span>予想</span>・・・<img src="images/mark02.gif" class="mark" />→<img src="images/mark03.gif"
+                class="mark" />→<img src="images/mark05.gif" class="mark" />→<img src="images/mark04.gif"
+                class="mark" /></li>
+            <li><span>独自スリット予想「選手コース別平均ST」</span>・・・開催初日の月を含む過去6カ月（F/Lは含まない）で、今節を含まない</li>
+          </ul>
+
+          <h4>■オッズ</h4>
+          <ul>
+            <li class="disc">原則として開催日午前8時30分頃より表示します。</li>
+            <li class="disc">
+              発売締め切り後に表示されているオッズは、確定オッズではありません。<br />
+              <span class="gray2">※内容については主催者発表のものとご照合ください。</span>
+            </li>
+          </ul>
+
+          <h4>■選手 枠番別</h4>
+          <ul>
+            <li><span>全国</span></li>
+            <li class="disc">「進入」は進入コースが枠と異なった場合にそのコースを表示します。</li>
+            <li class="disc">「着」の□はSG、○はGⅠとGⅡ、数字のみはGⅢ以下を表し、4着以下はグレーです。</li>
+            <li class="disc">枠番勝率と枠番平均STは直近10走（F/Lは含まない）より算出します。</li>
+            <li><span>当地</span></li>
+            <li class="disc">2014年以降のデータです。</li>
+            <li><span>全国女子</span></li>
+            <li class="disc">オール女子戦時のみ表示します。</li>
+            <li class="disc">2014年以降のデータです。</li>
+            <li class="disc">グレードの表記はありません。</li>
+          </ul>
+
+          <h4>■得点率早見</h4>
+          <ul>
+            <li class="disc">予選最終日前日の翌日出走表データ取得後から当該レース確定まで表示します。</li>
+            <li class="disc">
+              着別得点率の黄色はこの1走で当確、水色は2走目次第で当確、色なしは圏外を表します。<br />
+              <span class="gray">※あくまで直近レース終了時点の早見ですのでご注意ください。</span><br />
+              <span class="gray">※ボーダーは変動し、得点には減点を含みます。また、ページ更新後に減点等が発表される場合があります。</span>
+            </li>
+          </ul>
+
+          <h4>■番組速報</h4>
+          <ul>
+            <li class="disc">
+              予選最終日の予選最終レース終了後に発表します。<br />
+              <span class="gray">※予選突破した選手が、予選終了後のレースで賞典除外の処分を受けたり、ケガ等により明日以降欠場する場合、変更が生じることがあります。</span>
+            </li>
+          </ul>
+
+          <h4>■番記者の機力診断</h4>
+          <ul>
+            <li><span>モーター　通算　勝率/2連率</span>・・・初使用～直近節</li>
+            <li><span>モーター　近況　勝率/2連率</span>・・・直近過去使用5節</li>
+            <li><span>選手　級別（勝率）</span>・・・使用時の級別と近況勝率（開催初日の月を含む過去6カ月/今節含まず）</li>
+            <li><span>過去2節成績</span>・・・○は準優勝戦、<span class="MS">●</span>は優勝戦</li>
+            <li><span>モーターパワー</span>・・・10段階評価（10が最も良い、1が最も悪い）　※前節までの実績で評価</li>
+            <li><span>出足/伸び/回り足</span>・・・5段階評価（<img src="images/mark01.gif" class="mark" />が最も良い、<img
+                src="images/mark02.gif" class="mark" />、<img src="images/mark03.gif" class="mark" />、<img
+                src="images/mark04.gif" class="mark" />、<img src="images/mark06.gif" class="mark" />が最も悪い）</li>
+          </ul>
+
+          <h4>■ピットの声</h4>
+          <ul>
+            <li><span>前日記事/本日記事</span>・・・前日/本日の選手コメント</li>
+            <li><span>NEW/○R前（記者/JLC）</span>・・・記者およびJLCが本日取得、更新した選手のコメントなど</li>
+          </ul>
+
+          <h4>■オリジナル展示タイム</h4>
+          <ul>
+            <!--	<li>coming soon</li>-->
+            <!--7/10からスタート予定	-->
+            <li class="disc">
+              一周・まわり足・直線タイムはボートレース蒲郡独自計測です。<br />
+              <span class="gray">※水面状況や再展示などで計測ができない場合がございます。予めご了承ください。<br />
+                ※計測ができなかった場合は「─」（ハイフン）が表示されます。　<br />
+                ※一周・まわり足・直線の計測タイムは周回展示2周目のものです。</span>
+            </li>
+            <li class="disc">なお、気象状況等により周回展示が1周となった場合は、1周目の計測とします。</li>
+            <img src="../kyogi/images/ori_point.png" width="300" style="margin-top: 3px; margin-left: 10px" />
+          </ul>
+
+          <!--h4>■GAMAタイム</h4>
+<img src="images/time_chart.png" width="440" id="time">
+<ul>
+<li class="disc">各タイム第1位は赤字、第2位は青字で表示します。</li>
+<li class="disc">諸事情により計測不良の場合があります。あらかじめご了承ください。また、ページ下部の注釈をご参照ください。</li>
+</ul-->
+
+          <h4>■直前情報＋実況高橋アナのズバッと解説</h4>
+          <ul>
+            <li class="disc">目展示評価は、実況アナウンサー高橋貴隆が展示終了後に更新。6～12Rで更新しますが、1～5Rでも更新する場合があります。</li>
+            <li class="disc">耳より情報は1～12Rで随時更新します。</li>
+            <li class="disc">評価チャートは、実況アナウンサー高橋貴隆が展示終了後に更新。スリット付近の勢いとターンの雰囲気を各5段階評価（5が最も良い）。&ldquo;注目モーター&rdquo;は点滅します。
+            </li>
+            <li><span>出走回数/事故率</span>・・・期始め～直近走終了</li>
+            <li><span>プロペラ「新」</span>・・・新しいプロペラに交換</li>
+            <li><span>今節平均ST/S順</span>・・・（今節1走目～直近走のSTの合計）&divide;出走回数　※F/Lは含まない</li>
+            <li><span>S/D</span>・・・Sはスロー、Dはダッシュ</li>
+            <li><span>チルト</span>・・・□は前走から変更された場合表示</li>
+          </ul>
+        </div>
+        <!--area_B end-->
+
+        <!--▼エリアC▼-->
+        <div id="area_C">
+          <h3><img src="images/header_C.gif" /></h3>
+
+          <h4>■直近の気象情報</h4>
+          <ul>
+            <li class="disc">風向きは、スリットラインに対しての風向きです。</li>
+          </ul>
+
+          <h4>■本日のみどころ</h4>
+          <ul>
+            <li class="disc">天気予報の風向きは、スリットラインに対しての風向きです。</li>
+            <li class="disc">決まり手一覧/進入コース別成績は各R更新で、黄色は12R終了時点の最大本数です。</li>
+            <li class="disc">
+              出走表一覧「ドリーム選手」はドリーム戦出場選手、「番記者の推しメン」は番記者がこれは！と推すモーターに乗艇中のメンバー、「実況高橋アナのモーター太鼓判」は実況アナウンサー高橋貴隆がピックアップした、エースモーターや隠れた名機たちです。
+            </li>
+          </ul>
+
+          <h4>■出走表PDF</h4>
+          <ul>
+            <li class="disc">
+              「Adobe Reader」が必要です。下のバナーよりダウンロードしてください。<br />
+              <a href="http://get.adobe.com/jp/reader/" target="_blank"><img src="images/get_adobe_reader.png" /></a>
+            </li>
+            <li class="disc">
+              出走表PDFデータは、レース開催日前日の午後10時頃に更新されます。<br />
+              <span class="gray">※最新データの更新が諸事情により遅れる場合があります。あらかじめご了承ください。</span><br />
+              <span class="gray">※発売締切予定時刻、周回数、モーター、ボート等は変更することがあります。また、病気、事故等で出走を取り消す場合があります。あらかじめご了承ください。</span><br />
+              <span class="gray">※インターネット接続環境等により、PDFファイルが開くまで多少時間がかかる場合があります。</span>
+            </li>
+          </ul>
+
+          <h4>■ガマスポPDF</h4>
+          <ul>
+            <li class="disc">
+              「Adobe Reader」が必要です。下のバナーよりダウンロードしてください。<br />
+              <a href="http://get.adobe.com/jp/reader/" target="_blank"><img src="images/get_adobe_reader.png" /></a>
+            </li>
+            <li class="disc">前日夜～当日朝の間、掲載データが揃った時点から公開します。閲覧、ダウンロードは最終日24時まで可能です。</li>
+            <li class="disc">
+              通常版はA3サイズ、簡易版はA4サイズで印刷されます。<br />
+              <span
+                class="gray">※余白が最適に印刷されない場合は、ページサイズ処理等で「PDFのページサイズに合わせて用紙を選択」にチェックを入れ、「合わせる」か「特大ページを縮小」を選択してください。</span>
+            </li>
+          </ul>
+
+          <div id="gamaspo">
+            <h5>【通常版】</h5>
+            <ul>
+              <li><span>出走回数/事故率</span>・・・期始め～前日</li>
+              <li><span>平均ST</span>・・・期別成績</li>
+              <li><span>期別勝率/2連率</span>・・・期別成績</li>
+              <li><span> 近況勝率/2連率（選手）</span>・・・開催初日の月を含む過去6カ月（今節含まず）</li>
+              <li><span> 通算勝率/2連率（モーター）</span>・・・初使用～直近</li>
+              <li><span> 近況勝率/2連率（モーター）</span>・・・直近過去使用5節</li>
+              <li><span> パワー</span>・・・10段階評価（10が最も良い、1が最も悪い）　※前節までの実績で評価</li>
+              <li><span> 出足/伸び/回り足</span>・・・5段階評価（<img src="images/mark01.gif" class="mark" />が最も良い、<img
+                  src="images/mark02.gif" class="mark" />、<img src="images/mark03.gif" class="mark" />、<img
+                  src="images/mark04.gif" class="mark" />、<img src="images/mark06.gif" class="mark" />が最も悪い）</li>
+              <li><span> 節間成績</span>・・・太字はドリーム戦、○は準優勝戦、<span style="color: #ff0066">○</span>はトップスタート</li>
+              <li><span> コース別平均ST（選手）</span>・・・開催初日の月を含む過去6カ月（今節含まず）</li>
+            </ul>
+          </div>
+
+          <div id="gamaspo">
+            <h5>【簡易版】</h5>
+            <ul>
+              <li><span>出走回数/事故率</span>・・・期始め～前日</li>
+              <li><span>平均ST</span>・・・期別成績</li>
+              <li><span>期別勝率/2連率</span>・・・期別成績</li>
+              <li><span> 近況勝率/2連率（選手）</span>・・・開催初日の月を含む過去6カ月（今節含まず）</li>
+              <li><span> 通算勝率/2連率（モーター）</span>・・・初使用～直近</li>
+              <li><span> パワー</span>・・・10段階評価（10が最も良い、1が最も悪い）　※前節までの実績で評価</li>
+              <li><span> 出足/伸び/回り足</span>・・・5段階評価（<img src="images/mark01.gif" class="mark" />が最も良い、<img
+                  src="images/mark02.gif" class="mark" />、<img src="images/mark03.gif" class="mark" />、<img
+                  src="images/mark04.gif" class="mark" />、<img src="images/mark06.gif" class="mark" />が最も悪い）</li>
+              <li><span> 節間成績</span>・・・太字はドリーム戦、○は準優勝戦</li>
+              <li><span class="gray">※締切時刻は変更になる場合があります。</span></li>
+            </ul>
+          </div>
+
+          <h4>■実況高橋アナのモーター太鼓判</h4>
+          <ul>
+            <li class="disc">初使用数節後より随時更新します。</li>
+            <li><span>出走回数/優出回数/優勝回数/通算勝率/通算2連率</span>・・・初使用～更新日直近節の前検日</li>
+            <li><span>近況5節勝率/近況5節2連率</span>・・・更新日直近節から過去使用5節</li>
+            <li><span>グラフ「レース名/選手名/級別」</span>・・・使用節のレース名/使用選手/使用時の級別</li>
+            <li><span>グラフ「2連率/勝率」</span>・・・初使用～当該レース終了後（次節前検日）</li>
+          </ul>
+
+          <h4>■コメント＆モーター一覧</h4>
+          <ul>
+            <li class="disc">登録番号順です。</li>
+            <li class="disc">ページアクセス時の最新情報を表示します。</li>
+            <li><span>通算勝率/2連率（モーター）</span>・・・初使用～直近節　※上位1～5位をマーク</li>
+            <li><span>近況勝率/2連率（モーター）</span>・・・直近過去使用5節　※上位1～5位をマーク</li>
+            <li><span>パワー</span>・・・10段階評価（10が最も良い、1が最も悪い）　※前節までの実績で評価</li>
+            <li><span>出足/伸び/回り足</span>・・・5段階評価（<img src="images/mark01.gif" class="mark" />が最も良い、<img
+                src="images/mark02.gif" class="mark" />、<img src="images/mark03.gif" class="mark" />、<img
+                src="images/mark04.gif" class="mark" />、<img src="images/mark06.gif" class="mark" />が最も悪い）</li>
+            <li><span>前日記事/本日記事</span>・・・前日/本日の選手コメント</li>
+            <li><span> NEW/○R前（記者/JLC）</span>・・・記者およびJLCが本日取得、更新した選手のコメントなど</li>
+          </ul>
+
+          <h4>■モーター・前検タイムランキング</h4>
+          <ul>
+            <li class="disc">「▼」のある列は並べ替えできます。</li>
+            <li class="disc">ページアクセス時の最新情報を表示します。</li>
+            <li><span> モーター　通算　勝率/2連率</span>・・・初使用～直近節</li>
+            <li><span> モーター　近況　勝率/2連率</span>・・・直近過去使用5節</li>
+            <li><span> ボート　通算　勝率/2連率</span>・・・初使用～直近節</li>
+            <li><span> 履歴</span>・・・初使用～前節。使用者の級・勝率（使用節初日の月を含む過去6カ月/使用節除く）は使用当時のもので、○は準優勝戦、<span class="MS">●</span>は優勝戦
+            </li>
+          </ul>
+
+          <h4>■予選得点率ランキング</h4>
+          <ul>
+            <li class="disc">予選初日から予選最終日前日は12R終了後、予選最終日は各R終了後（予選最終Rまで）に更新します。</li>
+            <li class="disc">日別成績の赤字はドリーム戦、青字は点増レースです。</li>
+            <li class="disc">予選最終日以降に表示されるピンクのラインは予選突破想定ボーダーです。</li>
+            <li class="disc">予選突破した選手が、予選終了後のレースで賞典除外の処分を受けたり、ケガ等により明日以降欠場する場合、変更が生じることがあります。</li>
+            <li class="disc">予選終了後、ボーダー上に複数いた場合は抽選にて決定します。</li>
+          </ul>
+
+          <h4>■展望番組</h4>
+          <ul>
+            <li class="disc">動画ファイルUP後から最終日24時まで視聴できます。</li>
+          </ul>
+
+          <h4>■データ集</h4>
+          <ul>
+            <li class="disc">月1回更新です。</li>
+          </ul>
+        </div>
+        <!--area_C end-->
+      </div>
+    </div>
+    <!--contents end-->
+
+    <!--▼フッター▼-->
+    <div id="footer">
+      <a href="#wrapper">▲ページトップ</a>
+    </div>
+  </div>
+  <!--wrapper end-->
+</body>
+
+</html>

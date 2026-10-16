@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>ご利用に際して｜ボートレース平和島オフィシャルサイト</title>
+
+    <!--WEBfont-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@100;300;400;500;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700;900&family=Oswald:wght@200;300;400;500;600;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet" />
+    <!--Adobe-font-->
+    <script>
+      (function (d) {
+        var config = {
+            kitId: "mbq4iuj",
+            scriptTimeout: 3000,
+            async: true,
+          },
+          h = d.documentElement,
+          t = setTimeout(function () {
+            h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive";
+          }, config.scriptTimeout),
+          tk = d.createElement("script"),
+          f = false,
+          s = d.getElementsByTagName("script")[0],
+          a;
+        h.className += " wf-loading";
+        tk.src = "https://use.typekit.net/" + config.kitId + ".js";
+        tk.async = true;
+        tk.onload = tk.onreadystatechange = function () {
+          a = this.readyState;
+          if (f || (a && a != "complete" && a != "loaded")) return;
+          f = true;
+          clearTimeout(t);
+          try {
+            Typekit.load(config);
+          } catch (e) {}
+        };
+        s.parentNode.insertBefore(tk, s);
+      })(document);
+    </script>
+    <!--viewport-->
+    <meta name="viewport" content="width=1920" />
+
+    <!-- 開催判定 -->
+    <script type="text/javascript" src="/js/kaisai_system.js"></script>
+
+    <!--css-->
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/contents.css" />
+    <link rel="stylesheet" href="../css/colorbox.css" />
+    <link rel="stylesheet" href="../css/help.css" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XBJWMP49W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-4XBJWMP49W");
+    </script>
+  </head>
+
+  <body id="help">
+    <div id="wrapper">
+      <!-- MENU -->
+      <header class="header">
+    <div class="header__inner">
+        <h1 class="header__logo"> <a href="/"><img src="https://www.heiwajima.gr.jp/images/heiwajima_logo.png" alt="boat race平和島ロゴ"></a> </h1>
+        <div class="header__held">
+            <h2 class="header__held-kaisai">開催中</h2>
+            <p class="header__held-time">開門▶<time class="race-info__open-time" datetime="9：00">9：00</time></p>
+        </div>
+        <div class="header__now">
+            <div class="header__date">
+                <time class="header__today js-today"></time>
+                <span class="header__today-weekday js-weekday"></span>
+            </div>
+            <time class="header__time js-time"></time>
+        </div>
+        <div class="header__info">
+            <div class="header__info-news head-news" id="ticker" rel="slide">
+                <div class="head-news__label">news</div>
+                <ul class="head-news__content">
+                                                        </ul>
+            </div>
+            <div class="race-info">
+                <span class="race-info__grade g1"></span>
+                <div class="race-info__wrap">
+                    <div class="race-info__race-name"></span>
+                                                    <h2>開設72周年記念トーキョー・ベイ・カップ</h2>
+                                            </div>
+                    <ul class="race-info__schedule">
+                        <li class="race-info__day">10/</li><li class="race-info__day">13<span class="race-info__week tue"></span></li><li class="race-info__day">14<span class="race-info__week wed"></span></li><li class="race-info__day">15<span class="race-info__week thu"></span></li><li class="race-info__day">16<span class="race-info__week fri"></span></li><li class="race-info__day">17<span class="race-info__week sat"></span></li><li class="race-info__day">18<span class="race-info__week sun"></span></li>
+                    </ul>
+                                        <a href="/01cal/01cal.htm" class="race-info__link">開催日程</a>
+                                    </div>
+                <p class="race-info__count">5日目</p>
+            </div>
+        </div> <button class="header__hamburger js-hamburger">
+            <div class="header__hamburger-wrap">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p class="header__hamburger-text">menu</p>
+        </button>
+    </div>
+    <div class="header__drawer drawer js-drawer">
+    <div class="drawer__container">
+      <dl class="drawer__menu">
+        <dt></dt>
+        <dd>
+          <ul class="drawer__btns">
+            <li class="drawer__btn"> <a href="/asp/heiwajima/kyogi/kyogihtml/index.htm">
+                <img src="/images/menu_btn-live.png" alt="競技情報＆LIVE">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/asp/heiwajima/replay/replay.php">
+                <img src="/images/menu_btn-replay.png" alt="replay">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/jump/vote.html" target="_blank">
+                <img src="/images/menu_btn-tel.png" alt="ネット投票">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/00live/00live.htm">
+                <img src="/images/menu_tv-4.png" alt="YouTube番組紹介">
+              </a> </li>
+
+            <li class="drawer__btn m_ptn_1"> <a href="/h_jump/youtube_channel.htm" target="_blank">
+                <img src="/images/menu_racer-4.png" alt="Tokyo Bay TV">
+              </a> </li>
+            <li class="drawer__btn m_ptn_2"> <a href="/h_jump/youtube_pstar.htm" target="_blank">
+                <img src="/images/menu_racer-5.png" alt="ピースターチャンネル">
+              </a> </li>
+            <li class="drawer__btn m_ptn_2"> <a href="/h_jump/niconico.htm" target="_blank">
+                <img src="/images/menu_racer-6.png" alt="ニコニコ生放送">
+              </a> </li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="drawer__menu">
+        <dt>
+          <div class="drawer__img">
+            <img src="/images/whale_swim.png" alt="クジラのイラスト">
+          </div>
+          <div class="drawer__titles">
+            <p class="drawer__title">レース情報</p>
+            <p class="drawer__title-en">Race Information</p>
+          </div>
+        </dt>
+        <dd>
+          <ul class="drawer__btns">
+            <li class="drawer__btn"> <a href="/01cal/01cal.htm">
+                <img src="/images/menu_race-1.png" alt="開催日程">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/asp/htmlmade/Race/Tenbo/04/PC/jumper.htm">
+                <img src="/images/menu_race-2.png" alt="レース展望">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/01motor/01motor.htm">
+                <img src="/images/menu_race-6.png" alt="モーター情報">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/s_pdf/s_pdf.htm">
+                <img src="/images/menu_race-5.png" alt="出走表PDF">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/asp/htmlmade/heiwajima/rank/rank.htm">
+                <img src="/images/menu_race-3.png" alt="予選得点率">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/01result/search01.php">
+                <img src="/images/menu_race-8.png" alt="レース結果">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/01suimen/01suimen.htm">
+                <img src="/images/menu_race-7.png" alt="水面特性">
+              </a> </li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="drawer__menu">
+        <dt>
+          <div class="drawer__img">
+            <img src="/images/whale_fan.png" alt="クジラのイラスト">
+          </div>
+          <div class="drawer__titles">
+            <p class="drawer__title">サービス</p>
+            <p class="drawer__title-en">Service</p>
+          </div>
+        </dt>
+        <dd>
+          <ul class="drawer__btns">
+            <li class="drawer__btn"> <a href="/01event/01event.htm">
+                <img src="/images/menu_race-4.png" alt="イベント・ファンサービス">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/h_jump/mail.htm" target="_blank">
+                <img src="/images/menu_service-1.png" alt="メルマガサービス">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/04mobile/04mobile.htm">
+                <img src="/images/menu_service-2.png" alt="スマートフォンサイト">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/h_jump/teleboat.htm" target="_blank">
+                <img src="/images/menu_service-3.png" alt="電話ネット投票会員募集">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/h_jump/heiwajimaclub.htm" target="_blank">
+                <img src="/images/menu_service-4.png" alt="平和島倶楽部">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/cashless/cashless.htm">
+                <img src="/images/menu_service-8.png" alt="キャッシュレスカード">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/h_jump/pointclub.htm" target="_blank">
+                <img src="/images/menu_service-5.png" alt="平和島deポイントクラブ">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/consult.htm">
+                <img src="/images/menu_service-6.png" alt="ボートレースをより楽しむために">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/00faq/00faq.htm">
+                <img src="/images/menu_service-7.png" alt="ビギナーガイド＆FAQ">
+              </a> </li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="drawer__menu">
+        <dt>
+          <div class="drawer__img">
+            <img src="/images/whale_racer.png" alt="クジラのイラスト">
+          </div>
+          <div class="drawer__titles">
+            <p class="drawer__title">レーサー・特集</p>
+            <p class="drawer__title-en">Racer＆Special site</p>
+          </div>
+        </dt>
+        <dd>
+          <ul class="drawer__btns">
+            <li class="drawer__btn drawer__btn--tokyo"> <a href="/asp/htmlmade/heiwajima/tokyo_next/index.htm" target="_blank">
+                <img src="/images/tokyo-next.jpg" alt="Tokyo Next">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/03profile/03profile.htm">
+                <img src="/images/menu_racer-1.png" alt="東京支部選手プロフィール">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/03quiz/03quiz.htm">
+                <img src="/images/menu_racer-2.png" alt="クイズ★ピースターカップ">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/03backnumber/03backnumber.htm">
+                <img src="/images/menu_racer-3.png" alt="特集バックナンバー">
+              </a> </li>
+
+            <li class="drawer__btn"> <a href="/h_jump/bosyu.htm" target="_blank">
+                <img src="/images/menu_racer-7.png" alt="選手募集">
+              </a> </li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="drawer__menu">
+        <dt>
+          <div class="drawer__img">
+            <img src="/images/whale_facilities.png" alt="クジラのイラスト">
+          </div>
+          <div class="drawer__titles">
+            <p class="drawer__title">施設・交通</p>
+            <p class="drawer__title-en">Facilities＆Access</p>
+          </div>
+        </dt>
+        <dd>
+          <ul class="drawer__btns">
+            <li class="drawer__btn"> <a href="/02facility/02facility.htm">
+                <img src="/images/menu_facilities-1.png" alt="施設案内">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/02access/02access.htm">
+                <img src="/images/menu_facilities-2.png" alt="交通案内">
+              </a> </li>
+            <li class="drawer__btn"> <a href="/h_jump/gekijyo.htm" target="_blank">
+                <img src="/images/menu_facilities-3.png" alt="平和島劇場">
+              </a> </li>
+          </ul>
+        </dd>
+      </dl>
+
+    </div>
+    <div class="drawer__links-wrap">
+      <ul class="drawer__links">
+        <li class="drawer__link-item"> <a href="/00link/00link.htm">リンク</a> </li>
+        <li class="drawer__link-item"> <a href="/00privacy/00privacy.htm">個人情報の取り扱いについて</a> </li>
+        <li class="drawer__link-item"> <a href="/h_jump/contact.htm" target="_blank">お問い合わせ</a> </li>
+        <li class="drawer__link-item"> <a href="/help/help.htm" >ご利用に際して</a> </li>
+        <li class="drawer__link-item"> <a href="/h_jump/conections.htm" target="_blank">収益使途について</a> </li>
+      </ul>
+      <ul class="drawer__lang">
+        <li class="drawer__lang-en"> <a href="/en/" target="_blank">English</a> </li>
+        <li class="drawer__lang-ko"> <a href="/kr/" target="_blank">한국어</a> </li>
+        <li class="drawer__lang-zh"> <a href="/cn/" target="_blank">中文简体</a> </li>
+      </ul>
+    </div>
+  </div>
+</header>
+<div class="race-info__anime"> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> <span class="race-info__loop-line js-loop-parts"></span> </div>
+      <script>
+    const REDIRECT_LIST = {
+        'btn_pdf': '/s_pdf/s_pdf.htm',
+        'btn_ten': '/asp/htmlmade/Race/Tenbo/04/PC/jumper.htm',
+        'btn_mor': '/01motor/01motor.htm',
+        'btn_eve': '/01event/01event.htm',
+        'btn_yos': '/asp/htmlmade/heiwajima/rank/rank.htm',
+        'btn_kek': '/01result/search01.php',
+        'btn_cal': '/01cal/01cal.htm',
+        'btn_inf': '/00news/00news.htm',
+        'btn_sui': '/01suimen/01suimen.htm',
+        'btn_kot': '/02access/02access.htm',
+        'btn_sis': '/02facility/02facility.htm',
+        'btn_rac': '/03profile/03profile.htm',
+        'btn_qui': '/03quiz/03quiz.htm',
+        'btn_bac': '/03backnumber/03backnumber.htm',
+        'btn_spv': '/04mobile/04mobile.htm',
+        'btn_big': '/00faq/00faq.htm',
+        'btn_liv': '/00live/00live.htm',
+        'btn_cas': '/cashless/cashless.htm',
+    };
+</script>
+<script src="https://www.heiwajima.gr.jp/js/mymenu.js"></script>
+<ul id="float_menu" onload="myMenuInit();">
+    <li id="btn_yoso"><a href="/asp/heiwajima/kyogi/kyogihtml/index.htm">競技情報</a></li>
+    <li id="btn_replay"><a href="/asp/heiwajima/replay/replay.php">リプレイ</a></li>
+    <li id="btn_dento"><a href="/jump/vote.html" target="_blank">電話投票</a></li>
+    <div id="top"></div>
+</ul>
+
+
+      <div class="contents">
+        <h3>ご利用に際して</h3>
+
+        <div class="help_wrap">
+          <!-- ▼ -->
+          <section>
+            <div class="mida">推奨環境</div>
+            <div class="area">
+              <table>
+                <tr>
+                  <th class="tit"></th>
+                  <th class="tit col1">Windows</th>
+                  <th class="tit col11">Macintosh</th>
+                </tr>
+                <tr>
+                  <th>OS</th>
+                  <td>Microsoft Windows 11</td>
+                  <td>Mac OS X 12~15、26</td>
+                </tr>
+                <tr>
+                  <th>ブラウザ</th>
+                  <td>Microsoft Edge（最新版）、Google Chrome（最新版）</td>
+                  <td>Safari （最新版）、Google Chrome（最新版）</td>
+                </tr>
+                <tr>
+                  <th>CPU</th>
+                  <td>2.33GHz以上のx86互換プロセッサー</td>
+                  <td>Intel Core Duo 1.33GHz以上のプロセッサー</td>
+                </tr>
+                <tr>
+                  <th>メモリ</th>
+                  <td>128MB以上</td>
+                  <td>256MB以上</td>
+                </tr>
+                <tr>
+                  <th>画面サイズ</th>
+                  <td colspan="2" style="text-align: center">解像度1920×1080以上(16:9)のディスプレイ</td>
+                </tr>
+              </table>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">マイメニュー機能について</div>
+            <div class="area">
+              <div class="mymenu"><img src="images/help_mymenu.png" width="100px" /></div>
+              よく見るコンテンツをお気に入り登録し、スムーズにページへ移動できる機能です。<br />
+              <ul class="dot">
+                <li>最大5つまで登録できます。</li>
+                <li>公式サイトHOME、外部ページ等、一部登録対象外のページがあります。</li>
+              </ul>
+              <br />
+              【操作方法】<br />
+              <ul class="dot">
+                <li>登録したいページに移動し、ページ上でマイメニューの＋ボタンをクリックすると登録完了です。</li>
+                <li>
+                  登録解除したい場合は、当該ボタン右上の「×」を押すと解除できます。
+                  <p class="come">※初期時に固定で登録されているボタンは解除できません。</p>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">競技情報について</div>
+            <div class="area">
+              <p class="tx01">■出走表</p>
+              <ul class="dot">
+                <li>前日の20時頃に更新されます。</li>
+                <li>級別・F/L・平均ST…今期成績</li>
+                <li>全国勝率および2連率…開催初日の月を含む過去6カ月（今節含まず）</li>
+                <li>当地勝率および2連率…開催初日を含む月の24カ月前の年の1月1日～前検日前日まで（今節含まず）</li>
+                <li>
+                  モーター、ボートの2連率…初使用から直近節<br />
+                  <span class="tx02">→今節成績</span><br />
+                  　・着…着順。クリックでレースリプレイが再生。<br />
+                  　・R…レース番号。<br />
+                  　・進…数字は進入コース、バック色は艇番。<br />
+                  　・ST…スタートタイミング。<br />
+                  <span class="tx02">→近況節成績</span><br />
+                  　・全国過去3節…前検日以前の直近3節で、青字は準優勝戦、赤字は優勝戦<br />
+                  　・当地過去1節…2004年1月1日～前検日の直近1節で、青字は準優勝戦、赤字は優勝戦<br />
+                  <span class="tx02">→モーター履歴</span><br />
+                  　・青字は準優勝戦、赤字は優勝戦
+                </li>
+                <li>
+                  得点率早見…予選最終日前日の翌日出走表データ取得後から当該レース確定まで表示。<br />
+                  <p class="come">※ボーダーは変動し、得点には減点を含みます。また、ページ更新後に減点等が発表される場合があります。</p>
+                </li>
+              </ul>
+              <br />
+              <p class="tx01">■予想</p>
+              <ul class="dot">
+                <li>前日記者予想…前日の20時頃に更新されます。</li>
+                <li>
+                  VPOWER予想…レース開催日前日の22時以降に更新。<br />
+                  <span class="tx02">→印</span><br />
+                  　◎○△×で評価。<br />
+                  <span class="tx02">→VPOWERスコア</span><br />
+                  　モーターや選手の過去成績等から独自の算出分析方法により、当該レースにおける選手の力量を数値化したもの。数値が大きいほど勝利に近いとみます。<br />
+                  <span class="tx02">→順位</span><br />
+                  　VPOWERスコアの順位。<br />
+                  <span class="tx02">→予想フォーカス</span><br />
+                  　3連単と2連単の出目を表示。<br />
+                  <p class="come">※出走表確定時の情報により、当日の欠場、変更事項は反映していませんのでご了承ください。</p>
+                </li>
+              </ul>
+              <br />
+              <p class="tx01">■オッズ</p>
+              原則として、開催日当日の8時30分頃より表示します。<br />
+              <br />
+              <p class="tx01">■直前＆展示</p>
+              <ul class="dot">
+                <li class="original">
+                  <div class="point"><img src="images/point.gif" width="350px" /></div>
+                  オリジナルデータ<br />
+                  ボートレース平和島独自の展示計測データです。<br />
+                  下記図の通りの計測ポイントでタイム、時速を算出します。<br />
+                  <p class="come">
+                    ※水面状況や再展示などで計測ができない場合がございますので、予めご了承ください。<br />
+                    ※計測ができなかった場合、「－」（ハイフン）が表示されます。
+                  </p>
+                </li>
+                <li>今節平均ST…（今節1走目～直近走のSTの合計）÷出走回数　※F/Lは含まない</li>
+                <li>体重・調整…当日の朝計測</li>
+                <li>
+                  部品交換…電気一式・ピストン・ピストンリング・キャブレター・シリンダ・クランクシャフト・ギヤケース・キャリアボデー・プロペラなど交換した部品を表示。<br />
+                  <p class="come">※薄暮レースの実施等により情報の更新が遅れる場合がございますので、ご了承ください。</p>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">レースライブについて</div>
+            <div class="area">
+              ご覧いただいているレースライブはボートレース場内で放送されているものですが、中継システムの都合で約1～2分遅れて配信されます。<br />
+              <br />
+              <div class="box">
+                <div class="b_tit">
+                  <p>快適に<br />ご覧いただくには</p>
+                </div>
+                <div class="b_txt">
+                  高速インターネットへの接続が必要です。<br />
+                  映像は512Kbps配信です。実効ビットレート512Kbps以上の速度がないとご覧いただけない場合があります。<br />
+                  <p class="come">※ダイヤルアップモデム（56K）やISDNターミナルアダプタ（64K）で接続されてもご覧いただけませんのでご注意ください。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">レースリプレイについて</div>
+            <div class="area">
+              レースリプレイの映像は、毎レース終了後からご覧いただけます。また以下の箇所でレースリプレイがご覧いただけます。<br />
+              <ul class="dot">
+                <li>「競技情報」出走表の今節成績</li>
+                <li>「競技情報」レース結果の本日のレース結果一覧</li>
+                <li>「レースリプレイ」開催中レースを含む初日から最終日までの全レース</li>
+                <li>
+                  「レースリプレイ」優勝戦リプレイ<br />
+                  レースリプレイで表示される出走表の選手級別、年齢、支部、全国勝率および2連率、当地勝率および2連率、モーター2連率は該当レース当時のデータです。<br />
+                </li>
+                <li>全国勝率および2連率…該当レース当時から直近6カ月</li>
+                <li>当地勝率および2連率…該当レース当時から直近3年</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">展示リプレイについて</div>
+            <div class="area">
+              <ul class="dot">
+                <li>展示リプレイは展示航走終了後からご覧いただけます。</li>
+                <li>開催中節を含む過去2節分がご覧いただけます。</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">勝利者インタビューについて</div>
+            <div class="area">
+              <ul class="dot">
+                <li>開催中節を含む過去2節分がご覧いただけます。</li>
+                <li>予選開催日は各レースの勝利者、準優勝戦開催日は準優勝戦の勝利者、最終日は優勝戦の勝利者インタビューを配信予定です。</li>
+              </ul>
+              <p class="come">※インタビュー配信は変更や中止になる場合がありますので、ご了承ください。</p>
+            </div>
+          </section>
+
+          <!-- ▼ -->
+          <section>
+            <div class="mida">スマートフォンでのご利用について</div>
+            <div class="area">各種スマートフォンでもレースライブ、リプレイをご覧いただけますが、非対応機種もございますのでご了承ください。またご利用の端末の通信状態、エリア等によっては正常にお使いいただけません。</div>
+          </section>
+        </div>
+        <!--help_wrap end-->
+      </div>
+      <!---contents--->
+
+      <footer class="footer">
+        <small class="footer__copyright">&copy;BOAT RACE HEIWAJIMA All rights reserved.</small>
+      </footer>
+    </div>
+    <!---#wrapper--->
+
+    <!--js-->
+    <script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.colorbox.js"></script>
+    <script type="text/javascript" src="/js/viewport.js"></script>
+    <script type="text/javascript" src="/js/swiper.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll(".tab_bt input");
+        const tabLabels = document.querySelectorAll(".tab_bt label");
+        const tabContents = document.querySelectorAll(".tab_content");
+
+        tabs.forEach((radio) => {
+          radio.addEventListener("change", () => {
+            // すべてのタブラベルから .active を削除
+            tabLabels.forEach((label) => label.classList.remove("active"));
+
+            // すべてのタブコンテンツを非表示にする
+            tabContents.forEach((content) => content.classList.remove("active"));
+
+            // 選択されたラジオボタンに対応するタブラベルに .active を追加
+            const checkedRadioId = radio.id;
+            const checkedLabel = document.querySelector(`label[for="${checkedRadioId}"]`);
+            if (checkedLabel) {
+              checkedLabel.classList.add("active");
+            }
+
+            // 選択されたラジオボタンに対応するタブコンテンツを表示
+            const targetId = `${checkedRadioId}_content`;
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+              targetContent.classList.add("active");
+            }
+          });
+        });
+
+        // 初期表示設定（最初のタブを表示）
+        document.querySelector('input[name="tab_item"]:checked').dispatchEvent(new Event("change"));
+      });
+    </script>
+  </body>
+</html>

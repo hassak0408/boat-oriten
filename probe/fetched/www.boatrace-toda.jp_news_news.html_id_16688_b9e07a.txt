@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>お知らせ | ボートレース戸田オフィシャルサイト</title>
+  <!-- BootstrapのCSS読み込み -->
+  <link href="../assets/css/bootstrap.css" rel="stylesheet">
+  <!-- js読み込み -->
+  <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WZQX9KD');</script>
+<!-- End Google Tag Manager -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+  <!--カスタム-->
+  <link href="../assets/css/common.css" rel="stylesheet">
+  <link href="../assets/css/common_pc.css" media="screen and (min-width:992px)" rel="stylesheet">
+  <link href="../assets/css/nav.css" rel="stylesheet">
+  <script src="../assets/js/nav.js"></script>
+  <script src="../assets/js/xml_read.js"></script>
+  <script src="../assets/js/news_content.js"></script>
+  <script src="../assets/js/system_sp.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script src="../assets/js/banner.js"></script>
+  <!--FONTICON-->
+  <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet">
+	<!--Favicon-->
+	<link rel="icon" href="/favicon.ico">
+	<link rel="apple-touch-icon" href="/favicon.png">
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5P8HN2S2YD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5P8HN2S2YD');
+  gtag('config', 'UA-5172848-41');
+</script>
+
+	<script>
+		if(/fbclid=/.test(location.search))
+			location.replace(location.href.replace(/\&fbclid.+/, ""));
+
+	</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yakuhanjp@3.3.1/dist/css/yakuhanjp-noto.min.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@600;900&display=swap" rel="stylesheet">
+</head>
+
+<body class="overflow-auto">
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WZQX9KD"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+  <div id="wrap">
+
+    <!-- header include -->
+    <div id="header"></div>
+    <div id="breadcrumbs">
+      <div class="breadcrumbs_list">
+        <a href="/">TOP</a>
+        <a href="list.html">お知らせ一覧</a>
+        <span name="news_title">お知らせタイトルが入ります</span>
+      </div>
+    </div>
+    <div id="contents">
+
+      <!--メインコンテンツ-->
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <h2>お知らせ</h2>
+          </div>
+          <!-- お知らせ個別コンテンツここから -->
+          <div class="col-12 section">
+            <div name="title">
+            <h3>
+              <div class="mb-2"><!--span class="icon_important mr-2 font_16">重要</span-->           </div>
+              
+            </h3>
+            </div>
+            <div class="comment" name="comment">
+            </div>
+            <!-- <div class="main_photo">
+              <figure>
+                <img src="dummy.jpg" alt="データがありません">
+              </figure>
+            </div> -->
+            <div name="news_html"></div>
+          </div>
+          <!-- イベント＆ファンサービス情報個別コンテンツここまで -->
+
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-4 mx-auto mb-3">
+            <a href="./list.html" class="btn btn-secondary"><i class="fas fa-angle-left"></i> お知らせ一覧へ戻る</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- footer include -->
+    <div id="footer"></div>
+
+  </div>
+</body></html>
