@@ -1,0 +1,3695 @@
+{
+ "history": {
+  "1": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-12",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ半周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ半周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-09",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "5": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-09",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-05",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-05",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "6": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-15",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-08",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-09-29",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-03",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "10": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-15",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-07",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-06",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-05",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-06",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "11": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-15",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-07",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示,lap=一周,turn=まわり足,straight=直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-07",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-09",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-09",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-06",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "13": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-15",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-08-19",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-02",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-09",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-01",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-09-12",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-09-13",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-09-26",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-03",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "18": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-14",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=一周,turn=まわり足"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-09",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ],
+  "22": [
+   {
+    "target": "2026-10-15",
+    "date": "2026-10-15",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2025-10-10",
+    "date": "2025-10-10",
+    "data": true,
+    "n": 6,
+    "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+   },
+   {
+    "target": "2024-10-10",
+    "date": "2024-10-08",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2023-10-10",
+    "date": "2023-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2022-10-10",
+    "date": "2022-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-10-10",
+    "date": "2021-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2021-04-10",
+    "date": "2021-04-06",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2020-10-10",
+    "date": "2020-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2019-10-10",
+    "date": "2019-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   },
+   {
+    "target": "2018-10-10",
+    "date": "2018-10-10",
+    "data": false,
+    "n": 0,
+    "memo": "まわり足の表なし"
+   }
+  ]
+ },
+ "search": {
+  "2": {
+   "name": "戸田",
+   "date": "2026-10-15",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/photogallery/photo_gallery_list.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/webreserve/pre-reserve",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21791",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21810",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21580",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21722",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21809",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21801",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21835",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21629",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21502",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21288",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21118",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=19436",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=21318",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/service/cashless.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=14097",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/news.html?id=3238",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/#tajyo1",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/#tajyo2",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/#oshirase_tab",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/#update_tab",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/news/update.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/beginners/index.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/beginners/howto.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/beginners/toda_guide.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/guide/access.html#tab2",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/wwp_toda/index.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-toda.jp/race_calendar.html",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-toda.jp/photogallery/photo_gallery_list.html",
+    "https://www.boatrace-toda.jp/webreserve/pre-reserve",
+    "https://www.boatrace-toda.jp/news/news.html?id=21791",
+    "https://www.boatrace-toda.jp/news/news.html?id=21810",
+    "https://www.boatrace-toda.jp/news/news.html?id=21580",
+    "https://www.boatrace-toda.jp/news/news.html?id=21722",
+    "https://www.boatrace-toda.jp/news/news.html?id=21809",
+    "https://www.boatrace-toda.jp/news/news.html?id=21801",
+    "https://www.boatrace-toda.jp/news/news.html?id=21835",
+    "https://www.boatrace-toda.jp/news/news.html?id=21629",
+    "https://www.boatrace-toda.jp/news/news.html?id=21502",
+    "https://www.boatrace-toda.jp/news/news.html?id=21288",
+    "https://www.boatrace-toda.jp/news/news.html?id=21118",
+    "https://www.boatrace-toda.jp/news/news.html?id=19436",
+    "https://www.boatrace-toda.jp/news/news.html?id=21318",
+    "https://www.boatrace-toda.jp/service/cashless.html",
+    "https://www.boatrace-toda.jp/news/news.html?id=14097",
+    "https://www.boatrace-toda.jp/news/news.html?id=3238",
+    "https://www.boatrace-toda.jp/#tajyo1",
+    "https://www.boatrace-toda.jp/#tajyo2",
+    "https://www.boatrace-toda.jp/#oshirase_tab",
+    "https://www.boatrace-toda.jp/#update_tab",
+    "https://www.boatrace-toda.jp/news/update.html",
+    "https://www.boatrace-toda.jp/beginners/index.html",
+    "https://www.boatrace-toda.jp/beginners/howto.html",
+    "https://www.boatrace-toda.jp/beginners/toda_guide.html",
+    "https://www.boatrace-toda.jp/guide/access.html#tab2",
+    "https://www.boatrace-toda.jp/wwp_toda/index.html",
+    "https://www.boatrace-toda.jp/race_calendar.html"
+   ]
+  },
+  "4": {
+   "name": "平和島",
+   "date": "2026-10-15",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/jumper.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/01event/01event.htm#race16305",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/01event/01event.htm#race16303",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/01event/01event.htm#race16304",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=1",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=2",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=3",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=4",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=5",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=6",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=7",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=8",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=9",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=10",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=11",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=12",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/heiwajima/tokyo_next/racer_message.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t408.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t409.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t410.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t411.htm",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/jumper.htm",
+    "https://www.heiwajima.gr.jp/01event/01event.htm#race16305",
+    "https://www.heiwajima.gr.jp/01event/01event.htm#race16303",
+    "https://www.heiwajima.gr.jp/01event/01event.htm#race16304",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=1",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=2",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=3",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=4",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=5",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=6",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=7",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=8",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=9",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=10",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=11",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/kyogi/kyogihtml/index.htm?racenum=12",
+    "https://www.heiwajima.gr.jp/asp/heiwajima/tokyo_next/racer_message.php",
+    "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t408.htm",
+    "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t409.htm",
+    "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t410.htm",
+    "https://www.heiwajima.gr.jp/asp/htmlmade/Race/Tenbo/04/PC/t411.htm"
+   ]
+  },
+  "7": {
+   "name": "蒲郡",
+   "date": "2026-10-10",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/cyokuzen.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/cyokuzen.php?day=20261010&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/group-cyokuzen.php?day=20261010&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/oriten.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/group-oriten.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/tenji.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/tenji_info.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/group-tenji.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/modules/yosou/original.php?day=20261010&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=437",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/asp/gamagori/contents/04racer/04racer.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=435",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=436",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=437",
+    "https://www.gamagori-kyotei.com/asp/gamagori/contents/04racer/04racer.php",
+    "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=435",
+    "https://www.gamagori-kyotei.com/asp/gamagori/contents/01race/01race.php?id=436"
+   ]
+  },
+  "8": {
+   "name": "常滑",
+   "date": "2026-10-11",
+   "hits": [
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/group-cyokuzen.php?day=20261011&race=1&kind=2",
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/cyokuzen.php?day=20261011&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/cyokuzen.php?day=20261011&race=1&kind=2",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/group-cyokuzen.php?day=20261011&race=1&kind=2",
+     "code": 200,
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/oriten.php?day=20261011&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/group-oriten.php?day=20261011&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/tenji.php?day=20261011&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/tenji_info.php?day=20261011&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/group-tenji.php?day=20261011&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/yosou/original.php?day=20261011&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/cal/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_tenbo",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_assen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_series_index_archive",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_racecourse",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_konsetsu",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_kikaku",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/racers/?page=index_shibu_winner",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_access",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_gruun_bus",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_facility",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_payseat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_gourmet",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_virtual",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/mooovi/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/mooovi/?page=index_gruun",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/access/?page=index_tokoname_history",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/service/?page=index_cashlesscard",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-tokoname.jp/modules/service/?page=index_goods",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-tokoname.jp/",
+    "https://www.boatrace-tokoname.jp/modules/cal/",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_pdf",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_timerank",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_tenbo",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_resultlist",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_assen",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_series_index_archive",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_racecourse",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_konsetsu",
+    "https://www.boatrace-tokoname.jp/modules/raceinfo/?page=index_kikaku",
+    "https://www.boatrace-tokoname.jp/modules/datafile/",
+    "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_boat",
+    "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_deme",
+    "https://www.boatrace-tokoname.jp/modules/datafile/?page=index_suimen",
+    "https://www.boatrace-tokoname.jp/modules/racers/",
+    "https://www.boatrace-tokoname.jp/modules/racers/?page=index_shibu_winner",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_access",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_gruun_bus",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_facility",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_payseat",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_gourmet",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_virtual",
+    "https://www.boatrace-tokoname.jp/modules/mooovi/",
+    "https://www.boatrace-tokoname.jp/modules/mooovi/?page=index_gruun",
+    "https://www.boatrace-tokoname.jp/modules/access/?page=index_tokoname_history",
+    "https://www.boatrace-tokoname.jp/modules/service/?page=index_cashlesscard",
+    "https://www.boatrace-tokoname.jp/modules/service/?page=index_goods",
+    "https://www.boatrace-tokoname.jp/modules/event/",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_youtube",
+    "https://www.boatrace-tokoname.jp/modules/other/?page=index_faq",
+    "https://www.boatrace-tokoname.jp/modules/event",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002121",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002061",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=001996",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=001997",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002011",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002072",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002071",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002013",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_youtube&news_id=002111",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_youtube&news_id=002101",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000064",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001891",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001871",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001861",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001391",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001461",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=001061",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000065",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000661",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000066",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000341",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000331",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=info&news_id=000321",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002121&info=all",
+    "https://www.boatrace-tokoname.jp/modules/news/?page=index_info_detail&page_id=event&news_id=002061&info=all"
+   ]
+  },
+  "12": {
+   "name": "住之江",
+   "date": "2026-10-15",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#424",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#421",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#420",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#404",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php?Year=2025#316",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/03event/event.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/jumper/sns1.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/jumper/sns2.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/jumper/sns3.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/jumper/sns4.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/jumper/sns5.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Syutujo/12/PC/jumper.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Tenbo/12/PC/jumper.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/htmlmade/suminoe/rank/rank.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/s_pdf/s_pdf.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/kyogi/kyogihtml/zenken/zenken1205.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/02kekka/kekka.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/replay/replay.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/ysen/ysen.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/suminoe/contents/01history/ranking_motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/asp/htmlmade/suminoe/01boat/boat02.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/01suimen/01suimen.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/01cal/cal.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/cal_tv.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/access.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/sisetsu.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/first.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/virtual.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-suminoe.jp/gourmet.html",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-suminoe.jp/",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#424",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#421",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#420",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#404",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php?Year=2025#316",
+    "https://www.boatrace-suminoe.jp/03event/event.htm",
+    "https://www.boatrace-suminoe.jp/jumper/sns1.html",
+    "https://www.boatrace-suminoe.jp/jumper/sns2.html",
+    "https://www.boatrace-suminoe.jp/jumper/sns3.html",
+    "https://www.boatrace-suminoe.jp/jumper/sns4.html",
+    "https://www.boatrace-suminoe.jp/jumper/sns5.html",
+    "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Syutujo/12/PC/jumper.htm",
+    "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Tenbo/12/PC/jumper.htm",
+    "https://www.boatrace-suminoe.jp/asp/htmlmade/suminoe/rank/rank.htm",
+    "https://www.boatrace-suminoe.jp/s_pdf/s_pdf.htm",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/kyogi/kyogihtml/zenken/zenken1205.htm",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/02kekka/kekka.php",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/replay/replay.php",
+    "https://www.boatrace-suminoe.jp/ysen/ysen.htm",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/contents/01history/ranking_motor.php",
+    "https://www.boatrace-suminoe.jp/asp/htmlmade/suminoe/01boat/boat02.htm",
+    "https://www.boatrace-suminoe.jp/01suimen/01suimen.htm",
+    "https://www.boatrace-suminoe.jp/01cal/cal.htm",
+    "https://www.boatrace-suminoe.jp/cal_tv.html",
+    "https://www.boatrace-suminoe.jp/access.html",
+    "https://www.boatrace-suminoe.jp/sisetsu.html",
+    "https://www.boatrace-suminoe.jp/first.html",
+    "https://www.boatrace-suminoe.jp/virtual.html",
+    "https://www.boatrace-suminoe.jp/gourmet.html",
+    "https://www.boatrace-suminoe.jp/seat/cal.htm",
+    "https://www.boatrace-suminoe.jp/seat.html",
+    "https://www.boatrace-suminoe.jp/premium3.html",
+    "https://www.boatrace-suminoe.jp/osaka.htm",
+    "https://www.boatrace-suminoe.jp/05win/win.htm",
+    "https://www.boatrace-suminoe.jp/jump/syokin.html",
+    "https://www.boatrace-suminoe.jp/dento01.html",
+    "https://www.boatrace-suminoe.jp/cashless.html",
+    "https://www.boatrace-suminoe.jp/jumpy.html",
+    "https://www.boatrace-suminoe.jp/link.html",
+    "https://www.boatrace-suminoe.jp/faq.html",
+    "https://www.boatrace-suminoe.jp/p_info.html",
+    "https://www.boatrace-suminoe.jp/jump/policy.html",
+    "https://www.boatrace-suminoe.jp/desk.html",
+    "https://www.boatrace-suminoe.jp/spec.html",
+    "https://www.boatrace-suminoe.jp/jump/conections.html",
+    "https://www.boatrace-suminoe.jp/asp/htmlmade/Race/Tenbo/12/PC/t202.htm",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#racer20261019",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#432",
+    "https://www.boatrace-suminoe.jp/asp/suminoe/00info/info.php#431",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_41",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_24",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_32",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_33",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_39",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_1_40",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_7_7",
+    "https://www.boatrace-suminoe.jp/03event/event.htm#eve10778_9_10"
+   ]
+  },
+  "14": {
+   "name": "鳴門",
+   "date": "2026-10-15",
+   "hits": [
+    {
+     "url": "https://www.n14.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "n": 5,
+     "memo": "列:ex=各タイム展示,lap=各タイム一周,turn=各タイムまわり足,straight=各タイム直線"
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_ichiosi",
+     "n": 6
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.n14.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 200,
+     "n": 5,
+     "memo": "列:ex=各タイム展示,lap=各タイム一周,turn=各タイムまわり足,straight=各タイム直線"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.n14.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_assen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_tenbo",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_kikaku",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_ichiosi",
+     "code": 200,
+     "has_mawari": true
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_boat_ticket_win",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_tide_table",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_syokin",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/racers/?page=index_newcomer",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/modules/racers/?page=index_shibu_winner",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.n14.jp/uploads/data/cal/nenkan.pdf?ver=20260520",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.n14.jp/modules/raceinfo/",
+    "https://www.n14.jp/modules/raceinfo/?page=index_assen",
+    "https://www.n14.jp/modules/raceinfo/?page=index_tenbo",
+    "https://www.n14.jp/modules/raceinfo/?page=index_resultlist",
+    "https://www.n14.jp/modules/raceinfo/?page=index_pdf",
+    "https://www.n14.jp/modules/raceinfo/?page=index_timerank",
+    "https://www.n14.jp/modules/raceinfo/?page=index_kikaku",
+    "https://www.n14.jp/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.n14.jp/modules/datafile/",
+    "https://www.n14.jp/modules/datafile/?page=index_boat",
+    "https://www.n14.jp/modules/datafile/?page=index_ichiosi",
+    "https://www.n14.jp/modules/datafile/?page=index_boat_ticket_win",
+    "https://www.n14.jp/modules/datafile/?page=index_suimen",
+    "https://www.n14.jp/modules/datafile/?page=index_tide_table",
+    "https://www.n14.jp/modules/datafile/?page=index_syokin",
+    "https://www.n14.jp/modules/datafile/?page=index_deme",
+    "https://www.n14.jp/modules/racers/",
+    "https://www.n14.jp/modules/racers/?page=index_newcomer",
+    "https://www.n14.jp/modules/racers/?page=index_shibu_winner",
+    "https://www.n14.jp/uploads/data/cal/nenkan.pdf?ver=20260520"
+   ]
+  },
+  "15": {
+   "name": "丸亀",
+   "date": "2026-10-15",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/jumper.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/jumper.htm?is_anchor",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/jumper.htm?is_anchor",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/t118.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/s119.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/s117.htm",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/jumper.htm",
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/jumper.htm?is_anchor",
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/jumper.htm?is_anchor",
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Tenbo/15/PC/t118.htm",
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/s119.htm",
+    "https://www.marugameboat.jp/asp/htmlmade/Race/Syutujo/15/PC/s117.htm"
+   ]
+  },
+  "16": {
+   "name": "児島",
+   "date": "2026-10-12",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/cyokuzen.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/cyokuzen.php?day=20261012&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/group-cyokuzen.php?day=20261012&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/oriten.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/group-oriten.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/tenji.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/tenji_info.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/group-tenji.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/modules/yosou/original.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://hj.kojima-yosou.com/hjpc/index/20261012/01",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/jumper.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/t57.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/t58.htm",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=04&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=09&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=02&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=13&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=08&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=03&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=14&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=10&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=21&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=20&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=01&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=19&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=24&yd=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.kojimaboat.jp/asp/htmlmade/Race/Syutujo/16/s59.htm",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/jumper.htm",
+    "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/t57.htm",
+    "https://www.kojimaboat.jp/asp/htmlmade/Race/Tenbo/16/t58.htm",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=04&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=09&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=02&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=13&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=08&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=03&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=14&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=10&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=21&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=20&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=01&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=19&yd=20261016",
+    "https://www.kojimaboat.jp/jump/official_raceindex.html?jyo=24&yd=20261016",
+    "https://www.kojimaboat.jp/asp/htmlmade/Race/Syutujo/16/s59.htm"
+   ]
+  },
+  "17": {
+   "name": "宮島",
+   "date": "2026-09-23",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/cyokuzen.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/cyokuzen.php?day=20260923&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/group-cyokuzen.php?day=20260923&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/oriten.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/group-oriten.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/tenji.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/tenji_info.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/group-tenji.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/modules/yosou/original.php?day=20260923&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/index.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/racer_list.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/prospect.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/racecard.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/racedata.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/raceinfo_timerank.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/yosen_point_rank.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/results.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/race_tenbou.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/paper.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/photo_gallery.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/surface.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/articles.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/ranking.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/schedule.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/hiroshima_racer.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/hiroshima_racer.html#under_base_winners",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/hiroshima_racer.html#under_base_lookie",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/diary_movie.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/monta_channel.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/news.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/event.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/fanservice.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/youtube_schedule.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/televoting.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/goods.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/momiji_card.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/app.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/beginners.html",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-miyajima.com/banners.html",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-miyajima.com/index.html",
+    "https://www.boatrace-miyajima.com/racer_list.html",
+    "https://www.boatrace-miyajima.com/prospect.html",
+    "https://www.boatrace-miyajima.com/racecard.html",
+    "https://www.boatrace-miyajima.com/racedata.html",
+    "https://www.boatrace-miyajima.com/raceinfo_timerank.html",
+    "https://www.boatrace-miyajima.com/yosen_point_rank.html",
+    "https://www.boatrace-miyajima.com/results.html",
+    "https://www.boatrace-miyajima.com/race_tenbou.html",
+    "https://www.boatrace-miyajima.com/paper.html",
+    "https://www.boatrace-miyajima.com/photo_gallery.html",
+    "https://www.boatrace-miyajima.com/surface.html",
+    "https://www.boatrace-miyajima.com/articles.html",
+    "https://www.boatrace-miyajima.com/ranking.html",
+    "https://www.boatrace-miyajima.com/schedule.html",
+    "https://www.boatrace-miyajima.com/hiroshima_racer.html",
+    "https://www.boatrace-miyajima.com/hiroshima_racer.html#under_base_winners",
+    "https://www.boatrace-miyajima.com/hiroshima_racer.html#under_base_lookie",
+    "https://www.boatrace-miyajima.com/diary_movie.html",
+    "https://www.boatrace-miyajima.com/monta_channel.html",
+    "https://www.boatrace-miyajima.com/news.html",
+    "https://www.boatrace-miyajima.com/event.html",
+    "https://www.boatrace-miyajima.com/fanservice.html",
+    "https://www.boatrace-miyajima.com/youtube_schedule.html",
+    "https://www.boatrace-miyajima.com/televoting.html",
+    "https://www.boatrace-miyajima.com/goods.html",
+    "https://www.boatrace-miyajima.com/momiji_card.html",
+    "https://www.boatrace-miyajima.com/app.html",
+    "https://www.boatrace-miyajima.com/beginners.html",
+    "https://www.boatrace-miyajima.com/banners.html",
+    "https://www.boatrace-miyajima.com/panorama.html",
+    "https://www.boatrace-miyajima.com/pdf/vr_schedule.pdf",
+    "https://www.boatrace-miyajima.com/pdf/kutsurogi_r8.pdf",
+    "https://www.boatrace-miyajima.com/ga-info.html",
+    "https://www.boatrace-miyajima.com/jalert-info.html",
+    "https://www.boatrace-miyajima.com/facility.html",
+    "https://www.boatrace-miyajima.com/gourmet.html",
+    "https://www.boatrace-miyajima.com/reserved_seat.html",
+    "https://www.boatrace-miyajima.com/seat_availability.html",
+    "https://www.boatrace-miyajima.com/access.html",
+    "https://www.boatrace-miyajima.com/parking.html",
+    "https://www.boatrace-miyajima.com/rokumiyajima.html",
+    "https://www.boatrace-miyajima.com/spot.html",
+    "https://www.boatrace-miyajima.com/contact.html",
+    "https://www.boatrace-miyajima.com/faq.html",
+    "https://www.boatrace-miyajima.com/req.html",
+    "https://www.boatrace-miyajima.com/privacy.html",
+    "https://www.boatrace-miyajima.com/links.html",
+    "https://www.boatrace-miyajima.com/groupinfo.html",
+    "https://www.boatrace-miyajima.com/boatrace-contribution.html",
+    "https://www.boatrace-miyajima.com/prospect_detail.html?id=476",
+    "https://www.boatrace-miyajima.com/net-campaign.html",
+    "https://www.boatrace-miyajima.com/coupon.html",
+    "https://www.boatrace-miyajima.com/youtube-cp.html",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=766",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=765",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=764",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=763",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=761",
+    "https://www.boatrace-miyajima.com/news_detail.html?id=749"
+   ]
+  },
+  "19": {
+   "name": "下関",
+   "date": "2026-10-14",
+   "hits": [
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/group-cyokuzen.php?day=20261014&race=1&kind=2",
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/cyokuzen.php?day=20261014&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/cyokuzen.php?day=20261014&race=1&kind=2",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/group-cyokuzen.php?day=20261014&race=1&kind=2",
+     "code": 200,
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/oriten.php?day=20261014&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/group-oriten.php?day=20261014&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/tenji.php?day=20261014&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/tenji_info.php?day=20261014&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/group-tenji.php?day=20261014&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/yosou/original.php?day=20261014&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_assen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_tenbo",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_raceindex",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_racecourse",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_konsetsu",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_tide_table",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_kouryaku_book",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_shimonoseki_video",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/racers/?page=index_pickupracerlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/racers/?page=index_newcomer",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_timetable",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=payseat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=fukuru",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=orale",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/service/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_event",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_youtube",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-shimonoseki.jp/",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_assen",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_tenbo",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_raceindex",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_resultlist",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_pdf",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_timerank",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_racecourse",
+    "https://www.boatrace-shimonoseki.jp/modules/raceinfo/?page=index_konsetsu",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_boat",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_deme",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_suimen",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_tide_table",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_kouryaku_book",
+    "https://www.boatrace-shimonoseki.jp/modules/datafile/?page=index_shimonoseki_video",
+    "https://www.boatrace-shimonoseki.jp/modules/racers/?page=index_pickupracerlist",
+    "https://www.boatrace-shimonoseki.jp/modules/racers/?page=index_newcomer",
+    "https://www.boatrace-shimonoseki.jp/modules/racers/",
+    "https://www.boatrace-shimonoseki.jp/modules/access/",
+    "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_timetable",
+    "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility",
+    "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=payseat",
+    "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=fukuru",
+    "https://www.boatrace-shimonoseki.jp/modules/access/?page=index_facility&kind=orale",
+    "https://www.boatrace-shimonoseki.jp/modules/service/",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_event",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_youtube",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_cashless",
+    "https://www.boatrace-shimonoseki.jp/modules/entry/magazine/",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_enjoy",
+    "https://www.boatrace-shimonoseki.jp/modules/cal/",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=003971",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=003871",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=003121",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=003013",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=003012",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=000871",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=000611",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=000124",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004121",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004111",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004101",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004081",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004071",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004061",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004031",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information&news_id=004021",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_information",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_event&news_id=003981",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_event&news_id=003122",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_event&news_id=003112",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_youtube&news_id=004042",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_youtube&news_id=004051",
+    "https://www.boatrace-shimonoseki.jp/modules/service/?page=index_youtube&news_id=004091",
+    "https://www.boatrace-shimonoseki.jp/sp/",
+    "https://www.boatrace-shimonoseki.jp/modules/other/",
+    "https://www.boatrace-shimonoseki.jp/modules/other/?page=index_kankyo"
+   ]
+  },
+  "20": {
+   "name": "若松",
+   "date": "2026-10-15",
+   "hits": [
+    {
+     "url": "https://www.wmb.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.wmb.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 200,
+     "n": 6,
+     "memo": "列:ex=展示タイム,lap=一周,turn=まわり足,straight=直線"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_assen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_racecourse",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_konsetsu",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/raceinfo/?page=index_winner",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/?page=index_tide_table",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/racers/?page=index_introduce",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/racers/?page=index_assen_racers",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.wmb.jp/modules/datafile/?page=index_motordata",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.wmb.jp/modules/raceinfo/",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_assen",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_resultlist",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_pdf",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_timerank",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_racecourse",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_konsetsu",
+    "https://www.wmb.jp/modules/raceinfo/?page=index_winner",
+    "https://www.wmb.jp/modules/datafile/",
+    "https://www.wmb.jp/modules/datafile/?page=index_boat",
+    "https://www.wmb.jp/modules/datafile/?page=index_deme",
+    "https://www.wmb.jp/modules/datafile/?page=index_suimen",
+    "https://www.wmb.jp/modules/datafile/?page=index_tide_table",
+    "https://www.wmb.jp/modules/racers/",
+    "https://www.wmb.jp/modules/racers/?page=index_introduce",
+    "https://www.wmb.jp/modules/racers/?page=index_assen_racers",
+    "https://www.wmb.jp/modules/datafile/?page=index_motordata"
+   ]
+  },
+  "21": {
+   "name": "芦屋",
+   "date": "2026-10-15",
+   "hits": [
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "n": 5,
+     "memo": "列:ex=展示,lap=一周,turn=まわり足,straight=直線"
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 200,
+     "n": 5,
+     "memo": "列:ex=展示,lap=一周,turn=まわり足,straight=直線"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": null,
+     "n": 0,
+     "memo": "None"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/lang/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/lang/?page=index_cchinese_sub",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/lang/?page=index_tchinese_sub",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/lang/?page=index_korean_sub",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_racecourse",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_racers_comment",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_sunrise",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/racers/?page=index_newcomer",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/cal/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_timetable",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_facility",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_ashimu",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_cafe",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_katsuyama",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_takajyo",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_kinpou",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_hyuga",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-ashiya.com/modules/access/?page=index_tenmonkan",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-ashiya.com/",
+    "https://www.boatrace-ashiya.com/modules/lang/",
+    "https://www.boatrace-ashiya.com/modules/lang/?page=index_cchinese_sub",
+    "https://www.boatrace-ashiya.com/modules/lang/?page=index_tchinese_sub",
+    "https://www.boatrace-ashiya.com/modules/lang/?page=index_korean_sub",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_resultlist",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_pdf",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_timerank",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_racecourse",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_racers_comment",
+    "https://www.boatrace-ashiya.com/modules/raceinfo/?page=index_sunrise",
+    "https://www.boatrace-ashiya.com/modules/datafile/",
+    "https://www.boatrace-ashiya.com/modules/datafile/?page=index_boat",
+    "https://www.boatrace-ashiya.com/modules/datafile/?page=index_deme",
+    "https://www.boatrace-ashiya.com/modules/datafile/?page=index_suimen",
+    "https://www.boatrace-ashiya.com/modules/racers/",
+    "https://www.boatrace-ashiya.com/modules/racers/?page=index_newcomer",
+    "https://www.boatrace-ashiya.com/modules/cal/",
+    "https://www.boatrace-ashiya.com/modules/access/",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_timetable",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_facility",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_ashimu",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_cafe",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_katsuyama",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_takajyo",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_kinpou",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_hyuga",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_tenmonkan",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_kama",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_miyazaki",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_nichinan",
+    "https://www.boatrace-ashiya.com/modules/access/?page=index_kajiki",
+    "https://www.boatrace-ashiya.com/modules/news/",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_event",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_bts",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_dento",
+    "https://www.boatrace-ashiya.com/modules/service/?page=index_cashless",
+    "https://www.boatrace-ashiya.com/modules/service/?page=index_magazine",
+    "https://www.boatrace-ashiya.com/modules/service/?page=index_telservice",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_event&news_id=004411",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=000289",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=000129",
+    "https://www.boatrace-ashiya.com/mooovi/",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=000214",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=004561",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=000901",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=004111",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=004481",
+    "https://www.boatrace-ashiya.com/modules/news/?news_id=000262",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_dento&news_id=004812",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_dento&news_id=004811",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_dento&news_id=004281",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_dento&news_id=004271",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_event&news_id=004801",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_event&news_id=004821",
+    "https://www.boatrace-ashiya.com/modules/news/?page=index_bts&news_id=004121",
+    "https://www.boatrace-ashiya.com/uploads/cdn/banner/tile_banner/pc/data/monthlyraceguide.pdf",
+    "https://www.boatrace-ashiya.com/url_changer.php?sdate=20261014&jo=21"
+   ]
+  },
+  "23": {
+   "name": "唐津",
+   "date": "2026-10-12",
+   "hits": [
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/group-cyokuzen.php?day=20261012&race=1&kind=2",
+     "n": 6,
+     "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+    }
+   ],
+   "tried": [
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/cyokuzen.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/cyokuzen.php?day=20261012&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/group-cyokuzen.php?day=20261012&race=1&kind=2",
+     "code": 200,
+     "n": 6,
+     "memo": "列:ex=展示,lap=オリジナル展示データ一周,turn=オリジナル展示データまわり足,straight=オリジナル展示データ直線"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/oriten.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/group-oriten.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/tenji.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/tenji_info.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/group-tenji.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/yosou/original.php?day=20261012&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/cal/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/lang/?page=index_en",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/lang/?page=index_zh_cn",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/lang/?page=index_zh_tw",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/lang/?page=index_kr",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_resultlist",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_pdf",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_timerank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_zensou",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_racecourse",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_konsetsu",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_tokutenrank",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_tenbo",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_racers_comment",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_marutoku",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_boat",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_deme",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_suimen",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_ichioshi",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/racers/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_winners_record",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/news/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/news/?page=index_event",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/access/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/access/?page=index_dream_pit",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/access/?page=index_bts_minit",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.boatrace-karatsu.jp/modules/access/?page=index_bts_yobuko",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.boatrace-karatsu.jp/",
+    "https://www.boatrace-karatsu.jp/modules/cal/",
+    "https://www.boatrace-karatsu.jp/modules/lang/?page=index_en",
+    "https://www.boatrace-karatsu.jp/modules/lang/?page=index_zh_cn",
+    "https://www.boatrace-karatsu.jp/modules/lang/?page=index_zh_tw",
+    "https://www.boatrace-karatsu.jp/modules/lang/?page=index_kr",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_resultlist",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_pdf",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_timerank",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_zensou",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_racecourse",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_konsetsu",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_tokutenrank",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_tenbo",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_racers_comment",
+    "https://www.boatrace-karatsu.jp/modules/raceinfo/?page=index_marutoku",
+    "https://www.boatrace-karatsu.jp/modules/datafile/",
+    "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_boat",
+    "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_deme",
+    "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_suimen",
+    "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_ichioshi",
+    "https://www.boatrace-karatsu.jp/modules/racers/",
+    "https://www.boatrace-karatsu.jp/modules/datafile/?page=index_winners_record",
+    "https://www.boatrace-karatsu.jp/modules/news/",
+    "https://www.boatrace-karatsu.jp/modules/news/?page=index_event",
+    "https://www.boatrace-karatsu.jp/modules/access/",
+    "https://www.boatrace-karatsu.jp/modules/access/?page=index_dream_pit",
+    "https://www.boatrace-karatsu.jp/modules/access/?page=index_bts_minit",
+    "https://www.boatrace-karatsu.jp/modules/access/?page=index_bts_yobuko",
+    "https://www.boatrace-karatsu.jp/modules/service/",
+    "https://www.boatrace-karatsu.jp/modules/service/?page=index_monthly",
+    "https://www.boatrace-karatsu.jp/modules/service/?page=index_telservice",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1437",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1471",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=172",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=258",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1141",
+    "https://www.boatrace-karatsu.jp/#tab1",
+    "https://www.boatrace-karatsu.jp/#tab2",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1509",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1434",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1483",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=95",
+    "https://www.boatrace-karatsu.jp/modules/news/?storyid=1522",
+    "https://www.boatrace-karatsu.jp/modules/news/?page=index_event&eventid=H20261018-1",
+    "https://www.boatrace-karatsu.jp/modules/news/?page=index_event&eventid=H20261027-1",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20260930&jo=23",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261008&jo=23",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261018&jo=23",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261027&jo=23",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261001&jo=14",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261003&jo=18",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261008&jo=14",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261010&jo=18",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261018&jo=21",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261019&jo=18",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261027&jo=10",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261029&jo=18",
+    "https://www.boatrace-karatsu.jp/url_changer.php?sdate=20261018&jo=10"
+   ]
+  },
+  "24": {
+   "name": "大村",
+   "date": "2026-10-15",
+   "hits": [],
+   "tried": [
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/cyokuzen.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/group-cyokuzen.php?day=20261015&race=1&kind=2",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/group-oriten.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/tenji_info.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/group-tenji.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://omurakyotei.jp/modules/yosou/original.php?day=20261015&race=1",
+     "code": 404,
+     "n": 0,
+     "memo": "404"
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/kekka_list.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/data/motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/racer",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosouselect.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/comment.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/point.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/ranking_motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/ranking_time.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/sp/racer/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/point.php?day=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/include/new_top_iframe_syussou_2.php?day=20261017&race=1",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://www.omurakyotei.jp/yosou/mimiyori.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/data/motor_review.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/kekka_list.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/data/motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/racer",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosouselect.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/comment.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/point.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/ranking_motor.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/ranking_time.php",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/sp/racer/",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/point.php?day=20261016",
+     "code": 200,
+     "has_mawari": false
+    },
+    {
+     "url": "https://omurakyotei.jp/yosou/include/new_top_iframe_syussou_2.php?day=20261017&race=1",
+     "code": 200,
+     "has_mawari": false
+    }
+   ],
+   "links": [
+    "https://www.omurakyotei.jp/yosou",
+    "https://www.omurakyotei.jp/yosou/kekka_list.php",
+    "https://www.omurakyotei.jp/data/motor.php",
+    "https://www.omurakyotei.jp/yosou/motor.php",
+    "https://www.omurakyotei.jp/racer",
+    "https://www.omurakyotei.jp/yosou/",
+    "https://www.omurakyotei.jp/yosouselect.php",
+    "https://www.omurakyotei.jp/yosou/comment.php",
+    "https://www.omurakyotei.jp/yosou/point.php",
+    "https://www.omurakyotei.jp/yosou/ranking_motor.php",
+    "https://www.omurakyotei.jp/yosou/ranking_time.php",
+    "https://www.omurakyotei.jp/sp/racer/",
+    "https://www.omurakyotei.jp/yosou/point.php?day=20261016",
+    "https://www.omurakyotei.jp/yosou/include/new_top_iframe_syussou_2.php?day=20261017&race=1",
+    "https://www.omurakyotei.jp/yosou/mimiyori.php",
+    "https://omurakyotei.jp/data/motor_review.php",
+    "https://omurakyotei.jp/yosou",
+    "https://omurakyotei.jp/yosou/kekka_list.php",
+    "https://omurakyotei.jp/data/motor.php",
+    "https://omurakyotei.jp/yosou/motor.php",
+    "https://omurakyotei.jp/racer",
+    "https://omurakyotei.jp/yosou/",
+    "https://omurakyotei.jp/yosouselect.php",
+    "https://omurakyotei.jp/yosou/comment.php",
+    "https://omurakyotei.jp/yosou/point.php",
+    "https://omurakyotei.jp/yosou/ranking_motor.php",
+    "https://omurakyotei.jp/yosou/ranking_time.php",
+    "https://omurakyotei.jp/sp/racer/",
+    "https://omurakyotei.jp/yosou/point.php?day=20261016",
+    "https://omurakyotei.jp/yosou/include/new_top_iframe_syussou_2.php?day=20261017&race=1",
+    "https://omurakyotei.jp/yosou/mimiyori.php"
+   ]
+  }
+ }
+}

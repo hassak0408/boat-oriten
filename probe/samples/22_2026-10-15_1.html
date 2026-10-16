@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="robots" content="NOINDEX,NOFOLLOW" />
+  <!--[if lt IE 9]>
+  <script src="/themes/fukuoka/js/common/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/themes/fukuoka/css/reset.css" type="text/css">
+  <link rel="stylesheet" href="/themes/fukuoka/css/common.css" type="text/css">
+  <link rel="stylesheet" href="/themes/fukuoka/css/common22.css" type="text/css">
+  <link rel="stylesheet" href="/modules/yosou/css/yosou.css?var=1" type="text/css">
+  <link rel="stylesheet" href="/modules/yosou/css/tenji_info.css?ver=1" type="text/css">  <script type="text/javascript" src="/themes/fukuoka/js/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript" src="/themes/fukuoka/js/common.js"></script>
+  <script type="text/javascript">
+  $(function(){
+    $(".yosou_series_schedule", parent.document).html("10月10日（土）・11日（日）・12日（月）・13日（火）・14日（水）・15日（木）");
+    $(".yosou_tenbo", parent.document).html("<span class='title'>優勝戦はパワー重視で河合佑樹に期待！</span><br /><p class='yosou_data'>ボートレース福岡の「日本トーター杯」は、１５日が最終日。準優勝戦を勝ち上がってきた６名により、最終１２Ｒで優勝が争われる。準優勝戦はすべて内両立で決まり、得点率上位６名がそのまま優勝戦に進出。ポールポジションを射止めたのは齊藤仁だが、Ａ１級勝負駆けの池永太が６号艇にいることでコース取りがもつれる可能性は高い。進入は１６２／３４５を想定し、本命には河合佑樹を推す。５７号機は好バランスの仕上がりで、特に伸び足はトップ級。内が深くなるのは大歓迎で、３コースからまくり勝負に持ち込む。ただ、優勝戦となれば誰も譲らない可能性も考えられるだけに、枠なりなら出足上位の齊藤が有力なＶ候補になる。平山智加や森野正弘、福島勇樹も仕上がりは良好で、全員にチャンスがありそう。<br />（注：これは 2026/10/15 の展望です）</p>");
+    $(".tab_nthday", parent.document).html("<ul class=\"tab_nthday_menu\"><li class=\"tab_nthday_item done\" day=\"20261010\"><a href=\"javascript:void(0);\">初　日</a></li></li><li class=\"tab_nthday_item done\" day=\"20261011\"><a href=\"javascript:void(0);\">２日目</a></li></li><li class=\"tab_nthday_item done\" day=\"20261012\"><a href=\"javascript:void(0);\">３日目</a></li></li><li class=\"tab_nthday_item done\" day=\"20261013\"><a href=\"javascript:void(0);\">４日目</a></li></li><li class=\"tab_nthday_item done\" day=\"20261014\"><a href=\"javascript:void(0);\">５日目</a></li></li><li class=\"tab_nthday_item done current\" day=\"20261015\"><a href=\"javascript:void(0);\">最終日</a></li></li></ul>");
+    $(".tab_race", parent.document).html("<ul class=\"tab_race_menu\"><li class=\"tab_race_item done current\" race=\"1\"><a href=\"javascript:void(0);\">1R</a></li><li class=\"tab_race_item done\" race=\"2\"><a href=\"javascript:void(0);\">2R</a></li><li class=\"tab_race_item done\" race=\"3\"><a href=\"javascript:void(0);\">3R</a></li><li class=\"tab_race_item done\" race=\"4\"><a href=\"javascript:void(0);\">4R</a></li><li class=\"tab_race_item done\" race=\"5\"><a href=\"javascript:void(0);\">5R</a></li><li class=\"tab_race_item done\" race=\"6\"><a href=\"javascript:void(0);\">6R</a></li><li class=\"tab_race_item done\" race=\"7\"><a href=\"javascript:void(0);\">7R</a></li><li class=\"tab_race_item done\" race=\"8\"><a href=\"javascript:void(0);\">8R</a></li><li class=\"tab_race_item done\" race=\"9\"><a href=\"javascript:void(0);\">9R</a></li><li class=\"tab_race_item done\" race=\"10\"><a href=\"javascript:void(0);\">10R</a></li><li class=\"tab_race_item done\" race=\"11\"><a href=\"javascript:void(0);\">11R</a></li><li class=\"tab_race_item done\" race=\"12\"><a href=\"javascript:void(0);\">12R</a></li></ul>");
+    $(".tab_nthday_item a, .tab_race_item a", parent.document).on('click', function(){
+        $(this).parent().siblings().removeClass('current');
+        $(this).parent().addClass('current');
+        window.parent.setframe();
+    });
+    $(".raceinfo_day", parent.document).html("10月15日");
+    $(".raceinfo_race", parent.document).html("1R");
+    $(".raceinfo_title", parent.document).html("カタメン１一般");
+    $(".raceinfo_entryFixed", parent.document).html("");
+    $(".raceinfo_dento", parent.document).html("<img src=\"/modules/yosou/images/icon_clock.png\"> 締切時刻　<span>締切</span>");
+  });
+  </script>
+</head>
+<body class="yosou">
+<div class="contents-wrapper">
+
+<script type="text/javascript">
+    $(window).bind("load", function() {
+        // console.log( "document loaded" + $(".yosou_data", parent.document).height() );
+        if(parseInt($(".yosou_data", parent.document).height()) > 250) {
+            console.log("in llll");
+            $(".yosou_data", parent.document).css({"height": "14em", "overflow": "hidden"});
+            $(".yosou_data", parent.document).addClass("content");
+            $(".yosou_more", parent.document).css({"display": ""});
+        }else {
+            $(".yosou_more", parent.document).css({"display": "none"});
+        }
+    });
+</script>
+
+<div class='category-tenji inner'>
+<div class='heading02 mb_10'><h3>展示情報</h3></div><table class='com-yosou-table tenji'>
+            <tr>
+                <th class='col1' rowspan='2'>艇番</th>
+                <th class='col2' rowspan='2'>級別/支部<br>レーサー名<br>登録番号/出身地/年齢</th>
+                <th class='col3 border_b' rowspan='2'>体重</th>
+                <th class='col4 border_b' rowspan='2'>調整体重</th>
+                <th class='col5 border_b' rowspan='2'>チルト</th>
+                <th class='col6' rowspan='2'>展示タイム</th>
+                <th class='col7-9 border_b' colspan='3'>オリジナル展示データ</th>
+                <th class='col10' rowspan='2'>展示評価</th>
+            </tr>
+            <tr>
+                <th class='col7'>一周</th>
+                <th class='col8'>まわり足</th>
+                <th class='col9'>直線</th>
+            </tr>
+            <tr>
+<td class='col1 imp-num1 tei'>1</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    <font color='#ff0000'>A1</font>/埼　玉
+	                </li>
+	                <li class='com-rname'>
+	                    鈴木　　　博
+	                </li>
+	                <li class='com-subinfo'>
+	                    3412/埼　玉/57
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>53.4</td>
+<td class='col4'></td>
+<td class='col5'>-0.5</td>
+<td class='col6'>6.81</td>
+<td class='col7 rank_1'>36.57</td>
+<td class='col8 rank_1'>5.40</td>
+<td class='col9'>7.49</td>
+<td class='col10 col_last'>3</td>
+</tr>
+<tr>
+<td class='col1 imp-num2 tei'>2</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    B1/東　京
+	                </li>
+	                <li class='com-rname'>
+	                    大西　　　賢
+	                </li>
+	                <li class='com-subinfo'>
+	                    4465/茨　城/40
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>52.0</td>
+<td class='col4'></td>
+<td class='col5'>0.0</td>
+<td class='col6'>6.86</td>
+<td class='col7 rank_2'>37.23</td>
+<td class='col8 rank_2'>5.47</td>
+<td class='col9'>7.53</td>
+<td class='col10 col_last'>3</td>
+</tr>
+<tr>
+<td class='col1 imp-num3 tei'>3</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    B1/岡　山
+	                </li>
+	                <li class='com-rname'>
+	                    福嶋　　智之
+	                </li>
+	                <li class='com-subinfo'>
+	                    4054/岡　山/48
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>52.9</td>
+<td class='col4'></td>
+<td class='col5'>0.0</td>
+<td class='col6 rank_2'>6.80</td>
+<td class='col7'>37.61</td>
+<td class='col8'>5.65</td>
+<td class='col9 rank_2'>7.45</td>
+<td class='col10 col_last'>3</td>
+</tr>
+<tr>
+<td class='col1 imp-num4 tei'>4</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    B1/山　口
+	                </li>
+	                <li class='com-rname'>
+	                    佐藤　　駿介
+	                </li>
+	                <li class='com-subinfo'>
+	                    4846/山　口/33
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>52.0</td>
+<td class='col4'></td>
+<td class='col5'>0.0</td>
+<td class='col6 rank_1'>6.78</td>
+<td class='col7'>38.02</td>
+<td class='col8'>5.64</td>
+<td class='col9'>7.46</td>
+<td class='col10 col_last'>3</td>
+</tr>
+<tr>
+<td class='col1 imp-num5 tei'>5</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    B1/香　川
+	                </li>
+	                <li class='com-rname'>
+	                    村越　　　篤
+	                </li>
+	                <li class='com-subinfo'>
+	                    3907/愛　媛/48
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>54.5</td>
+<td class='col4'></td>
+<td class='col5'>-0.5</td>
+<td class='col6'>6.85</td>
+<td class='col7'>37.80</td>
+<td class='col8'>5.53</td>
+<td class='col9'>7.47</td>
+<td class='col10 col_last'>3</td>
+</tr>
+<tr>
+<td class='col1 imp-num6 tei'>6</td>
+<td class='col2'><ul>
+	                <li class='com-subinfo'>
+	                    B2/<font color='#ff0000'>福　岡</font>
+	                </li>
+	                <li class='com-rname'>
+	                    宮田　　　栞
+	                </li>
+	                <li class='com-subinfo'>
+	                    5464/福　岡/19
+	                </li>
+	            </ul></td>
+<td class='col3 weight'>49.7</td>
+<td class='col4'></td>
+<td class='col5'>-0.5</td>
+<td class='col6'>6.82</td>
+<td class='col7'>37.73</td>
+<td class='col8'>5.87</td>
+<td class='col9 rank_1'>7.40</td>
+<td class='col10 col_last'>3</td>
+</tr>
+
+        </table>            <div class="original-note u-mt_30">
+                <div class="left_note">
+                    <h2 class="note_ttl">一周・まわり足・直線タイムは、BOATRACE 福岡独自計測値です。</h2>
+                    <p class="notice">
+                        ※水面状況や再展示などで計測ができない場合がございます。予めご了承ください。<br/>
+                        ※計測ができなかった場合は、「-」（ハイフン）が表示されます。<br/>
+                        ※一周・まわり足・直線の計測タイムは周回展示2周目のものです。なお、気象状況等により周回展示が1周となった場合は、1周目の計測とします。
+                    </p>
+                </div>
+                <div class="right_note">
+                    <span class="color_box rank_1">1位</span><!--
+                    --><span class="color_box rank_2">2位</span><!--
+                    --><a href='javascript:void(0);' class='js-lightbox-btn oriten_lightbox_btn' data-img-path='./images/cyokuzen/pc_img-s03-modal.png'>計測位置</a>
+                    <div class='js-lightbox-target' style='display: none;'><img src='./images/cyokuzen/pc_img-s03-modal.png' alt=''></div>
+                </div>
+            </div></div>
+<script type='text/javascript' src='/themes/fukuoka/js/jquery-1.11.2.min.js'></script>
+<script type='text/javascript' src='./js/simple-light-box.js'></script>
+
+</div>
+</body>
+</html>
