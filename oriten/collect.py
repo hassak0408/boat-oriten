@@ -51,7 +51,7 @@ def main():
             if time.time() - t0 > a.max_minutes * 60:
                 print('時間切れ（続きは同じ指定でもう一度動かすと、済んだ分を飛ばして続ける）', flush=True)
                 fcsv.close(); flog.close(); return
-            url = v['url'].format(d=ymd, r=r)
+            url = v['url'].format(d=ymd, r=r, r2=f'{r:02d}')
             code, html = F.get(url); n_pages += 1
             rows, memo = parse_page(html) if code == 200 else ([], f'取得失敗 {code} {html if code is None else ""}')
             if a.raw and code == 200:
@@ -65,7 +65,7 @@ def main():
                 empty_first = (len(rows) == 0)
             if r == 2 and empty_first and len(rows) == 0:
                 # 1R・2Rとも表が無い日は、12Rだけ見て無ければ飛ばす
-                code, html = F.get(v['url'].format(d=ymd, r=12)); n_pages += 1
+                code, html = F.get(v['url'].format(d=ymd, r=12, r2='12')); n_pages += 1
                 rows12, memo12 = parse_page(html) if code == 200 else ([], 'x')
                 if not rows12:
                     flog.write(json.dumps(dict(date=d, race=0, code=code, n=0, memo='この日は表なし'), ensure_ascii=False) + '\n')

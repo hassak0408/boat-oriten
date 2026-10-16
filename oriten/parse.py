@@ -58,10 +58,26 @@ def table_grid(tbl):
     return grid, base
 
 
+def parse_toda_xml(text):
+    """戸田の XML（record ごとに teiban・ttime・rnd（一周）・cnr（まわり足）・str（直線））"""
+    out = []
+    for rec in re.findall(r'<record>(.*?)</record>', text, re.S):
+        g = lambda t: (re.search(rf'<{t}>(.*?)</{t}>', rec, re.S) or [None, None])[1]
+        lane = g('teiban')
+        if not lane or not lane.strip().isdigit():
+            continue
+        out.append(dict(lane=int(lane), reg=None, ex=_num(g('ttime') or ''), lap=_num(g('rnd') or ''), lap_kind='一周',
+                        turn=_num(g('cnr') or ''), straight=_num(g('str') or '')))
+    return out
+
+
 def parse_page(html):
     """返り値：(艇ごとの行のリスト, メモ)。行は dict(lane, reg, name, ex, lap, lap_kind, turn, straight)"""
     if isinstance(html, bytes):
         html = html.decode('utf-8', errors='replace')
+    if '<record>' in html and '<rnd>' in html:
+        rows = parse_toda_xml(html)
+        return rows, ('戸田のXML' if rows else 'XMLが読めない')
     if 'まわり' not in html and '回り足' not in html:
         return [], 'まわり足の表なし'
     doc = lxml.html.fromstring(html)

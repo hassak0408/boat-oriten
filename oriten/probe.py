@@ -37,7 +37,7 @@ def main():
                 continue
             ok = False
             for r in (1, 6, 12):
-                code, html = F.get(cfg['url'].format(d=d.replace('-', ''), r=r))
+                code, html = F.get(cfg['url'].format(d=d.replace('-', ''), r=r, r2=f'{r:02d}'))
                 rows, memo = parse_page(html) if code == 200 else ([], str(code))
                 if rows:
                     ok = True

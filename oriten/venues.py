@@ -9,6 +9,7 @@ VENUES = {
     18: dict(name='徳山',   ok=True,  url='https://www.boatrace-tokuyama.jp/modules/yosou/tenji.php?day={d}&race={r}'),
     22: dict(name='福岡',   ok=True,  url='https://www.boatrace-fukuoka.com/modules/yosou/tenji_info.php?day={d}&race={r}'),
     # 2026-10-16 の probe で見つけた場
+    2:  dict(name='戸田',   ok=True,  url='https://www.boatrace-toda.jp/xml/kaisai/{d}/race_table_original_{r2}.xml'),
     8:  dict(name='常滑',   ok=True,  url='https://www.boatrace-tokoname.jp/modules/yosou/group-cyokuzen.php?day={d}&race={r}&kind=2'),
     14: dict(name='鳴門',   ok=True,  url='https://www.n14.jp/modules/yosou/group-cyokuzen.php?day={d}&race={r}&kind=2'),
     19: dict(name='下関',   ok=True,  url='https://www.boatrace-shimonoseki.jp/modules/yosou/group-cyokuzen.php?day={d}&race={r}&kind=2'),
@@ -18,7 +19,6 @@ VENUES = {
 }
 # まだページの場所が分かっていない場（probe.py で探す）。江戸川（3）と津（9）はオリジナル展示を出していない
 CANDIDATES = {
-    2:  dict(name='戸田',   sites=['https://www.boatrace-toda.jp']),
     4:  dict(name='平和島', sites=['https://www.heiwajima.gr.jp']),
     7:  dict(name='蒲郡',   sites=['https://www.gamagori-kyotei.com']),
     12: dict(name='住之江', sites=['https://www.boatrace-suminoe.jp']),
