@@ -22,25 +22,40 @@ def _num(s):
 
 
 def table_grid(tbl):
-    """rowspan/colspan を広げた表。grid[(行, 列)] = (文字, 見出しか, 元のセルか)"""
-    grid = {}
-    rows = tbl.xpath('./thead/tr|./tbody/tr|./tr|./tfoot/tr')
-    for r, tr in enumerate(rows):
-        c = 0
-        for cell in tr.xpath('./th|./td'):
-            while (r, c) in grid:
-                c += 1
-            try:
-                rs = max(1, int(cell.get('rowspan', '1') or 1))
-                cs = max(1, int(cell.get('colspan', '1') or 1))
-            except ValueError:
-                rs, cs = 1, 1
-            text = cell.text_content()
-            for dr in range(rs):
-                for dc in range(cs):
-                    grid[(r + dr, c + dc)] = (text, cell.tag == 'th', dr == 0 and dc == 0)
-            c += cs
-    return grid, len(rows)
+    """rowspan/colspan を広げた表。grid[(行, 列)] = (文字, 見出しか, 元のセルか)。
+    rowspan は thead・tbody の中だけで広げる（ブラウザと同じ。見出しの rowspan が本文にはみ出す場があるため）"""
+    sections, cur = [], []
+    for ch in tbl:
+        tag = ch.tag if isinstance(ch.tag, str) else ''
+        if tag in ('thead', 'tbody', 'tfoot'):
+            if cur:
+                sections.append(cur); cur = []
+            sections.append(ch.xpath('./tr'))
+        elif tag == 'tr':
+            cur.append(ch)
+    if cur:
+        sections.append(cur)
+    grid = {}; base = 0
+    for rows in sections:
+        n = len(rows)
+        for i, tr in enumerate(rows):
+            r = base + i; c = 0
+            for cell in tr.xpath('./th|./td'):
+                while (r, c) in grid:
+                    c += 1
+                try:
+                    rs = max(1, int(cell.get('rowspan', '1') or 1))
+                    cs = max(1, int(cell.get('colspan', '1') or 1))
+                except ValueError:
+                    rs, cs = 1, 1
+                rs = min(rs, n - i)
+                text = cell.text_content()
+                for dr in range(rs):
+                    for dc in range(cs):
+                        grid[(r + dr, c + dc)] = (text, cell.tag == 'th', dr == 0 and dc == 0)
+                c += cs
+        base += n
+    return grid, base
 
 
 def parse_page(html):
