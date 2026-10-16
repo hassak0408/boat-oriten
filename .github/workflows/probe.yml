@@ -1,0 +1,27 @@
+# 分かっている場が何年前までさかのぼれるか、まだ分からない場のオリジナル展示のページの場所を調べる
+name: probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: oriten-write
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests lxml
+      - run: python -m oriten.probe
+      - name: 結果を保存
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add probe
+          git commit -m "probe：オリジナル展示のページ探し" || echo "変更なし"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 10; done

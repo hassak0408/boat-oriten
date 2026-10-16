@@ -1,0 +1,104 @@
+# さかのぼって集める。場×期間ごとに分けて同時に動かし、最後に data/ にまとめる
+name: backfill
+on:
+  workflow_dispatch:
+    inputs:
+      venues:
+        description: '場番号（カンマ区切り）'
+        default: '1,5,6,10,11,13,18,22'
+      start:
+        description: '開始日 YYYY-MM-DD'
+        default: '2026-01-01'
+      end:
+        description: '終了日 YYYY-MM-DD'
+        default: '2026-10-15'
+      chunk:
+        description: '1つの仕事で受け持つ月数'
+        default: '12'
+      raw:
+        description: '元のページも保存する（1）／しない（0）'
+        default: '1'
+permissions:
+  contents: write
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.p.outputs.matrix }}
+    steps:
+      - id: p
+        env:
+          VENUES: ${{ inputs.venues }}
+          START: ${{ inputs.start }}
+          END: ${{ inputs.end }}
+          CHUNK: ${{ inputs.chunk }}
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json, os, datetime as dt
+          vs = [int(x) for x in os.environ['VENUES'].split(',') if x.strip()]
+          s = dt.date.fromisoformat(os.environ['START']); e = dt.date.fromisoformat(os.environ['END']); ch = int(os.environ['CHUNK'])
+          items = []; cur = s
+          while cur <= e:
+              m = cur.month - 1 + ch; nxt = dt.date(cur.year + m // 12, m % 12 + 1, 1)
+              end = min(e, nxt - dt.timedelta(days=1))
+              items += [dict(venue=v, start=cur.isoformat(), end=end.isoformat()) for v in vs]
+              cur = nxt
+          print('matrix=' + json.dumps(dict(include=items)))
+          PY
+  collect:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests lxml
+      - run: python -m oriten.collect --venue ${{ matrix.venue }} --start ${{ matrix.start }} --end ${{ matrix.end }} --out out --raw ${{ inputs.raw }} --max-minutes 330
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: csv-${{ matrix.venue }}-${{ matrix.start }}
+          path: |
+            out/csv
+            out/log
+      - name: 元のページをまとめる
+        if: always() && inputs.raw == '1'
+        run: tar -cJf raw-${{ matrix.venue }}-${{ matrix.start }}.tar.xz -C out raw || true
+      - uses: actions/upload-artifact@v4
+        if: always() && inputs.raw == '1'
+        with:
+          name: raw-${{ matrix.venue }}-${{ matrix.start }}
+          path: raw-*.tar.xz
+          retention-days: 90
+  merge:
+    needs: collect
+    if: always()
+    runs-on: ubuntu-latest
+    concurrency:
+      group: oriten-write
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: csv-*
+          path: artifacts
+      - run: python -m oriten.merge artifacts data
+      - name: ログもまとめる
+        run: mkdir -p logs && find artifacts -name '*.jsonl' -exec cp {} logs/ \; || true
+      - name: 保存
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data logs
+          git commit -m "backfill：${{ inputs.venues }} ${{ inputs.start }}〜${{ inputs.end }}" || echo "変更なし"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 10; done

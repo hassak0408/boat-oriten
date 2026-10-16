@@ -1,0 +1,42 @@
+# 毎日、前の日のオリジナル展示を集めて data/ に足す（日本時間0:30）
+name: daily
+on:
+  schedule:
+    - cron: '30 15 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '日付 YYYY-MM-DD（空なら前の日）'
+        default: ''
+permissions:
+  contents: write
+concurrency:
+  group: oriten-write
+  cancel-in-progress: false
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests lxml
+      - name: 集める
+        run: |
+          D="${{ inputs.date }}"
+          if [ -z "$D" ]; then D=$(TZ=Asia/Tokyo date -d 'yesterday' +%F); fi
+          for v in $(python -c "from oriten.venues import VENUES; print(' '.join(str(k) for k,c in VENUES.items() if c['ok']))"); do
+            python -m oriten.collect --venue $v --start $D --end $D --days $D --out out --raw 0 || true
+          done
+          mkdir -p artifacts/daily && cp -r out/csv artifacts/daily/ || true
+          mkdir -p logs && cp out/log/*.jsonl logs/ || true
+          python -m oriten.merge artifacts data
+      - name: 保存
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data logs
+          git commit -m "daily：$(TZ=Asia/Tokyo date -d 'yesterday' +%F)" || echo "変更なし"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 10; done
