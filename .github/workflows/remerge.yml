@@ -1,0 +1,48 @@
+# 前の実行（backfill）の保存物（csv-*）を取り直して、data/ にまとめ直す
+name: remerge
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'まとめ直す backfill の実行番号'
+        required: true
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: oriten-write
+  cancel-in-progress: false
+jobs:
+  remerge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: csv-*
+          path: artifacts
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: python -m oriten.merge artifacts data
+      - name: ログもまとめる
+        run: mkdir -p logs && find artifacts -name '*.jsonl' -exec cp {} logs/ \; || true
+      - name: 保存
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data logs
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "remerge：実行 ${{ inputs.run_id }} の分"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1

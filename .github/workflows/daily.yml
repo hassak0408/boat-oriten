@@ -19,6 +19,9 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -38,5 +41,11 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data logs
-          git commit -m "daily：$(TZ=Asia/Tokyo date -d 'yesterday' +%F)" || echo "変更なし"
-          for i in 1 2 3; do git pull --rebase && git push && break; sleep 10; done
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "daily：$(TZ=Asia/Tokyo date -d 'yesterday' +%F)"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
