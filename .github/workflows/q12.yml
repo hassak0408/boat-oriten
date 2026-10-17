@@ -1,0 +1,38 @@
+# 2連複1=2 の戻りモデル：前の日までの記録を q12/ に足す（日本時間 7:20。止まっていた日もまとめて足す）
+name: q12-record
+on:
+  schedule:
+    - cron: '20 22 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: oriten-write
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 記録する
+        run: node q12/record.js
+      - name: 保存
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add q12
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "q12：記録 $(TZ=Asia/Tokyo date -d 'yesterday' +%F)"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
