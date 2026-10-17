@@ -1,5 +1,6 @@
 // ===== 2連複1=2 戻りモデル（オッズなし）の計算部分 =====
 // BoatraceOpenAPI v1 の1レース（出走表＋直前情報）から学習と同じ143項目を作り、木のモデル3本で「100円あたりの戻りの見込み」を出す。
+// 確率モデル（「1=2が来る確率」を当てる木。link が logit）を渡すと、的中見込み（hitp）も出す。
 // Node（確かめ用）でも Google Apps Script でもそのまま動くように、標準の JavaScript だけで書く。
 var Q12 = (function () {
   var PREF = {1:10,2:11,3:13,4:13,5:13,6:22,7:23,8:23,9:24,10:18,11:25,12:27,13:28,14:36,15:37,16:33,17:34,18:35,19:35,20:40,21:40,22:40,23:41,24:42};
@@ -87,11 +88,11 @@ var Q12 = (function () {
     }
     var raw = M.baseline;
     for (var ti = 0; ti < M.trees.length; ti++) {
-      var T = M.trees[ti], nd = 0;
-      while (!T.leaf[nd]) {
+      var T = M.trees[ti], nd = 0, LF = T.leaf, CT = T.c;    // 小さい形の書き出し（leaf・c が無い）は、左の子が0の節を葉とみなす
+      while (LF ? !LF[nd] : T.l[nd] !== 0) {
         var f = T.f[nd], d = z[f];
         if (isNaN(d)) nd = T.m[nd] ? T.l[nd] : T.r[nd];
-        else if (T.c[nd]) {
+        else if (CT && CT[nd]) {
           if (d < 0) nd = T.m[nd] ? T.l[nd] : T.r[nd];
           else if (inBits(T.bits[T.b[nd]], d)) nd = T.l[nd];
           else if (inBits(M.known[M.fmap[f]], d)) nd = T.r[nd];
@@ -100,23 +101,31 @@ var Q12 = (function () {
       }
       raw += T.v[nd];
     }
-    return Math.exp(raw);
+    return (M.link === 'logit') ? 1 / (1 + Math.exp(-raw)) : Math.exp(raw);   // 確率モデルは logit、戻りモデルは exp
   }
-  // 1レースの判定。戻り値 null＝まだ展示が出ていない（MODEL.lanes で目の艇を指定。無ければ1=2）
-  function score(MODEL, race) {
+  function colsOf(MODEL, F) { return MODEL.cols.map(function (c) { var v = F[c]; return (v === undefined) ? NaN : Math.fround(v); }); }
+  function hitProb(PM, F) {                  // 的中見込み（確率モデルの本数の平均）
+    var xs = colsOf(PM, F), s = 0;
+    PM.models.forEach(function (M) { s += predictOne(M, xs); });
+    return s / PM.models.length;
+  }
+  // 1レースの判定。戻り値 null＝まだ展示が出ていない（MODEL.lanes で目の艇を指定。無ければ1=2）。PM（確率モデル）を渡すと hitp も出す
+  function score(MODEL, race, PM) {
     var o = features(race), F = o.F;
     var nEx = o.ext.filter(function (x) { return !isNaN(x); }).length;
     if (nEx < 5) return null;                                   // 展示がまだ（欠場1艇までは待たない）
     var lanes = MODEL.lanes || [0, 1];                           // この目の艇（0始まり。1=2なら[0,1]、1=3なら[0,2]）
     var absent12 = lanes.some(function (i) { return isNaN(o.ext[i]); });   // 目の艇が展示に出ていない＝欠場とみなして買わない
-    var xs = MODEL.cols.map(function (c) { var v = F[c]; return (v === undefined) ? NaN : Math.fround(v); });
+    var xs = colsOf(MODEL, F);
     var preds = MODEL.models.map(function (M) { return predictOne(M, xs); });
     var r = MODEL.qs.map(function (q, qi) {                       // 線との比の3本の平均
       var s = 0; MODEL.models.forEach(function (M, i) { s += preds[i] / M.thr[qi]; }); return s / MODEL.models.length;
     });
     var tier = absent12 ? 0 : (r[1] >= 1 ? 2 : (r[0] >= 1 ? 1 : 0));   // 2＝★★（上位2%の線）、1＝★（上位5%の線）
-    return { preds: preds, ratio: r, tier: tier, absent12: absent12, mean: preds.reduce(function (a, b) { return a + b; }, 0) / preds.length };
+    var out = { preds: preds, ratio: r, tier: tier, absent12: absent12, mean: preds.reduce(function (a, b) { return a + b; }, 0) / preds.length };
+    if (PM) out.hitp = hitProb(PM, F);
+    return out;
   }
-  return { features: features, predictOne: predictOne, score: score, rtype: rtype };
+  return { features: features, predictOne: predictOne, score: score, hitProb: hitProb, rtype: rtype };
 })();
 if (typeof module !== 'undefined') module.exports = Q12;
