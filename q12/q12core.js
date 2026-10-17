@@ -102,12 +102,13 @@ var Q12 = (function () {
     }
     return Math.exp(raw);
   }
-  // 1レースの判定。戻り値 null＝まだ展示が出ていない
+  // 1レースの判定。戻り値 null＝まだ展示が出ていない（MODEL.lanes で目の艇を指定。無ければ1=2）
   function score(MODEL, race) {
     var o = features(race), F = o.F;
     var nEx = o.ext.filter(function (x) { return !isNaN(x); }).length;
     if (nEx < 5) return null;                                   // 展示がまだ（欠場1艇までは待たない）
-    var absent12 = isNaN(o.ext[0]) || isNaN(o.ext[1]);         // 1号艇か2号艇が展示に出ていない＝欠場とみなして買わない
+    var lanes = MODEL.lanes || [0, 1];                           // この目の艇（0始まり。1=2なら[0,1]、1=3なら[0,2]）
+    var absent12 = lanes.some(function (i) { return isNaN(o.ext[i]); });   // 目の艇が展示に出ていない＝欠場とみなして買わない
     var xs = MODEL.cols.map(function (c) { var v = F[c]; return (v === undefined) ? NaN : Math.fround(v); });
     var preds = MODEL.models.map(function (M) { return predictOne(M, xs); });
     var r = MODEL.qs.map(function (q, qi) {                       // 線との比の3本の平均

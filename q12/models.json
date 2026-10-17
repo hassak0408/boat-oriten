@@ -1,0 +1,6 @@
+[
+ {"key":"12","label":"2連複1=2","file":"model_2026A.json","payout":"quinella","combo":"1=2","boats":[1,2],"csv":"record","start":"2026-10-01"},
+ {"key":"q13","label":"2連複1=3（記録だけ）","file":"model_2026A_q13.json","payout":"quinella","combo":"1=3","boats":[1,3],"csv":"record_q13","start":"2026-10-01","note":"通知は既定では出さない（確かめで100%前後）。"},
+ {"key":"e12","label":"2連単1-2（記録だけ）","file":"model_2026A_e12.json","payout":"exacta","combo":"1-2","boats":[1,2],"csv":"record_e12","start":"2026-10-01","note":"通知は既定では出さない（確かめで100%前後）。"},
+ {"key":"e13","label":"2連単1-3（記録だけ）","file":"model_2026A_e13.json","payout":"exacta","combo":"1-3","boats":[1,3],"csv":"record_e13","start":"2026-10-01","note":"通知は既定では出さない（確かめで100%前後）。"}
+]
