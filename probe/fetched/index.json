@@ -148,5 +148,23 @@
   "file": "www.omurakyotei.jp_js_getdata.js_370ed5.txt",
   "bytes": 1233,
   "mawari": false
+ },
+ "https://www.boatrace.jp/owpc/pc/race/odds2tf?rno=3&jcd=16&hd=20220113": {
+  "code": 200,
+  "file": "www.boatrace.jp_owpc_pc_race_odds2tf_rno_3_jcd_16_hd_20220113_2a659d.txt",
+  "bytes": 37915,
+  "mawari": false
+ },
+ "https://www.boatrace.jp/owpc/pc/race/odds2tf?rno=11&jcd=16&hd=20230114": {
+  "code": 200,
+  "file": "www.boatrace.jp_owpc_pc_race_odds2tf_rno_11_jcd_16_hd_20230114_f105b5.txt",
+  "bytes": 37778,
+  "mawari": false
+ },
+ "https://www.boatrace.jp/owpc/pc/race/odds2tf?rno=11&jcd=05&hd=20250105": {
+  "code": 200,
+  "file": "www.boatrace.jp_owpc_pc_race_odds2tf_rno_11_jcd_05_hd_20250105_f423cb.txt",
+  "bytes": 37784,
+  "mawari": false
  }
 }
