@@ -1,0 +1,42 @@
+# 過去のレースの確定オッズを公式サイトから読む（q12 のオッズの見送りの確かめ用。手で動かす）
+name: q12-odds
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: '読む時間（分）'
+        required: false
+        default: '150'
+permissions:
+  contents: write
+concurrency:
+  group: q12-odds
+  cancel-in-progress: false
+jobs:
+  odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 読む
+        run: node q12/odds_hist.js ${{ inputs.minutes }}
+      - name: 保存
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add q12/odds_hist.csv
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "q12：過去の確定オッズ"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
