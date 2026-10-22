@@ -2,7 +2,7 @@
 //   node q12/snap.js 分   … 今日（日本時間）の全レースを、締切の約12分前（通知のころ）・5分前（黒石で買うころ）・2分前に1回ずつ読む。
 //                           決めた分だけ動いて止まる（その日のレースが全部締め切られたら早く止まる）。読み始めは1秒に1回まで
 //   出力：q12/snap/YYYYMMDD.csv  日付,場,R,締切,読んだ時刻,締切の何分前,印,2連複1=2,2連複15,2連単30（/区切り、2連複は1=2,1=3,…,5=6、2連単は公式の並び）
-//   その日のレースと締切は BoatraceOpenAPI（通知と同じ v1）から読み、20分ごとに読み直す（締切の変更に追いつく）
+//   その日のレースと締切は BoatraceOpenAPI（通知と同じ v1、前の日の0時すぎに出る）から読み、5分ごとに読み直す（締切の変更に追いつく）
 const fs = require('fs');
 const path = require('path');
 const DIR = path.join(__dirname, 'snap');
@@ -61,9 +61,9 @@ async function schedule(ymd) {   // [{v, rno, close(ms)}]
   for (;;) {
     const t = now();
     if (t - t0 - Number(process.env.SNAP_SHIFT_MS || 0) > LIMIT) { console.log('時間になったので止める'); break; }
-    if (t - lastSched > 20 * 60e3 || !races.length) {
+    if (t - lastSched > 5 * 60e3 || !races.length) {
       const s = await schedule(ymd);
-      if (s.length) races = s; else if (!races.length) { console.log('今日のレースが読めない', ymd); await sleep(60e3); if (Date.now() - t0 > 30 * 60e3) break; continue; }
+      if (s.length) races = s; else if (!races.length) { console.log('今日のレースが読めない', ymd); await sleep(120e3); if (Date.now() - t0 > 180 * 60e3) break; continue; }
       lastSched = t;
     }
     if (races.every(r => r.close < t)) { console.log('今日のレースはすべて締め切られた'); break; }
