@@ -1,14 +1,20 @@
-# 過去のレースの確定オッズを公式サイトから読む（q12 のオッズの見送りの確かめ用。手で動かす）
+# 過去のレースの確定オッズを公式サイトから読む（q12 のオッズの見送りの確かめ用）
+#   手で1回動かすと、読み終わるまで自分で次の回を動かす（1回で1件も進まなかったら止まる）
 name: q12-odds
 on:
   workflow_dispatch:
     inputs:
       minutes:
-        description: '読む時間（分）'
+        description: '1回で読む時間（分）'
         required: false
-        default: '150'
+        default: '60'
+      chain:
+        description: '残りがあれば次の回を動かす（yes／no）'
+        required: false
+        default: 'yes'
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: q12-odds
   cancel-in-progress: false
@@ -25,18 +31,26 @@ jobs:
         with:
           node-version: '22'
       - name: 読む
+        id: read
         run: node q12/odds_hist.js ${{ inputs.minutes }}
       - name: 保存
         if: always()
+        env:
+          LEFT: ${{ steps.read.outputs.left }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add q12/odds_hist.csv
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
-          git commit -q -m "q12：過去の確定オッズ"
+          git commit -q -m "q12：過去の確定オッズ（残り ${LEFT:-?}）"
           for i in 1 2 3 4 5; do
             if git push origin HEAD:main; then exit 0; fi
             git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
             sleep 5
           done
           echo "保存できなかった"; exit 1
+      - name: 次の回を動かす
+        if: inputs.chain == 'yes' && steps.read.outputs.n != '0' && steps.read.outputs.left != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run q12odds.yml --repo ${{ github.repository }} --ref main -f minutes=${{ inputs.minutes }} -f chain=yes
