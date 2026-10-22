@@ -145,8 +145,8 @@ function section(c, M, rows, PM) {
     out.push(line(`★以上・的中見込み${Math.round(pm * 100)}%以上`, sel.filter(r => star(r) && pok(r))));
     out.push(line(`★以上・的中見込み${Math.round(pm * 100)}%未満`, sel.filter(r => star(r) && !pok(r))));
     const b2 = sel.filter(r => r['印'] === '★★' && pok(r));
-    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}以上（見送りを入れた形）`, b2.filter(r => odd(r) && ev(r) >= em)));
-    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}未満（見送った分）`, b2.filter(r => odd(r) && ev(r) < em)));
+    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}以上（参考：確定オッズでの見送り。通知では使わない）`, b2.filter(r => odd(r) && ev(r) >= em)));
+    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}未満（参考：その見送った分）`, b2.filter(r => odd(r) && ev(r) < em)));
     out.push(line(`★★・確定オッズで期待値${em}以上`, sel.filter(r => r['印'] === '★★' && odd(r) && ev(r) >= em)));
     const wait = b2.filter(r => !odd(r) && r[ODDS_COL] !== 'なし').length;
     if (wait) out.push(`| （確定オッズ待ち：★★・的中見込み${Math.round(pm * 100)}%以上 ${wait}点） | | | | |`);
@@ -166,7 +166,7 @@ function section(c, M, rows, PM) {
 }
 (async () => {
   const end = addDays(jstToday(), -1);
-  const parts = ['# 戻りモデル（オッズを使わない）の記録', ''];
+  const parts = ['# 戻りモデル（オッズを使わない）の記録', '', '通知の買い方（B）は「★★・的中見込み25%以上」を全部買う形（2026-10-22から、オッズで見送らない）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
     const PM = c.hit ? JSON.parse(fs.readFileSync(path.join(DIR, c.hit), 'utf8')) : null;   // 的中見込みのモデル
