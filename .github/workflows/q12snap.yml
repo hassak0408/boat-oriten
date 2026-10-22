@@ -1,0 +1,55 @@
+# 締切前のオッズの記録（q12 の「オッズで見送る」を、黒石で買うころのオッズで確かめるため）
+#   毎朝8:05（日本時間）に動き出し、その日の全レースを締切の約12分前（通知のころ）・5分前（買うころ）・2分前に1回ずつ読む（q12/snap.js）。
+#   1回は最大5時間40分。まだ締め切られていないレースがあれば、自分で次の回を動かす（1日3回ほど）。記録は q12/snap/日付.csv
+name: q12-snap
+on:
+  schedule:
+    - cron: '5 23 * * *'
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: '1回で動く時間（分、最大340）'
+        required: false
+        default: '340'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: q12-snap
+  cancel-in-progress: false
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 読む
+        id: read
+        run: node q12/snap.js ${{ inputs.minutes || '340' }}
+      - name: 保存
+        if: always()
+        env:
+          YMD: ${{ steps.read.outputs.ymd }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add q12/snap
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "q12：締切前のオッズ ${YMD:-}"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
+      - name: 次の回を動かす
+        if: steps.read.outputs.left != '' && steps.read.outputs.left != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run q12snap.yml --repo ${{ github.repository }} --ref main -f minutes=${{ inputs.minutes || '340' }}
