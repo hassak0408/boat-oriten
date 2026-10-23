@@ -1,7 +1,7 @@
-// 戻りモデル（オッズを使わない）：毎日の記録
+// 1=2お得レース通知（オッズを使わない）：毎日の記録（名前は2026-10-23に付け直し：お得度＝線との比、来る確率＝的中見込み、安定型＝B、配当型＝A、的中型＝C、勝負レース＝強い通知）
 // q12/models.json に並べた目ごとに、まだ記録していない日（START〜前の日）について、BoatraceOpenAPI v1 の1日ファイルを読み、
 // 展示の出た全レースの見込みと印（★★・★）、その目の結果を q12/<csv>_年.csv に足し、q12/summary.md を作り直す。
-// models.json に hit（確率モデル）がある目は「的中見込み」（その目が来る確率）の列も足す。
+// models.json に hit（確率モデル）がある目は「的中見込み」（その目が来る確率＝来る確率。列の名前は前のまま）の列も足す。
 // 最後の列は「確定オッズ」（その目の確定オッズ。turnmark のデータが出た日から埋める。出ていない日は次の回にもう一度読む）。
 //   node q12/record.js            … 前の日まで
 //   Q12_LOCAL_DIR=フォルダ node q12/record.js  … ネットに出ずに、フォルダの YYYYMMDD.json を読む（確かめ用）
@@ -125,8 +125,8 @@ function readAll(prefix) {                // 列はファイルの1行目に合�
   return rows;
 }
 function section(c, M, rows, PM) {
-  const out = [`## ${c.label}`, '', `モデル：${M.name}（${M.made}）。★★＝3本の「見込み÷上位2%の線」の平均が1以上、★＝「上位5%の線」で1以上（★★を除く）。1点100円として数える。${c.note ? c.note : ''}` +
-    (PM ? `的中見込みのモデル：${PM.name}（${PM.made}）。` : ''), ''];
+  const out = [`## ${c.label}`, '', `モデル：${M.name}（${M.made}）。★★＝お得度（払戻の見込み÷お得なレースの上位2%の線、3本の平均）が1.00以上、★＝上位5%の線で1以上（★★を除く）。1点100円として数える。${c.note ? c.note : ''}` +
+    (PM ? `来る確率のモデル：${PM.name}（${PM.made}）。` : ''), ''];
   const sel = rows.filter(r => r['結果'] !== '中止' && r['結果'] !== '');
   function line(name, R) {
     const n = R.length, hit = R.filter(r => r['結果'] === '的中').length, ret = R.reduce((a, r) => a + Number(r['戻り']), 0);
@@ -141,15 +141,15 @@ function section(c, M, rows, PM) {
   const pm = c.pmin || 0.25, pok = r => r['的中見込み'] !== undefined && r['的中見込み'] !== '' && Number(r['的中見込み']) >= pm;
   const em = c.evmin || 0.8, odd = r => Number(r[ODDS_COL]) > 0, ev = r => Number(r['的中見込み']) * Number(r[ODDS_COL]);
   if (c.hit) {
-    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上`, sel.filter(r => r['印'] === '★★' && pok(r))));
-    out.push(line(`★以上・的中見込み${Math.round(pm * 100)}%以上`, sel.filter(r => star(r) && pok(r))));
-    out.push(line(`★以上・的中見込み${Math.round(pm * 100)}%未満`, sel.filter(r => star(r) && !pok(r))));
+    out.push(line(`★★・来る確率${Math.round(pm * 100)}%以上`, sel.filter(r => r['印'] === '★★' && pok(r))));
+    out.push(line(`★以上・来る確率${Math.round(pm * 100)}%以上`, sel.filter(r => star(r) && pok(r))));
+    out.push(line(`★以上・来る確率${Math.round(pm * 100)}%未満`, sel.filter(r => star(r) && !pok(r))));
     const b2 = sel.filter(r => r['印'] === '★★' && pok(r));
-    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}以上（参考：確定オッズでの見送り。通知では使わない）`, b2.filter(r => odd(r) && ev(r) >= em)));
-    out.push(line(`★★・的中見込み${Math.round(pm * 100)}%以上・確定オッズで期待値${em}未満（参考：その見送った分）`, b2.filter(r => odd(r) && ev(r) < em)));
+    out.push(line(`★★・来る確率${Math.round(pm * 100)}%以上・確定オッズで期待値${em}以上（参考：確定オッズでの見送り。通知では使わない）`, b2.filter(r => odd(r) && ev(r) >= em)));
+    out.push(line(`★★・来る確率${Math.round(pm * 100)}%以上・確定オッズで期待値${em}未満（参考：その見送った分）`, b2.filter(r => odd(r) && ev(r) < em)));
     out.push(line(`★★・確定オッズで期待値${em}以上`, sel.filter(r => r['印'] === '★★' && odd(r) && ev(r) >= em)));
     const wait = b2.filter(r => !odd(r) && r[ODDS_COL] !== 'なし').length;
-    if (wait) out.push(`| （確定オッズ待ち：★★・的中見込み${Math.round(pm * 100)}%以上 ${wait}点） | | | | |`);
+    if (wait) out.push(`| （確定オッズ待ち：★★・来る確率${Math.round(pm * 100)}%以上 ${wait}点） | | | | |`);
   }
   out.push(line(`参考：全部のレースで${c.combo}（欠場がらみを除く）`, sel.filter(r => r['印'] !== '欠場')));
   out.push('', '月ごと（★以上）', '', '| 月 | 点 | 的中 | 回収 | 損益 |', '| --- | --- | --- | --- | --- |');
@@ -158,59 +158,60 @@ function section(c, M, rows, PM) {
   out.push('', '月ごと（★★）', '', '| 月 | 点 | 的中 | 回収 | 損益 |', '| --- | --- | --- | --- | --- |');
   months.forEach(m => out.push(line(m, sel.filter(r => r['日付'].startsWith(m) && r['印'] === '★★'))));
   if (c.hit) {
-    out.push('', `月ごと（★★・的中見込み${Math.round(pm * 100)}%以上）`, '', '| 月 | 点 | 的中 | 回収 | 損益 |', '| --- | --- | --- | --- | --- |');
+    out.push('', `月ごと（★★・来る確率${Math.round(pm * 100)}%以上）`, '', '| 月 | 点 | 的中 | 回収 | 損益 |', '| --- | --- | --- | --- | --- |');
     months.forEach(m => out.push(line(m, sel.filter(r => r['日付'].startsWith(m) && r['印'] === '★★' && pok(r)))));
   }
   out.push('');
   return out;
 }
-function topU(R, end) {   // summary.md のいちばん上：いまの買い方（通知 BAC＝B＋A★★＋C★★）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行
+function topU(R, end) {   // summary.md のいちばん上：いまの買い方（全部＝安定型B＋配当型A＋的中型C）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行
   const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
   const ok = r => r['結果'] !== '中止' && r['結果'] !== '' && win(r);
   const pick = { B: r => r['印'] === '★★' && Number(r['的中見込み']) >= 0.25, A: r => r['印'] === '★★', C: r => r['印'] === '★★' };
+  const TAG = { B: '安定', A: '配当', C: '的中' };
   const U = new Map();
   ['B', 'A', 'C'].forEach(k => (R[k] || []).forEach(r => {
     if (!ok(r) || !pick[k](r)) return;
     const key = r['日付'] + '|' + r['場'] + '|' + r['R'];
     const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '', 強さ: 0 });
-    u['選ばれ方'] += k; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝選ばれた形の線との比の一番高いもの
+    u['選ばれ方'] += (u['選ばれ方'] ? '・' : '') + TAG[k]; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝お得度（選ばれた形の線との比の一番高いもの）
   }));
   const S = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
   const sum = X => ({ n: X.length, hit: X.filter(r => r['結果'] === '的中').length, ret: X.reduce((a, r) => a + Number(r['戻り']), 0) });
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
-  const FROM = '2026-10-23';   // BAC にした日（その前はBだけで買っていた）
-  const STRONG = 1.1, STRONG_UNITS = 2;   // 強い通知（強さ1.1以上）は2点（通知の STRONG・STRONG_UNITS と同じ）
+  const FROM = '2026-10-23';   // 全部（安定＋配当＋的中）にした日（その前は安定型だけで買っていた）
+  const STRONG = 1.1, STRONG_UNITS = 2;   // 勝負レース（お得度1.10以上）は2点（通知の STRONG・STRONG_UNITS と同じ）
   const units = r => r['強さ'] >= STRONG ? STRONG_UNITS : 1;
   const sumU = X => ({ n: X.reduce((a, r) => a + units(r), 0), ret: X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0) });
   const strong = r => r['強さ'] >= STRONG;
-  const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('B')));
+  const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('安定')));
   const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
-  // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（強い通知は2点）が、効いているなら2,000点までに一度でも割る見込みが約4%（撤退）・約11%（注意）の線
+  // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（勝負レースは2点）が、効いているなら2,000点までに一度でも割る見込みが約4%（撤退）・約11%（注意）の線
   let lineTxt = '';
   try {
     const J = JSON.parse(fs.readFileSync(path.join(DIR, 'stop_line.json'), 'utf8'));
     const at = (arr, n) => { const g = J.grid; if (n <= g[0]) return arr[0]; if (n >= g[g.length - 1]) return arr[arr.length - 1];
       const i = g.findIndex(x => x >= n); const f = (n - g[i - 1]) / (g[i] - g[i - 1]); return arr[i - 1] + f * (arr[i] - arr[i - 1]); };
     const pl = (tu.ret - tu.n) * 100, st = at(J.stop, tu.n), wa = at(J.warn, tu.n);
-    const state = !tu.n ? 'まだ買っていない' : pl < st ? '撤退ラインを割った → 買うのを止めて、モデルを確かめ直す' : pl < wa ? '注意ラインを割った → 1点に戻す（STRONG_UNITS＝1）か B だけにして様子を見る' : 'ふつうのぶれの中';
+    const state = !tu.n ? 'まだ買っていない' : pl < st ? '撤退ラインを割った → 買うのを止めて、モデルを確かめ直す' : pl < wa ? '注意ラインを割った → 勝負レースも1点に戻す（STRONG_UNITS＝1）か、安定型だけ（RULE＝安定）にして様子を見る' : 'ふつうのぶれの中';
     const keys = [100, 200, 500, 1000].map(n => `${n}点で${yen(at(J.stop, n) / 100)}`).join('・');
     lineTxt = (tu.n ? `撤退ライン：${FROM}から ${tu.n}点で ${yen(st / 100)}（注意ライン ${yen(wa / 100)}）。いまの損益 ${yen(pl / 100)} → ${state}。` : `撤退ライン：${FROM}からの通算の損益で見る（${keys}。まだ買っていない）。`) +
       '（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約4%・注意ラインは約11%。75点で−2,000円ほどの負けは確かめの5年でも年に3〜4回あった）';
   } catch (e) { lineTxt = ''; }
-  const out = ['## いまの買い方（通知 BAC：B＋A★★＋C★★、締切10:00〜20:50）', '',
+  const out = ['## いまの買い方（1=2お得レース通知：全部＝安定型・配当型・的中型、締切10:00〜20:50）', '',
     (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) + '（確かめの見込みは1日4.1R・回収107%前後・1か月で+860円前後。月ごとのぶれは大きい）',
-    `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうちB（頭打ち10倍★★・的中見込み25%以上）は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
-    `強い通知（強さ＝線との比が${STRONG}以上、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日0.6R・回収124%前後。穴寄りが多く、外れが続くこともある）。` +
-      `強い通知を${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), '',
-    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 強い通知 | 強い通知を2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
+    `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
+    `勝負レース（お得度${STRONG.toFixed(2)}以上、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日0.6R・回収124%前後。穴寄りが多く、外れが続くこともある）。` +
+      `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), '',
+    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
     out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
   const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
-  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：B・A・C のどれで選ばれたか）`, '');
+  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：安定型・配当型・的中型のどれで選ばれたか。お得度1.10以上は勝負レースで2点）`, '');
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
-    out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | 強さ | 点 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | お得度 | 点 | 来る確率 | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']} | ${r['強さ'].toFixed(3)} | ${units(r)} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
   }
   out.push('');
@@ -218,11 +219,11 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
 }
 (async () => {
   const end = addDays(jstToday(), -1);
-  const parts = ['# 戻りモデル（オッズを使わない）の記録', '', '通知の買い方は、2026-10-23から BAC（B＋A★★＋C★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22まではBだけ）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
+  const parts = ['# 1=2お得レース通知の記録', '', '通知の買い方は、2026-10-23から「全部」（安定型・配当型・的中型のどれかが★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22までは安定型だけ）。お得度1.10以上は勝負レースで2点。名前は2026-10-23に付け直した（お得度＝線との比、来る確率＝的中見込み、安定型＝B・頭打ち10倍、配当型＝A・いまの戻りモデル、的中型＝C・頭打ち6倍）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
   const ROWS = {};   // いちばん上の「いまの買い方」に使う各モデルの行
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
-    const PM = c.hit ? JSON.parse(fs.readFileSync(path.join(DIR, c.hit), 'utf8')) : null;   // 的中見込みのモデル
+    const PM = c.hit ? JSON.parse(fs.readFileSync(path.join(DIR, c.hit), 'utf8')) : null;   // 来る確率のモデル
     const head = (c.hit ? HEAD.concat(['的中見込み']) : HEAD).concat([ODDS_COL]);
     fs.readdirSync(DIR).filter(x => new RegExp('^' + c.csv + '_\\d{4}\\.csv$').test(x)).forEach(x => migrate(path.join(DIR, x), head));
     const done = new Set(readAll(c.csv).map(r => r['日付']));

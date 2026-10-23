@@ -1,6 +1,6 @@
-// ===== 2連複1=2 戻りモデル（オッズなし）の計算部分 =====
-// BoatraceOpenAPI v1 の1レース（出走表＋直前情報）から学習と同じ143項目を作り、木のモデル3本で「100円あたりの戻りの見込み」を出す。
-// 確率モデル（「1=2が来る確率」を当てる木。link が logit）を渡すと、的中見込み（hitp）も出す。
+// ===== 1=2お得レース通知の計算部分（オッズなし）=====
+// BoatraceOpenAPI v1 の1レース（出走表＋直前情報）から学習と同じ143項目を作り、木のモデル3本で「100円あたりの払戻の見込み」とお得度（線との比）を出す。
+// 確率モデル（「1号艇と2号艇が1・2着に来る確率」を当てる木。link が logit）を渡すと、来る確率（hitp）も出す。
 // Node（確かめ用）でも Google Apps Script でもそのまま動くように、標準の JavaScript だけで書く。
 var Q12 = (function () {
   var PREF = {1:10,2:11,3:13,4:13,5:13,6:22,7:23,8:23,9:24,10:18,11:25,12:27,13:28,14:36,15:37,16:33,17:34,18:35,19:35,20:40,21:40,22:40,23:41,24:42};
@@ -101,10 +101,10 @@ var Q12 = (function () {
       }
       raw += T.v[nd];
     }
-    return (M.link === 'logit') ? 1 / (1 + Math.exp(-raw)) : Math.exp(raw);   // 確率モデルは logit、戻りモデルは exp
+    return (M.link === 'logit') ? 1 / (1 + Math.exp(-raw)) : Math.exp(raw);   // 確率モデルは logit、払戻の見込みのモデルは exp
   }
   function colsOf(MODEL, F) { return MODEL.cols.map(function (c) { var v = F[c]; return (v === undefined) ? NaN : Math.fround(v); }); }
-  function hitProb(PM, F) {                  // 的中見込み（確率モデルの本数の平均）
+  function hitProb(PM, F) {                  // 来る確率（確率モデルの本数の平均）
     var xs = colsOf(PM, F), s = 0;
     PM.models.forEach(function (M) { s += predictOne(M, xs); });
     return s / PM.models.length;
@@ -118,7 +118,7 @@ var Q12 = (function () {
     var absent12 = lanes.some(function (i) { return isNaN(o.ext[i]); });   // 目の艇が展示に出ていない＝欠場とみなして買わない
     var xs = colsOf(MODEL, F);
     var preds = MODEL.models.map(function (M) { return predictOne(M, xs); });
-    var r = MODEL.qs.map(function (q, qi) {                       // 線との比の3本の平均
+    var r = MODEL.qs.map(function (q, qi) {                       // お得度＝線との比の3本の平均（[0]上位5%・[1]上位2%）
       var s = 0; MODEL.models.forEach(function (M, i) { s += preds[i] / M.thr[qi]; }); return s / MODEL.models.length;
     });
     var tier = absent12 ? 0 : (r[1] >= 1 ? 2 : (r[0] >= 1 ? 1 : 0));   // 2＝★★（上位2%の線）、1＝★（上位5%の線）
