@@ -6,10 +6,14 @@
 //     2連単：1-2,2-1,3-1,4-1,5-1,6-1,1-3,2-3,3-2,4-2,5-2,6-2,1-4,2-4,3-4,4-3,5-3,6-3,1-5,2-5,3-5,4-5,5-4,6-4,1-6,2-6,3-6,4-6,5-6,6-5
 //   その日のレースと締切は BoatraceOpenAPI（通知と同じ v1、前の日の0時すぎに出る）から読み、5分ごとに読み直す（締切の変更に追いつく）
 //   Actions の中では30分ごとに、それまでの記録を main に足す（途中で止まっても残る・途中でも確かめられる）
+//   展示が v1 に出た時刻も記録する（2026-10-23 から）：q12/pv/YYYYMMDD.csv  日付,場,R,締切,見つけた時刻,締切の何分前,展示タイムの数,その回の最初の読み（1＝それより前は見ていない）
+//     5分ごとに v1 を読み直すたびに、展示タイムが5艇以上そろったレースを1回だけ書く。通知（5分おき）が締切の何分前に計算できるかの目安。失敗しても odds の記録は止めない
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const DIR = path.join(__dirname, 'snap');
+const PVDIR = path.join(__dirname, 'pv');
+const PVHEAD = 'date,v,rno,closed_at,seen_at,mins,n_ex,first_read';
 const UA = 'boat-oriten (+https://github.com/hassak0408/boat-oriten)';
 const V1 = 'https://boatraceopenapi.github.io/api/v1/';
 const BR = 'https://www.boatrace.jp/owpc/pc/race/odds2tf';
@@ -35,7 +39,7 @@ function save(msg) {   // Actions の中だけ：q12/snap を main に足す（�
   try {
     // 名前とメールを先に設定する（無いと、main が先に進んでいたときの rebase が「名前が無い」で失敗して、途中の保存が1回も通らなかった。2026-10-23 に直した）
     sh(`git config user.name 'github-actions[bot]' && git config user.email '41898282+github-actions[bot]@users.noreply.github.com'`);
-    sh(`git add q12/snap && (git diff --cached --quiet || git commit -q -m "${msg}")`);
+    sh(`git add q12/snap${fs.existsSync(PVDIR) ? ' q12/pv' : ''} && (git diff --cached --quiet || git commit -q -m "${msg}")`);
     for (let i = 0; i < 5; i++) {
       try { sh('git push -q origin HEAD:main'); console.log('途中の保存', msg); return; } catch (e) { try { sh('git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)'); } catch (e2) { console.log('rebase に失敗', String(e2).slice(0, 200)); } }
     }
@@ -56,7 +60,13 @@ async function get(url, asJson) {
   }
   return null;
 }
-async function schedule(ymd) {   // [{v, rno, close(ms)}]
+function nEx(r) {   // v1 の展示タイムがそろっている艇の数（通知の q12core と同じ：0より大きい数）
+  const P = ((r || {}).preview || {}).racers || {};
+  let n = 0;
+  for (let i = 1; i <= 6; i++) { const e = Number((P[String(i)] || {}).exhibition_time); if (e > 0) n++; }
+  return n;
+}
+async function schedule(ymd) {   // [{v, rno, close(ms), nex}]
   const J = await get(`${V1}${ymd.slice(0, 4)}/${ymd}.json?t=${Date.now()}`, true);
   const out = [], S = ((J || {}).programs || {}).stadiums || {};
   for (const v of Object.keys(S)) {
@@ -64,7 +74,7 @@ async function schedule(ymd) {   // [{v, rno, close(ms)}]
     for (const k of Object.keys(R)) {
       const r = R[k], c = String(r.closed_at || '');
       if (!/^\d{4}-\d\d-\d\d \d\d:\d\d/.test(c)) continue;
-      out.push({ v: Number(r.stadium_number || v), rno: Number(r.race_number || k), closed: c, close: Date.parse(c.replace(' ', 'T') + '+09:00') });
+      out.push({ v: Number(r.stadium_number || v), rno: Number(r.race_number || k), closed: c, close: Date.parse(c.replace(' ', 'T') + '+09:00'), nex: nEx(r) });
     }
   }
   return out;
@@ -75,12 +85,31 @@ async function schedule(ymd) {   // [{v, rno, close(ms)}]
   if (!fs.existsSync(OUT)) fs.writeFileSync(OUT, HEAD + '\n');
   const done = new Set(fs.readFileSync(OUT, 'utf8').split('\n').slice(1).filter(s => s.trim()).map(s => { const a = s.split(','); return `${a[1]}-${a[2]}-${a[6]}`; }));
   let races = [], lastSched = 0, got = 0, miss = 0, lastSave = Date.now();
+  const PVOUT = path.join(PVDIR, `${ymd}.csv`), pvDone = new Set();
+  let pvFirst = true;
+  try { if (fs.existsSync(PVOUT)) fs.readFileSync(PVOUT, 'utf8').split('\n').slice(1).filter(x => x.trim()).forEach(x => { const a = x.split(','); pvDone.add(`${a[1]}-${a[2]}`); }); } catch (e) { console.log('展示の記録が読めない', String(e).slice(0, 200)); }
+  const pvLog = (list, ts) => {   // 展示タイムが5艇以上そろったレースを、見つけた回に1回だけ書く（失敗しても odds の記録は続ける）
+    try {
+      const rows = [];
+      for (const r of list) {
+        const key = `${r.v}-${r.rno}`;
+        if (r.nex < 5 || pvDone.has(key)) continue;
+        pvDone.add(key);
+        rows.push([ymd, r.v, r.rno, r.closed, jst(ts).hms, ((r.close - ts) / 60e3).toFixed(2), r.nex, pvFirst ? 1 : 0].join(','));
+      }
+      pvFirst = false;
+      if (!rows.length) return;
+      fs.mkdirSync(PVDIR, { recursive: true });
+      if (!fs.existsSync(PVOUT)) fs.writeFileSync(PVOUT, PVHEAD + '\n');
+      fs.appendFileSync(PVOUT, rows.map(x => x + '\n').join(''));
+    } catch (e) { console.log('展示の記録に失敗', String(e).slice(0, 200)); }
+  };
   for (;;) {
     const t = now();
     if (t - t0 - Number(process.env.SNAP_SHIFT_MS || 0) > LIMIT) { console.log('時間になったので止める'); break; }
     if (t - lastSched > 5 * 60e3 || !races.length) {
       const s = await schedule(ymd);
-      if (s.length) races = s; else if (!races.length) { console.log('今日のレースが読めない', ymd); await sleep(120e3); if (Date.now() - t0 > 180 * 60e3) break; continue; }
+      if (s.length) { races = s; pvLog(s, now()); } else if (!races.length) { console.log('今日のレースが読めない', ymd); await sleep(120e3); if (Date.now() - t0 > 180 * 60e3) break; continue; }
       lastSched = t;
     }
     if (races.every(r => r.close < t)) { console.log('今日のレースはすべて締め切られた'); break; }

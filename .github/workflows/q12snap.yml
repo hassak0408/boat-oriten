@@ -1,6 +1,7 @@
 # 締切前のオッズの記録（q12 の「オッズで見送る」を、黒石で買うころのオッズで確かめるため）
 #   毎朝8:05（日本時間）に動き出し、その日の全レースを締切の約12分前（通知のころ）・5分前（買うころ）・2分前に1回ずつ読む（q12/snap.js）。
 #   1回は最大5時間40分。まだ締め切られていないレースがあれば、自分で次の回を動かす（1日3回ほど）。記録は q12/snap/日付.csv
+#   展示が v1 に出た時刻（締切の何分前に通知が計算できるか）も q12/pv/日付.csv に書く（2026-10-23 から）
 name: q12-snap
 on:
   schedule:
@@ -40,6 +41,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add q12/snap
+          if [ -d q12/pv ]; then git add q12/pv; fi
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
           git commit -q -m "q12：締切前のオッズ ${YMD:-}"
           for i in 1 2 3 4 5; do
