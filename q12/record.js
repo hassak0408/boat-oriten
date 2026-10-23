@@ -164,32 +164,42 @@ function section(c, M, rows, PM) {
   out.push('');
   return out;
 }
-function topB(rows, pm, end) {   // summary.md のいちばん上：いまの買い方（通知B）の通算・月ごと・直近7日のレース
+function topU(R, end) {   // summary.md のいちばん上：いまの買い方（通知 BAC＝B＋A★★＋C★★）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行
   const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
-  const S = rows.filter(r => r['結果'] !== '中止' && r['結果'] !== '' && r['印'] === '★★' && Number(r['的中見込み']) >= pm && win(r))
-    .sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
-  const sum = R => ({ n: R.length, hit: R.filter(r => r['結果'] === '的中').length, ret: R.reduce((a, r) => a + Number(r['戻り']), 0) });
+  const ok = r => r['結果'] !== '中止' && r['結果'] !== '' && win(r);
+  const pick = { B: r => r['印'] === '★★' && Number(r['的中見込み']) >= 0.25, A: r => r['印'] === '★★', C: r => r['印'] === '★★' };
+  const U = new Map();
+  ['B', 'A', 'C'].forEach(k => (R[k] || []).forEach(r => {
+    if (!ok(r) || !pick[k](r)) return;
+    const key = r['日付'] + '|' + r['場'] + '|' + r['R'];
+    const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '' });
+    u['選ばれ方'] += k; U.set(key, u);
+  }));
+  const S = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
+  const sum = X => ({ n: X.length, hit: X.filter(r => r['結果'] === '的中').length, ret: X.reduce((a, r) => a + Number(r['戻り']), 0) });
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
-  const t = sum(S);
-  const out = ['## いまの買い方（通知B：★★・的中見込み25%以上、締切10:00〜20:50）', '',
-    `通算（${S.length ? S[0]['日付'] : '-'}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}（確かめの見込みは回収107%前後・1か月で+300円前後。月ごとのぶれは大きい）`, '',
+  const FROM = '2026-10-23';   // BAC にした日（その前はBだけで買っていた）
+  const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('B')));
+  const out = ['## いまの買い方（通知 BAC：B＋A★★＋C★★、締切10:00〜20:50）', '',
+    (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) + '（確かめの見込みは1日4.1R・回収107%前後・1か月で+860円前後。月ごとのぶれは大きい）',
+    `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうちB（頭打ち10倍★★・的中見込み25%以上）は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`, '',
     '| 月 | 点 | 的中 | 回収 | 損益（1点100円） |', '| --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const u = sum(S.filter(r => r['日付'].startsWith(m))); out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} |`); });
   const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
-  out.push('', `直近7日（${from}〜${end}）のレース`, '');
+  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：B・A・C のどれで選ばれたか）`, '');
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
-    out.push('| 日付 | 場 | R | 締切 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- |');
-    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${Math.round(Number(r['的中見込み']) * 100)}% | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
+    out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- |');
+    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
   }
   out.push('');
   return out;
 }
 (async () => {
   const end = addDays(jstToday(), -1);
-  const parts = ['# 戻りモデル（オッズを使わない）の記録', '', '通知の買い方（B）は「★★・的中見込み25%以上」を全部買う形（2026-10-22から、オッズで見送らない）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
-  let top = null;
+  const parts = ['# 戻りモデル（オッズを使わない）の記録', '', '通知の買い方は、2026-10-23から BAC（B＋A★★＋C★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22まではBだけ）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
+  const ROWS = {};   // いちばん上の「いまの買い方」に使う各モデルの行
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
     const PM = c.hit ? JSON.parse(fs.readFileSync(path.join(DIR, c.hit), 'utf8')) : null;   // 的中見込みのモデル
@@ -225,11 +235,11 @@ function topB(rows, pm, end) {   // summary.md のいちばん上：いまの買
     }
     await fillOdds(c, end);
     const all = readAll(c.csv);
-    if (c.key === '12c10') top = topB(all, c.pmin || 0.25, end);
+    if (c.key === '12') ROWS.A = all; if (c.key === '12c10') ROWS.B = all; if (c.key === '12c6') ROWS.C = all;
     parts.push(...section(c, M, all, PM));
     console.log(c.label, '足した行', added);
   }
-  if (top) parts.splice(4, 0, ...top);
+  if (ROWS.B) parts.splice(4, 0, ...topU(ROWS, end));
   parts.push(`最終更新：${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')}（日本時間）`);
   fs.writeFileSync(path.join(DIR, 'summary.md'), parts.join('\n') + '\n');
 })().catch(e => { console.error(e); process.exit(1); });
