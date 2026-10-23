@@ -33,10 +33,13 @@ function save(msg) {   // Actions の中だけ：q12/snap を main に足す（�
   if (!process.env.GITHUB_ACTIONS) return;
   const sh = c => execSync(c, { stdio: 'inherit', shell: '/bin/bash', cwd: path.join(__dirname, '..') });
   try {
-    sh(`git add q12/snap && (git diff --cached --quiet || git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -q -m "${msg}")`);
+    // 名前とメールを先に設定する（無いと、main が先に進んでいたときの rebase が「名前が無い」で失敗して、途中の保存が1回も通らなかった。2026-10-23 に直した）
+    sh(`git config user.name 'github-actions[bot]' && git config user.email '41898282+github-actions[bot]@users.noreply.github.com'`);
+    sh(`git add q12/snap && (git diff --cached --quiet || git commit -q -m "${msg}")`);
     for (let i = 0; i < 5; i++) {
-      try { sh('git push -q origin HEAD:main'); return; } catch (e) { try { sh('git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)'); } catch (e2) { /* 次へ */ } }
+      try { sh('git push -q origin HEAD:main'); console.log('途中の保存', msg); return; } catch (e) { try { sh('git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)'); } catch (e2) { console.log('rebase に失敗', String(e2).slice(0, 200)); } }
     }
+    console.log('途中の保存：push が5回とも通らなかった（最後の「保存」で入る）');
   } catch (e) { console.log('途中の保存に失敗', String(e).slice(0, 200)); }
 }
 let next = 0;
