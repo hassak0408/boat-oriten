@@ -166,23 +166,5 @@
   "file": "www.boatrace.jp_owpc_pc_race_odds2tf_rno_11_jcd_05_hd_20250105_f423cb.txt",
   "bytes": 37784,
   "mawari": false
- },
- "https://www.keiba.go.jp/KeibaWeb/MonthlyConveneInfo/MonthlyConveneInfoTop": {
-  "code": 200,
-  "file": "www.keiba.go.jp_KeibaWeb_MonthlyConveneInfo_MonthlyConveneInfoTop_168553.txt",
-  "bytes": 209548,
-  "mawari": false
- },
- "https://www.keiba.go.jp/KeibaWeb/MonthlyConveneInfo/MonthlyConveneInfoTop?k_year=2025&k_month=10": {
-  "code": 200,
-  "file": "www.keiba.go.jp_KeibaWeb_MonthlyConveneInfo_MonthlyConveneInfoTop_k_year_2025_k_month_10_6a5aa7.txt",
-  "bytes": 215643,
-  "mawari": false
- },
- "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/TodayRaceInfoTop": {
-  "code": 200,
-  "file": "www.keiba.go.jp_KeibaWeb_TodayRaceInfo_TodayRaceInfoTop_8e6841.txt",
-  "bytes": 51229,
-  "mawari": false
  }
 }
