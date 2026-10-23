@@ -181,10 +181,11 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
   const FROM = '2026-10-23';   // 全部（安定＋配当＋的中）にした日（その前は安定型だけで買っていた）
-  const STRONG = 1.1, STRONG_UNITS = 2;   // 勝負レース（お得度1.10以上）は2点（通知の STRONG・STRONG_UNITS と同じ）
-  const units = r => r['強さ'] >= STRONG ? STRONG_UNITS : 1;
+  const STRONG = 1.1, SWEET = [0.25, 0.32], STRONG_UNITS = 2;   // 勝負レース（お得度1.10以上・または来る確率25〜32%）は2点（通知の STRONG・SWEET・STRONG_UNITS と同じ）
+  const pOf = r => Number(r['的中見込み']);
+  const strong = r => r['強さ'] >= STRONG || (pOf(r) >= SWEET[0] && pOf(r) < SWEET[1]);
+  const units = r => strong(r) ? STRONG_UNITS : 1;
   const sumU = X => ({ n: X.reduce((a, r) => a + units(r), 0), ret: X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0) });
-  const strong = r => r['強さ'] >= STRONG;
   const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('安定')));
   const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
   // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（勝負レースは2点）が、効いているなら2,000点までに一度でも割る見込みが約4%（撤退）・約11%（注意）の線
@@ -202,13 +203,13 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   const out = ['## いまの買い方（1=2お得レース通知：全部＝安定型・配当型・的中型、締切10:00〜20:50）', '',
     (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) + '（確かめの見込みは1日4.1R・回収107%前後・1か月で+860円前後。月ごとのぶれは大きい）',
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
-    `勝負レース（お得度${STRONG.toFixed(2)}以上、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日0.6R・回収124%前後。穴寄りが多く、外れが続くこともある）。` +
+    `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
       `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), '',
     '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
     out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
   const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
-  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：安定型・配当型・的中型のどれで選ばれたか。お得度1.10以上は勝負レースで2点）`, '');
+  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：安定型・配当型・的中型のどれで選ばれたか。お得度1.10以上・または来る確率25〜32%は勝負レースで2点）`, '');
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
     out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | お得度 | 点 | 来る確率 | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
@@ -219,7 +220,7 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
 }
 (async () => {
   const end = addDays(jstToday(), -1);
-  const parts = ['# 1=2お得レース通知の記録', '', '通知の買い方は、2026-10-23から「全部」（安定型・配当型・的中型のどれかが★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22までは安定型だけ）。お得度1.10以上は勝負レースで2点。名前は2026-10-23に付け直した（お得度＝線との比、来る確率＝的中見込み、安定型＝B・頭打ち10倍、配当型＝A・いまの戻りモデル、的中型＝C・頭打ち6倍）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
+  const parts = ['# 1=2お得レース通知の記録', '', '通知の買い方は、2026-10-23から「全部」（安定型・配当型・的中型のどれかが★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22までは安定型だけ）。お得度1.10以上・または来る確率25〜32%は勝負レースで2点。名前は2026-10-23に付け直した（お得度＝線との比、来る確率＝的中見込み、安定型＝B・頭打ち10倍、配当型＝A・いまの戻りモデル、的中型＝C・頭打ち6倍）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
   const ROWS = {};   // いちばん上の「いまの買い方」に使う各モデルの行
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
