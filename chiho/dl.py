@@ -8,7 +8,7 @@ BASE = 'https://www.keiba.go.jp/KeibaWeb/DataDownload/'
 VENUES = ['盛岡', '水沢', '園田', '姫路', '笠松']
 UA = 'Mozilla/5.0 (personal research; monthly data download, 1 request / 20s)'
 GAP = 20
-OUT = 'chiho/data'
+OUT = os.environ.get('OUT', 'chiho/data')
 
 def months(spec):
     out = []
@@ -81,7 +81,12 @@ def main():
     rp = f'{OUT}/report.json'
     report = json.load(open(rp, encoding='utf-8')) if os.path.exists(rp) else {}
     t0 = time.time(); limit = float(os.environ.get('LIMIT_MIN', '300')) * 60
-    for kind, spec in (('race', os.environ.get('RACE_MONTHS', '')), ('odds', os.environ.get('ODDS_MONTHS', ''))):
+    rs, os_ = os.environ.get('RACE_MONTHS', '').strip(), os.environ.get('ODDS_MONTHS', '').strip()
+    if not rs and not os_:   # 何も指定が無ければ前の月（毎月の自動の回）
+        t = time.localtime(time.time() + 9 * 3600); y, m = t.tm_year, t.tm_mon - 1
+        if m == 0: y, m = y - 1, 12
+        rs = os_ = f'{y}{m:02d}'
+    for kind, spec in (('race', rs), ('odds', os_)):
         for ym in months(spec):
             if time.time() - t0 > limit:
                 print('時間切れ。続きは次の回', flush=True); break

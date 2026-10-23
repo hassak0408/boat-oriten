@@ -1,7 +1,8 @@
-"""chiho/data/race/YYYYMM/ の3つのCSV（レース一覧・払戻・出馬表）を読んで、1つの表にまとめる。"""
+"""data/race/YYYYMM/ の3つのCSV（レース一覧・払戻・出馬表）を読んで、1つの表にまとめる。
+データの置き場所は環境変数 CHIHO_DATA（非公開のリポジトリ chiho-keiba の data）。無ければ chiho/data。"""
 import glob, gzip, os, pandas as pd
 
-D = os.path.join(os.path.dirname(__file__), '..', 'data')
+D = os.environ.get('CHIHO_DATA') or os.path.join(os.path.dirname(__file__), '..', 'data')   # データは非公開のリポジトリ（chiho-keiba の data）
 
 def _read(kind, pat):
     fs = sorted(glob.glob(f'{D}/{kind}/*/*{pat}*.csv.gz'))
