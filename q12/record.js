@@ -172,26 +172,34 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   ['B', 'A', 'C'].forEach(k => (R[k] || []).forEach(r => {
     if (!ok(r) || !pick[k](r)) return;
     const key = r['日付'] + '|' + r['場'] + '|' + r['R'];
-    const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '' });
-    u['選ばれ方'] += k; U.set(key, u);
+    const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '', 強さ: 0 });
+    u['選ばれ方'] += k; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝選ばれた形の線との比の一番高いもの
   }));
   const S = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
   const sum = X => ({ n: X.length, hit: X.filter(r => r['結果'] === '的中').length, ret: X.reduce((a, r) => a + Number(r['戻り']), 0) });
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
   const FROM = '2026-10-23';   // BAC にした日（その前はBだけで買っていた）
+  const STRONG = 1.1, STRONG_UNITS = 2;   // 強い通知（強さ1.1以上）は2点（通知の STRONG・STRONG_UNITS と同じ）
+  const units = r => r['強さ'] >= STRONG ? STRONG_UNITS : 1;
+  const sumU = X => ({ n: X.reduce((a, r) => a + units(r), 0), ret: X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0) });
+  const strong = r => r['強さ'] >= STRONG;
   const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('B')));
+  const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
   const out = ['## いまの買い方（通知 BAC：B＋A★★＋C★★、締切10:00〜20:50）', '',
     (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) + '（確かめの見込みは1日4.1R・回収107%前後・1か月で+860円前後。月ごとのぶれは大きい）',
-    `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうちB（頭打ち10倍★★・的中見込み25%以上）は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`, '',
-    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） |', '| --- | --- | --- | --- | --- |'];
-  [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const u = sum(S.filter(r => r['日付'].startsWith(m))); out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} |`); });
+    `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうちB（頭打ち10倍★★・的中見込み25%以上）は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
+    `強い通知（強さ＝線との比が${STRONG}以上、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日0.6R・回収124%前後。穴寄りが多く、外れが続くこともある）。` +
+      `強い通知を${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, '',
+    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 強い通知 | 強い通知を2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
+  [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
+    out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
   const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
   out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：B・A・C のどれで選ばれたか）`, '');
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
-    out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- |');
-    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
+    out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | 強さ | 点 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']} | ${r['強さ'].toFixed(3)} | ${units(r)} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
   }
   out.push('');
   return out;
