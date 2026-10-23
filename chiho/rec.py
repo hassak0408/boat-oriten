@@ -88,6 +88,11 @@ def fetch_race(day_dir, day):
         head, body = keep_tracks(rows)
         kind = kind_of(name, head)
         info[kind] = {'元の名前': name, '行': len(body), '全体の行': len(rows) - 1}
+        if kind == 'racelist' and '競馬場' in rows[0]:   # どの場の分が入っていたか（対象の場の名前の書き方の確かめ）
+            ic = rows[0].index('競馬場'); cnt = {}
+            for x in rows[1:]:
+                if len(x) > ic: cnt[x[ic]] = cnt.get(x[ic], 0) + 1
+            info[kind]['場ごとのレース'] = cnt
         write_gz(f'{day_dir}/race_{kind}.csv.gz', head, body)
         if not os.path.exists(f'{day_dir}/race_{kind}_am.csv.gz'):
             write_gz(f'{day_dir}/race_{kind}_am.csv.gz', head, body)
