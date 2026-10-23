@@ -1,0 +1,61 @@
+# 地方競馬の月ごとのレース情報を、全部の場の分で落として、非公開のリポジトリ hassak0408/chiho-keiba の data_all/ に置く（1回だけ）。
+#   目的：5場の外を走った馬の成績（転入馬の前の成績）を材料に入れるため、全部の場で学ぶため。
+#   説明書の目安（月ごとのファイルは1日1回まで）を守るため、前に落とした日（2026-10-23〜24）の次の日、2026-10-25 0:40（日本時間）に動かす。
+#   済んだらこのファイルは消す。
+name: chiho-dl-all
+on:
+  schedule:
+    - cron: '40 15 24 10 *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: chiho-store
+  cancel-in-progress: false
+jobs:
+  dl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - name: 日付の確かめ（2026-10-25 より前は動かさない）
+        run: |
+          d=$(TZ=Asia/Tokyo date +%Y%m%d); echo "今日 $d"
+          if [ "$d" -lt 20261025 ]; then echo "まだ早い"; exit 1; fi
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 落とす
+        env:
+          RACE_MONTHS: '201601-202609'
+          ODDS_MONTHS: ''
+          OUT: store/data_all
+          VENUES: all
+          LIMIT_MIN: '300'
+        run: python chiho/dl.py
+      - name: 保存
+        if: always()
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ ! -d data_all ]; then echo "何もない"; exit 0; fi
+          git add data_all
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "chiho-dl-all：全部の場の月ごとのレース情報"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1

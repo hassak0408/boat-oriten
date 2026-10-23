@@ -1,11 +1,11 @@
 """地方競馬情報サイトの「データダウンロード」（月ごとのZIP）を落として、対象の場だけCSV（gzip）で残す。
 説明書（/pdf/manual/data_pdf_manual.pdf）の推奨（月次ファイルは1日1回まで）を守り、同じファイルは1回だけ読む。
 1回ごとに20秒あける（robots.txt の Crawl-delay 10 より長く）。
-環境変数：RACE_MONTHS / ODDS_MONTHS（YYYYMM の空白区切り、または YYYYMM-YYYYMM）、KEEP_RAW=1 でZIPの中身の見出しを記録。"""
+環境変数：RACE_MONTHS / ODDS_MONTHS（YYYYMM の空白区切り、または YYYYMM-YYYYMM）、OUT（置き場所）、VENUES=all（全部の場を残す）。"""
 import os, io, sys, time, zipfile, gzip, json, csv, re, requests
 
 BASE = 'https://www.keiba.go.jp/KeibaWeb/DataDownload/'
-VENUES = ['盛岡', '水沢', '園田', '姫路', '笠松']
+VENUES = None if os.environ.get('VENUES') == 'all' else ['盛岡', '水沢', '園田', '姫路', '笠松']   # VENUES=all なら全部の場を残す
 UA = 'Mozilla/5.0 (personal research; monthly data download, 1 request / 20s)'
 GAP = 20
 OUT = os.environ.get('OUT', 'chiho/data')
@@ -66,7 +66,7 @@ def handle(kind, ym, report):
         if not rows: continue
         head, body = rows[0], rows[1:]
         vcol = next((i for i, h in enumerate(head) if '競馬場' in h), None)
-        keep = body if vcol is None else [x for x in body if len(x) > vcol and any(v in x[vcol] for v in VENUES)]
+        keep = body if vcol is None or VENUES is None else [x for x in body if len(x) > vcol and any(v in x[vcol] for v in VENUES)]
         safe = f'{idx:02d}_' + re.sub(r'[^0-9A-Za-z_.-]+', '_', os.path.basename(name)).strip('_')
         buf = io.StringIO(); w = csv.writer(buf); w.writerow(head); w.writerows(keep)
         with gzip.open(f'{out_dir}/{safe}.gz', 'wt', encoding='utf-8', newline='') as f:
