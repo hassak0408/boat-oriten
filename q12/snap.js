@@ -5,8 +5,10 @@
 //     2連複：1=2,1=3,2=3,1=4,2=4,3=4,1=5,2=5,3=5,4=5,1=6,2=6,3=6,4=6,5=6
 //     2連単：1-2,2-1,3-1,4-1,5-1,6-1,1-3,2-3,3-2,4-2,5-2,6-2,1-4,2-4,3-4,4-3,5-3,6-3,1-5,2-5,3-5,4-5,5-4,6-4,1-6,2-6,3-6,4-6,5-6,6-5
 //   その日のレースと締切は BoatraceOpenAPI（通知と同じ v1、前の日の0時すぎに出る）から読み、5分ごとに読み直す（締切の変更に追いつく）
+//   Actions の中では30分ごとに、それまでの記録を main に足す（途中で止まっても残る・途中でも確かめられる）
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 const DIR = path.join(__dirname, 'snap');
 const UA = 'boat-oriten (+https://github.com/hassak0408/boat-oriten)';
 const V1 = 'https://boatraceopenapi.github.io/api/v1/';
@@ -26,6 +28,16 @@ function cells(html) {
     out.push(/^[0-9.]+$/.test(t) && isFinite(v) ? v : null);
   }
   return out;
+}
+function save(msg) {   // Actions の中だけ：q12/snap を main に足す（失敗しても読むのは続ける）
+  if (!process.env.GITHUB_ACTIONS) return;
+  const sh = c => execSync(c, { stdio: 'inherit', shell: '/bin/bash', cwd: path.join(__dirname, '..') });
+  try {
+    sh(`git add q12/snap && (git diff --cached --quiet || git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -q -m "${msg}")`);
+    for (let i = 0; i < 5; i++) {
+      try { sh('git push -q origin HEAD:main'); return; } catch (e) { try { sh('git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)'); } catch (e2) { /* 次へ */ } }
+    }
+  } catch (e) { console.log('途中の保存に失敗', String(e).slice(0, 200)); }
 }
 let next = 0;
 async function slot() { for (;;) { const t = Date.now(); if (t >= next) { next = t + 1000; return; } await sleep(next - t); } }
@@ -59,7 +71,7 @@ async function schedule(ymd) {   // [{v, rno, close(ms)}]
   fs.mkdirSync(DIR, { recursive: true });
   if (!fs.existsSync(OUT)) fs.writeFileSync(OUT, HEAD + '\n');
   const done = new Set(fs.readFileSync(OUT, 'utf8').split('\n').slice(1).filter(s => s.trim()).map(s => { const a = s.split(','); return `${a[1]}-${a[2]}-${a[6]}`; }));
-  let races = [], lastSched = 0, got = 0, miss = 0;
+  let races = [], lastSched = 0, got = 0, miss = 0, lastSave = Date.now();
   for (;;) {
     const t = now();
     if (t - t0 - Number(process.env.SNAP_SHIFT_MS || 0) > LIMIT) { console.log('時間になったので止める'); break; }
@@ -92,6 +104,7 @@ async function schedule(ymd) {   // [{v, rno, close(ms)}]
       }
     };
     await Promise.all([one(), one(), one(), one()]);   // 同時に待つのは4本まで（読み始めは全体で1秒に1回まで）
+    if (Date.now() - lastSave > Number(process.env.SNAP_SAVE_MIN || 30) * 60e3) { save(`q12：締切前のオッズ ${ymd}（途中・${jst(now()).hms.slice(0, 5)}）`); lastSave = Date.now(); }
     await sleep(due.length ? 1000 : 10e3);
   }
   const left = races.filter(r => r.close > now()).length;
