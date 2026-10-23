@@ -181,14 +181,15 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
   const FROM = '2026-10-23';   // 全部（安定＋配当＋的中）にした日（その前は安定型だけで買っていた）
-  const STRONG = 1.1, SWEET = [0.25, 0.32], STRONG_UNITS = 2;   // 勝負レース（お得度1.10以上・または来る確率25〜32%）は2点（通知の STRONG・SWEET・STRONG_UNITS と同じ）
+  const STRONG = 1.1, SWEET = [0.25, 0.32], STRONG_UNITS = 2, SUMMER_ONE = true;   // 勝負レース（お得度1.10以上・または来る確率25〜32%）は2点・7〜9月は1点（通知の STRONG・SWEET・STRONG_UNITS・SUMMER_ONE と同じ）
   const pOf = r => Number(r['的中見込み']);
   const strong = r => r['強さ'] >= STRONG || (pOf(r) >= SWEET[0] && pOf(r) < SWEET[1]);
-  const units = r => strong(r) ? STRONG_UNITS : 1;
+  const summer = r => SUMMER_ONE && ['07', '08', '09'].includes(String(r['日付']).slice(5, 7));   // 7〜9月は勝負レースも1点（5年とも7〜9月の勝負レースは100%未満。前の年までで決める確かめで損益が増えた、2026-10-23 夜）
+  const units = r => (strong(r) && !summer(r)) ? STRONG_UNITS : 1;
   const sumU = X => ({ n: X.reduce((a, r) => a + units(r), 0), ret: X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0) });
   const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('安定')));
   const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
-  // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（勝負レースは2点）が、効いているなら2,000点までに一度でも割る見込みが約4%（撤退）・約11%（注意）の線
+  // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（勝負レースは2点・7〜9月は1点）が、効いているなら2,000点までに一度でも割る見込みが約6%（撤退）・約11%（注意）の線
   let lineTxt = '';
   try {
     const J = JSON.parse(fs.readFileSync(path.join(DIR, 'stop_line.json'), 'utf8'));
@@ -198,19 +199,34 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
     const state = !tu.n ? 'まだ買っていない' : pl < st ? '撤退ラインを割った → 買うのを止めて、モデルを確かめ直す' : pl < wa ? '注意ラインを割った → 勝負レースも1点に戻す（STRONG_UNITS＝1）か、安定型だけ（RULE＝安定）にして様子を見る' : 'ふつうのぶれの中';
     const keys = [100, 200, 500, 1000].map(n => `${n}点で${yen(at(J.stop, n) / 100)}`).join('・');
     lineTxt = (tu.n ? `撤退ライン：${FROM}から ${tu.n}点で ${yen(st / 100)}（注意ライン ${yen(wa / 100)}）。いまの損益 ${yen(pl / 100)} → ${state}。` : `撤退ライン：${FROM}からの通算の損益で見る（${keys}。まだ買っていない）。`) +
-      '（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約4%・注意ラインは約11%。75点で−2,000円ほどの負けは確かめの5年でも年に3〜4回あった）';
+      '（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約6%・注意ラインは約11%。75点で−2,000円ほどの負けは確かめの5年でも年に3〜4回あった）';
   } catch (e) { lineTxt = ''; }
+  // 勝ち幅がある見込み（edge_prior.json）：確かめから置いた「本当の回収」の見込み（平均・ばらつき）を、10月1日からの実際の成績で更新し、100%より上である見込みを出す
+  let edgeTxt = '';
+  try {
+    const E = JSON.parse(fs.readFileSync(path.join(DIR, 'edge_prior.json'), 'utf8'));
+    const X = S.filter(r => r['日付'] >= (E.from || '2026-10-01'));
+    const su = X.reduce((a, r) => a + units(r), 0), su2 = X.reduce((a, r) => a + units(r) * units(r), 0), sr = X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0);
+    const phi = z => { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2);
+      const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+    const p0 = phi((E.mean - 1) / E.sd);
+    let pm = E.mean, ps = E.sd;
+    if (su > 0) { const w0 = 1 / (E.sd * E.sd), w1 = su * su / (E.sigma * E.sigma * su2); pm = (E.mean * w0 + (sr / su) * w1) / (w0 + w1); ps = Math.sqrt(1 / (w0 + w1)); }
+    edgeTxt = `勝ち幅がある見込み（この買い方の本当の回収が100%より上である見込み）：${(phi((pm - 1) / ps) * 100).toFixed(0)}%（確かめだけなら${(p0 * 100).toFixed(0)}%。` +
+      (su > 0 ? `${E.from}からの実際の${su}点・回収${(sr / su * 100).toFixed(1)}%で更新。本当の回収の見立ては${(pm * 100).toFixed(1)}%前後` : 'まだ実際の成績がない') +
+      '。1点の払戻のばらつきが大きいので、はっきりするまで数千点かかる。50%を切ったら、撤退ラインの前でも買い方を見直す）';
+  } catch (e) { edgeTxt = ''; }
   const out = ['## いまの買い方（1=2お得レース通知：全部＝安定型・配当型・的中型、締切10:00〜20:50）', '',
-    (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}レース・${tu.n}点（うち勝負レース${sum(S.filter(r => r['日付'] >= FROM && strong(r))).n}）・的中${t.hit}・回収${(tu.ret / tu.n * 100).toFixed(1)}%・損益${yen(tu.ret - tu.n)}（1点100円、勝負レースは2点）` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) +
-      '。確かめ（2022〜2026年9月）の見込みは1日4.1レース・5.4点・回収110%前後・1か月で+1,500円前後。いくつか試した中で一番良かった形の数字なので、これからは数ポイント低めに見る。月ごとのぶれは大きい',
+    (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}レース・${tu.n}点（うち勝負レース${sum(S.filter(r => r['日付'] >= FROM && strong(r))).n}）・的中${t.hit}・回収${(tu.ret / tu.n * 100).toFixed(1)}%・損益${yen(tu.ret - tu.n)}（1点100円、勝負レースは2点・7〜9月は1点）` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) +
+      '。見込み：決まりを毎年、前の年までのデータだけで選び直す厳しい数え方（2023〜2026年9月）で回収109.5%・1か月+1,400円前後（いまの決まりの決め打ちなら111.1%・+1,800円）。ただし2026年は100〜105%。月ごとのぶれは大きい',
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
-    `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
-      `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), '',
-    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
+    `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う・7〜9月は1点）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
+      `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
+    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点（7〜9月は1点）にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
     out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
   const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
-  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：安定型・配当型・的中型のどれで選ばれたか。お得度1.10以上・または来る確率25〜32%は勝負レースで2点）`, '');
+  out.push('', `直近7日（${from}〜${end}）のレース（選ばれ方：安定型・配当型・的中型のどれで選ばれたか。お得度1.10以上・または来る確率25〜32%は勝負レースで2点、7〜9月は1点）`, '');
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
     out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | お得度 | 点 | 来る確率 | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
@@ -221,7 +237,7 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
 }
 (async () => {
   const end = addDays(jstToday(), -1);
-  const parts = ['# 1=2お得レース通知の記録', '', '通知の買い方は、2026-10-23から「全部」（安定型・配当型・的中型のどれかが★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22までは安定型だけ）。お得度1.10以上・または来る確率25〜32%は勝負レースで2点。名前は2026-10-23に付け直した（お得度＝線との比、来る確率＝的中見込み、安定型＝B・頭打ち10倍、配当型＝A・いまの戻りモデル、的中型＝C・頭打ち6倍）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
+  const parts = ['# 1=2お得レース通知の記録', '', '通知の買い方は、2026-10-23から「全部」（安定型・配当型・的中型のどれかが★★、締切10:00〜20:50）を全部買う形（オッズで見送らない。10-22までは安定型だけ）。お得度1.10以上・または来る確率25〜32%は勝負レースで2点（7〜9月は1点）。名前は2026-10-23に付け直した（お得度＝線との比、来る確率＝的中見込み、安定型＝B・頭打ち10倍、配当型＝A・いまの戻りモデル、的中型＝C・頭打ち6倍）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
   const ROWS = {};   // いちばん上の「いまの買い方」に使う各モデルの行
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
