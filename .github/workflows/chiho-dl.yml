@@ -1,0 +1,51 @@
+# 地方競馬情報サイトの月ごとのデータ（レース情報・オッズ）を落として chiho/data/ に残す（盛岡・水沢・園田・姫路・笠松だけ）
+name: chiho-dl
+on:
+  workflow_dispatch:
+    inputs:
+      race_months:
+        description: 'レース情報の月（YYYYMM か YYYYMM-YYYYMM、空白区切り）'
+        required: false
+        default: ''
+      odds_months:
+        description: 'オッズの月（2026年3月から）'
+        required: false
+        default: ''
+permissions:
+  contents: write
+concurrency:
+  group: oriten-write
+  cancel-in-progress: false
+jobs:
+  dl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 落とす
+        env:
+          RACE_MONTHS: ${{ inputs.race_months }}
+          ODDS_MONTHS: ${{ inputs.odds_months }}
+          LIMIT_MIN: '300'
+        run: python chiho/dl.py
+      - name: 保存
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add chiho
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "chiho-dl：地方競馬の月ごとのデータ"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 1 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
