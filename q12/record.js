@@ -164,9 +164,32 @@ function section(c, M, rows, PM) {
   out.push('');
   return out;
 }
+function topB(rows, pm, end) {   // summary.md のいちばん上：いまの買い方（通知B）の通算・月ごと・直近7日のレース
+  const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
+  const S = rows.filter(r => r['結果'] !== '中止' && r['結果'] !== '' && r['印'] === '★★' && Number(r['的中見込み']) >= pm && win(r))
+    .sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
+  const sum = R => ({ n: R.length, hit: R.filter(r => r['結果'] === '的中').length, ret: R.reduce((a, r) => a + Number(r['戻り']), 0) });
+  const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
+  const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
+  const t = sum(S);
+  const out = ['## いまの買い方（通知B：★★・的中見込み25%以上、締切10:00〜20:50）', '',
+    `通算（${S.length ? S[0]['日付'] : '-'}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}（確かめの見込みは回収107%前後・1か月で+300円前後。月ごとのぶれは大きい）`, '',
+    '| 月 | 点 | 的中 | 回収 | 損益（1点100円） |', '| --- | --- | --- | --- | --- |'];
+  [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const u = sum(S.filter(r => r['日付'].startsWith(m))); out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} |`); });
+  const from = addDays(end, -6), last = S.filter(r => r['日付'] >= from);
+  out.push('', `直近7日（${from}〜${end}）のレース`, '');
+  if (!last.length) out.push('（この7日はありませんでした）');
+  else {
+    out.push('| 日付 | 場 | R | 締切 | 的中見込み | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- |');
+    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${Math.round(Number(r['的中見込み']) * 100)}% | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
+  }
+  out.push('');
+  return out;
+}
 (async () => {
   const end = addDays(jstToday(), -1);
   const parts = ['# 戻りモデル（オッズを使わない）の記録', '', '通知の買い方（B）は「★★・的中見込み25%以上」を全部買う形（2026-10-22から、オッズで見送らない）。「確定オッズで期待値…」の行は、買うときには分からない確定オッズで見た参考。', ''];
+  let top = null;
   for (const c of CFG) {
     const M = JSON.parse(fs.readFileSync(path.join(DIR, c.file), 'utf8'));
     const PM = c.hit ? JSON.parse(fs.readFileSync(path.join(DIR, c.hit), 'utf8')) : null;   // 的中見込みのモデル
@@ -201,9 +224,12 @@ function section(c, M, rows, PM) {
       d = addDays(d, 1);
     }
     await fillOdds(c, end);
-    parts.push(...section(c, M, readAll(c.csv), PM));
+    const all = readAll(c.csv);
+    if (c.key === '12c10') top = topB(all, c.pmin || 0.25, end);
+    parts.push(...section(c, M, all, PM));
     console.log(c.label, '足した行', added);
   }
+  if (top) parts.splice(4, 0, ...top);
   parts.push(`最終更新：${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')}（日本時間）`);
   fs.writeFileSync(path.join(DIR, 'summary.md'), parts.join('\n') + '\n');
 })().catch(e => { console.error(e); process.exit(1); });
