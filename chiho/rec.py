@@ -3,7 +3,7 @@
   その日最初に読んだ分（朝の出馬表）は race_*_am.csv.gz として残し、あとは race_*.csv.gz を上書きする（最後の回が結果入り）。
 - 当日のオッズ（中間オッズ）は、発走の16分前〜1分後のレースがある時だけ5分ごとに読み、そのレースの分だけを
   ファイルの作成時刻・発走まで分つきで odds_snap.csv.gz に足していく。
-  残す賭式は 単勝・複勝・枠複・馬複・ワイド（3連単・3連複・馬単は量が多く、今の確かめに使わないので残さない）。
+  残す賭式は 単勝・複勝・枠複・馬複・馬単・ワイド・3連複（3連単は量が多いので残さない）。
 - サイトへの読み込みは、どれも2分以上あける（説明書の目安：当日ファイルは約2分に1回まで）。
 - 30分ごとと最後に STORE へ保存する。最終レースの20分後に結果入りのレース情報を読んで終わる。
 使い方：python chiho/rec.py STORE 最大の分 [--once]
@@ -13,7 +13,7 @@ import requests
 
 BASE = 'https://www.keiba.go.jp/KeibaWeb/DataDownload/'
 TRACKS = ['盛岡', '水沢', '園田', '姫路', '笠松']
-KEEP_BETS = ('単勝', '複勝', '枠複', '馬複', 'ワイド')
+KEEP_BETS = ('単勝', '複勝', '枠複', '馬複', '馬単', 'ワイド', '３連複', '3連複')
 UA = 'Mozilla/5.0 (personal research; daily files, odds every 5 min only around post time, race info every 30 min)'
 JST = dt.timezone(dt.timedelta(hours=9))
 END = os.environ.get('END', '21:40')          # この時刻を過ぎたら終わる
