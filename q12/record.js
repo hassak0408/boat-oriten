@@ -186,11 +186,23 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   const strong = r => r['強さ'] >= STRONG;
   const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('B')));
   const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
+  // 撤退ライン（stop_line.json）：買い始め（FROM）からの通算の損益（強い通知は2点）が、効いているなら2,000点までに一度でも割る見込みが約4%（撤退）・約11%（注意）の線
+  let lineTxt = '';
+  try {
+    const J = JSON.parse(fs.readFileSync(path.join(DIR, 'stop_line.json'), 'utf8'));
+    const at = (arr, n) => { const g = J.grid; if (n <= g[0]) return arr[0]; if (n >= g[g.length - 1]) return arr[arr.length - 1];
+      const i = g.findIndex(x => x >= n); const f = (n - g[i - 1]) / (g[i] - g[i - 1]); return arr[i - 1] + f * (arr[i] - arr[i - 1]); };
+    const pl = (tu.ret - tu.n) * 100, st = at(J.stop, tu.n), wa = at(J.warn, tu.n);
+    const state = !tu.n ? 'まだ買っていない' : pl < st ? '撤退ラインを割った → 買うのを止めて、モデルを確かめ直す' : pl < wa ? '注意ラインを割った → 1点に戻す（STRONG_UNITS＝1）か B だけにして様子を見る' : 'ふつうのぶれの中';
+    const keys = [100, 200, 500, 1000].map(n => `${n}点で${yen(at(J.stop, n) / 100)}`).join('・');
+    lineTxt = (tu.n ? `撤退ライン：${FROM}から ${tu.n}点で ${yen(st / 100)}（注意ライン ${yen(wa / 100)}）。いまの損益 ${yen(pl / 100)} → ${state}。` : `撤退ライン：${FROM}からの通算の損益で見る（${keys}。まだ買っていない）。`) +
+      '（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約4%・注意ラインは約11%。75点で−2,000円ほどの負けは確かめの5年でも年に3〜4回あった）';
+  } catch (e) { lineTxt = ''; }
   const out = ['## いまの買い方（通知 BAC：B＋A★★＋C★★、締切10:00〜20:50）', '',
     (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}点・的中${t.hit}・回収${roi(t)}・1点100円で${yen(t.ret - t.n)}` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) + '（確かめの見込みは1日4.1R・回収107%前後・1か月で+860円前後。月ごとのぶれは大きい）',
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうちB（頭打ち10倍★★・的中見込み25%以上）は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
     `強い通知（強さ＝線との比が${STRONG}以上、${STRONG_UNITS}点で買う）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日0.6R・回収124%前後。穴寄りが多く、外れが続くこともある）。` +
-      `強い通知を${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, '',
+      `強い通知を${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), '',
     '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 強い通知 | 強い通知を2点にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
     out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
