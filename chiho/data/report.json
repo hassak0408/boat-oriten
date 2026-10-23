@@ -14,5 +14,1077 @@
   "bytes": 10925912,
   "disp": "attachment; filename=\"202609_1792688597_odds.zip\"",
   "n_files": 3
+ },
+ "race_201601": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1009850,
+  "disp": "attachment; filename=\"201601_1779801854_race.zip\"",
+  "n_files": 3
+ },
+ "race_201602": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 919007,
+  "disp": "attachment; filename=\"201602_1779802016_race.zip\"",
+  "n_files": 3
+ },
+ "race_201603": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 994793,
+  "disp": "attachment; filename=\"201603_1779802180_race.zip\"",
+  "n_files": 3
+ },
+ "race_201604": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1036097,
+  "disp": "attachment; filename=\"201604_1779802377_race.zip\"",
+  "n_files": 3
+ },
+ "race_201605": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1163176,
+  "disp": "attachment; filename=\"201605_1779802593_race.zip\"",
+  "n_files": 3
+ },
+ "race_201606": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1175116,
+  "disp": "attachment; filename=\"201606_1779802838_race.zip\"",
+  "n_files": 3
+ },
+ "race_201607": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1190845,
+  "disp": "attachment; filename=\"201607_1779803071_race.zip\"",
+  "n_files": 3
+ },
+ "race_201608": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1187612,
+  "disp": "attachment; filename=\"201608_1779803306_race.zip\"",
+  "n_files": 3
+ },
+ "race_201609": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1130154,
+  "disp": "attachment; filename=\"201609_1779803556_race.zip\"",
+  "n_files": 3
+ },
+ "race_201610": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1260823,
+  "disp": "attachment; filename=\"201610_1779803809_race.zip\"",
+  "n_files": 3
+ },
+ "race_201611": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1161761,
+  "disp": "attachment; filename=\"201611_1779804029_race.zip\"",
+  "n_files": 3
+ },
+ "race_201612": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2016&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1144078,
+  "disp": "attachment; filename=\"201612_1779804258_race.zip\"",
+  "n_files": 3
+ },
+ "race_201701": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1037359,
+  "disp": "attachment; filename=\"201701_1779804468_race.zip\"",
+  "n_files": 3
+ },
+ "race_201702": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 902625,
+  "disp": "attachment; filename=\"201702_1779804642_race.zip\"",
+  "n_files": 3
+ },
+ "race_201703": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1019463,
+  "disp": "attachment; filename=\"201703_1779804866_race.zip\"",
+  "n_files": 3
+ },
+ "race_201704": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1029814,
+  "disp": "attachment; filename=\"201704_1779805038_race.zip\"",
+  "n_files": 3
+ },
+ "race_201705": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1211595,
+  "disp": "attachment; filename=\"201705_1779805255_race.zip\"",
+  "n_files": 3
+ },
+ "race_201706": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1158077,
+  "disp": "attachment; filename=\"201706_1779805458_race.zip\"",
+  "n_files": 3
+ },
+ "race_201707": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1240514,
+  "disp": "attachment; filename=\"201707_1779805702_race.zip\"",
+  "n_files": 3
+ },
+ "race_201708": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1201018,
+  "disp": "attachment; filename=\"201708_1779805916_race.zip\"",
+  "n_files": 3
+ },
+ "race_201709": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1137312,
+  "disp": "attachment; filename=\"201709_1779806147_race.zip\"",
+  "n_files": 3
+ },
+ "race_201710": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1307495,
+  "disp": "attachment; filename=\"201710_1779806404_race.zip\"",
+  "n_files": 3
+ },
+ "race_201711": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1184671,
+  "disp": "attachment; filename=\"201711_1779806636_race.zip\"",
+  "n_files": 3
+ },
+ "race_201712": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2017&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1199998,
+  "disp": "attachment; filename=\"201712_1779806850_race.zip\"",
+  "n_files": 3
+ },
+ "race_201801": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1054089,
+  "disp": "attachment; filename=\"201801_1779807053_race.zip\"",
+  "n_files": 3
+ },
+ "race_201802": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 924102,
+  "disp": "attachment; filename=\"201802_1779807217_race.zip\"",
+  "n_files": 3
+ },
+ "race_201803": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1031625,
+  "disp": "attachment; filename=\"201803_1779807438_race.zip\"",
+  "n_files": 3
+ },
+ "race_201804": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1104373,
+  "disp": "attachment; filename=\"201804_1779807656_race.zip\"",
+  "n_files": 3
+ },
+ "race_201805": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1198683,
+  "disp": "attachment; filename=\"201805_1779807879_race.zip\"",
+  "n_files": 3
+ },
+ "race_201806": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1235702,
+  "disp": "attachment; filename=\"201806_1779808139_race.zip\"",
+  "n_files": 3
+ },
+ "race_201807": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1243737,
+  "disp": "attachment; filename=\"201807_1779808359_race.zip\"",
+  "n_files": 3
+ },
+ "race_201808": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1240720,
+  "disp": "attachment; filename=\"201808_1779808591_race.zip\"",
+  "n_files": 3
+ },
+ "race_201809": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1174077,
+  "disp": "attachment; filename=\"201809_1779808876_race.zip\"",
+  "n_files": 3
+ },
+ "race_201810": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1280294,
+  "disp": "attachment; filename=\"201810_1779809111_race.zip\"",
+  "n_files": 3
+ },
+ "race_201811": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1132650,
+  "disp": "attachment; filename=\"201811_1779809338_race.zip\"",
+  "n_files": 3
+ },
+ "race_201812": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2018&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1174117,
+  "disp": "attachment; filename=\"201812_1779809536_race.zip\"",
+  "n_files": 3
+ },
+ "race_201901": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1056221,
+  "disp": "attachment; filename=\"201901_1779809736_race.zip\"",
+  "n_files": 3
+ },
+ "race_201902": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 930973,
+  "disp": "attachment; filename=\"201902_1779809918_race.zip\"",
+  "n_files": 3
+ },
+ "race_201903": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1048027,
+  "disp": "attachment; filename=\"201903_1779810116_race.zip\"",
+  "n_files": 3
+ },
+ "race_201904": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1083347,
+  "disp": "attachment; filename=\"201904_1779810341_race.zip\"",
+  "n_files": 3
+ },
+ "race_201905": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1276231,
+  "disp": "attachment; filename=\"201905_1779810583_race.zip\"",
+  "n_files": 3
+ },
+ "race_201906": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1236391,
+  "disp": "attachment; filename=\"201906_1779810832_race.zip\"",
+  "n_files": 3
+ },
+ "race_201907": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1275910,
+  "disp": "attachment; filename=\"201907_1779811082_race.zip\"",
+  "n_files": 3
+ },
+ "race_201908": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1271108,
+  "disp": "attachment; filename=\"201908_1779811312_race.zip\"",
+  "n_files": 3
+ },
+ "race_201909": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1216726,
+  "disp": "attachment; filename=\"201909_1779811540_race.zip\"",
+  "n_files": 3
+ },
+ "race_201910": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1314929,
+  "disp": "attachment; filename=\"201910_1779811791_race.zip\"",
+  "n_files": 3
+ },
+ "race_201911": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1121556,
+  "disp": "attachment; filename=\"201911_1779812023_race.zip\"",
+  "n_files": 3
+ },
+ "race_201912": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2019&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1218661,
+  "disp": "attachment; filename=\"201912_1779812245_race.zip\"",
+  "n_files": 3
+ },
+ "race_202001": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1052202,
+  "disp": "attachment; filename=\"202001_1779784638_race.zip\"",
+  "n_files": 3
+ },
+ "race_202002": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 954411,
+  "disp": "attachment; filename=\"202002_1779784684_race.zip\"",
+  "n_files": 3
+ },
+ "race_202003": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1122506,
+  "disp": "attachment; filename=\"202003_1779784730_race.zip\"",
+  "n_files": 3
+ },
+ "race_202004": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1119308,
+  "disp": "attachment; filename=\"202004_1779784837_race.zip\"",
+  "n_files": 3
+ },
+ "race_202005": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1280534,
+  "disp": "attachment; filename=\"202005_1779785061_race.zip\"",
+  "n_files": 3
+ },
+ "race_202006": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1211154,
+  "disp": "attachment; filename=\"202006_1779785280_race.zip\"",
+  "n_files": 3
+ },
+ "race_202007": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1192503,
+  "disp": "attachment; filename=\"202007_1779785507_race.zip\"",
+  "n_files": 3
+ },
+ "race_202008": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1217006,
+  "disp": "attachment; filename=\"202008_1779785730_race.zip\"",
+  "n_files": 3
+ },
+ "race_202009": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1248494,
+  "disp": "attachment; filename=\"202009_1779785952_race.zip\"",
+  "n_files": 3
+ },
+ "race_202010": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1319569,
+  "disp": "attachment; filename=\"202010_1779786166_race.zip\"",
+  "n_files": 3
+ },
+ "race_202011": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1190626,
+  "disp": "attachment; filename=\"202011_1779786394_race.zip\"",
+  "n_files": 3
+ },
+ "race_202012": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2020&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1307444,
+  "disp": "attachment; filename=\"202012_1779786611_race.zip\"",
+  "n_files": 3
+ },
+ "race_202101": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1078273,
+  "disp": "attachment; filename=\"202101_1779786801_race.zip\"",
+  "n_files": 3
+ },
+ "race_202102": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 846313,
+  "disp": "attachment; filename=\"202102_1779786988_race.zip\"",
+  "n_files": 3
+ },
+ "race_202103": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1101429,
+  "disp": "attachment; filename=\"202103_1779787199_race.zip\"",
+  "n_files": 3
+ },
+ "race_202104": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1031492,
+  "disp": "attachment; filename=\"202104_1779787378_race.zip\"",
+  "n_files": 3
+ },
+ "race_202105": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1234864,
+  "disp": "attachment; filename=\"202105_1779787590_race.zip\"",
+  "n_files": 3
+ },
+ "race_202106": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1182439,
+  "disp": "attachment; filename=\"202106_1779787806_race.zip\"",
+  "n_files": 3
+ },
+ "race_202107": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1211588,
+  "disp": "attachment; filename=\"202107_1779788058_race.zip\"",
+  "n_files": 3
+ },
+ "race_202108": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1197515,
+  "disp": "attachment; filename=\"202108_1779788277_race.zip\"",
+  "n_files": 3
+ },
+ "race_202109": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1298719,
+  "disp": "attachment; filename=\"202109_1779788510_race.zip\"",
+  "n_files": 3
+ },
+ "race_202110": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1327653,
+  "disp": "attachment; filename=\"202110_1779788766_race.zip\"",
+  "n_files": 3
+ },
+ "race_202111": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1238246,
+  "disp": "attachment; filename=\"202111_1779788993_race.zip\"",
+  "n_files": 3
+ },
+ "race_202112": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2021&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1206852,
+  "disp": "attachment; filename=\"202112_1779789220_race.zip\"",
+  "n_files": 3
+ },
+ "race_202201": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 997976,
+  "disp": "attachment; filename=\"202201_1779789400_race.zip\"",
+  "n_files": 3
+ },
+ "race_202202": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 879300,
+  "disp": "attachment; filename=\"202202_1779789570_race.zip\"",
+  "n_files": 3
+ },
+ "race_202203": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1151185,
+  "disp": "attachment; filename=\"202203_1779789811_race.zip\"",
+  "n_files": 3
+ },
+ "race_202204": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1100387,
+  "disp": "attachment; filename=\"202204_1779790041_race.zip\"",
+  "n_files": 3
+ },
+ "race_202205": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1302628,
+  "disp": "attachment; filename=\"202205_1779790278_race.zip\"",
+  "n_files": 3
+ },
+ "race_202206": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1236815,
+  "disp": "attachment; filename=\"202206_1779790523_race.zip\"",
+  "n_files": 3
+ },
+ "race_202207": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1298269,
+  "disp": "attachment; filename=\"202207_1779790771_race.zip\"",
+  "n_files": 3
+ },
+ "race_202208": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1236465,
+  "disp": "attachment; filename=\"202208_1779791055_race.zip\"",
+  "n_files": 3
+ },
+ "race_202209": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1315555,
+  "disp": "attachment; filename=\"202209_1779791362_race.zip\"",
+  "n_files": 3
+ },
+ "race_202210": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1314023,
+  "disp": "attachment; filename=\"202210_1779791645_race.zip\"",
+  "n_files": 3
+ },
+ "race_202211": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1232537,
+  "disp": "attachment; filename=\"202211_1779791961_race.zip\"",
+  "n_files": 3
+ },
+ "race_202212": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2022&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1243445,
+  "disp": "attachment; filename=\"202212_1779792217_race.zip\"",
+  "n_files": 3
+ },
+ "race_202301": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1046317,
+  "disp": "attachment; filename=\"202301_1779792471_race.zip\"",
+  "n_files": 3
+ },
+ "race_202302": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 922882,
+  "disp": "attachment; filename=\"202302_1779792708_race.zip\"",
+  "n_files": 3
+ },
+ "race_202303": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1194980,
+  "disp": "attachment; filename=\"202303_1779792937_race.zip\"",
+  "n_files": 3
+ },
+ "race_202304": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1124605,
+  "disp": "attachment; filename=\"202304_1779793227_race.zip\"",
+  "n_files": 3
+ },
+ "race_202305": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1324489,
+  "disp": "attachment; filename=\"202305_1779793506_race.zip\"",
+  "n_files": 3
+ },
+ "race_202306": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1286027,
+  "disp": "attachment; filename=\"202306_1779793791_race.zip\"",
+  "n_files": 3
+ },
+ "race_202307": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1291848,
+  "disp": "attachment; filename=\"202307_1779794078_race.zip\"",
+  "n_files": 3
+ },
+ "race_202308": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1283029,
+  "disp": "attachment; filename=\"202308_1779794372_race.zip\"",
+  "n_files": 3
+ },
+ "race_202309": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1221968,
+  "disp": "attachment; filename=\"202309_1779794643_race.zip\"",
+  "n_files": 3
+ },
+ "race_202310": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1364759,
+  "disp": "attachment; filename=\"202310_1779794913_race.zip\"",
+  "n_files": 3
+ },
+ "race_202311": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1262423,
+  "disp": "attachment; filename=\"202311_1779795189_race.zip\"",
+  "n_files": 3
+ },
+ "race_202312": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2023&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1290058,
+  "disp": "attachment; filename=\"202312_1779795447_race.zip\"",
+  "n_files": 3
+ },
+ "race_202401": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1061092,
+  "disp": "attachment; filename=\"202401_1779795687_race.zip\"",
+  "n_files": 3
+ },
+ "race_202402": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 989054,
+  "disp": "attachment; filename=\"202402_1779795905_race.zip\"",
+  "n_files": 3
+ },
+ "race_202403": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1111564,
+  "disp": "attachment; filename=\"202403_1779796164_race.zip\"",
+  "n_files": 3
+ },
+ "race_202404": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1223169,
+  "disp": "attachment; filename=\"202404_1779796408_race.zip\"",
+  "n_files": 3
+ },
+ "race_202405": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1313171,
+  "disp": "attachment; filename=\"202405_1779796659_race.zip\"",
+  "n_files": 3
+ },
+ "race_202406": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1310361,
+  "disp": "attachment; filename=\"202406_1779796972_race.zip\"",
+  "n_files": 3
+ },
+ "race_202407": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1359530,
+  "disp": "attachment; filename=\"202407_1779797248_race.zip\"",
+  "n_files": 3
+ },
+ "race_202408": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1191409,
+  "disp": "attachment; filename=\"202408_1779797519_race.zip\"",
+  "n_files": 3
+ },
+ "race_202409": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1284270,
+  "disp": "attachment; filename=\"202409_1779797775_race.zip\"",
+  "n_files": 3
+ },
+ "race_202410": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1376249,
+  "disp": "attachment; filename=\"202410_1779798056_race.zip\"",
+  "n_files": 3
+ },
+ "race_202411": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1251638,
+  "disp": "attachment; filename=\"202411_1779798334_race.zip\"",
+  "n_files": 3
+ },
+ "race_202412": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2024&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1340706,
+  "disp": "attachment; filename=\"202412_1779798627_race.zip\"",
+  "n_files": 3
+ },
+ "race_202501": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1110135,
+  "disp": "attachment; filename=\"202501_1779798856_race.zip\"",
+  "n_files": 3
+ },
+ "race_202502": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 943736,
+  "disp": "attachment; filename=\"202502_1779799071_race.zip\"",
+  "n_files": 3
+ },
+ "race_202503": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1172720,
+  "disp": "attachment; filename=\"202503_1779799333_race.zip\"",
+  "n_files": 3
+ },
+ "race_202504": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1165538,
+  "disp": "attachment; filename=\"202504_1779799605_race.zip\"",
+  "n_files": 3
+ },
+ "race_202505": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1273529,
+  "disp": "attachment; filename=\"202505_1779799851_race.zip\"",
+  "n_files": 3
+ },
+ "race_202506": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1321842,
+  "disp": "attachment; filename=\"202506_1779800110_race.zip\"",
+  "n_files": 3
+ },
+ "race_202507": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1261231,
+  "disp": "attachment; filename=\"202507_1779800408_race.zip\"",
+  "n_files": 3
+ },
+ "race_202508": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1100309,
+  "disp": "attachment; filename=\"202508_1779800649_race.zip\"",
+  "n_files": 3
+ },
+ "race_202509": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1322983,
+  "disp": "attachment; filename=\"202509_1779800919_race.zip\"",
+  "n_files": 3
+ },
+ "race_202511": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=11",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1272919,
+  "disp": "attachment; filename=\"202511_1779801472_race.zip\"",
+  "n_files": 3
+ },
+ "race_202512": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=12",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1305598,
+  "disp": "attachment; filename=\"202512_1779801747_race.zip\"",
+  "n_files": 3
+ },
+ "race_202601": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=1",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1059227,
+  "disp": "attachment; filename=\"202601_1779801942_race.zip\"",
+  "n_files": 3
+ },
+ "race_202602": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=2",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 941511,
+  "disp": "attachment; filename=\"202602_1779804385_race.zip\"",
+  "n_files": 3
+ },
+ "race_202603": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1262890,
+  "disp": "attachment; filename=\"202603_1780160703_race.zip\"",
+  "n_files": 3
+ },
+ "race_202604": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1235458,
+  "disp": "attachment; filename=\"202604_1782752694_race.zip\"",
+  "n_files": 3
+ },
+ "race_202605": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1360810,
+  "disp": "attachment; filename=\"202605_1785431120_race.zip\"",
+  "n_files": 3
+ },
+ "race_202606": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1321050,
+  "disp": "attachment; filename=\"202606_1788109500_race.zip\"",
+  "n_files": 3
+ },
+ "race_202607": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1357657,
+  "disp": "attachment; filename=\"202607_1790701524_race.zip\"",
+  "n_files": 3
+ },
+ "race_202608": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1211108,
+  "disp": "attachment; filename=\"202608_1792688691_race.zip\"",
+  "n_files": 3
+ },
+ "race_202609": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2026&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1359644,
+  "disp": "attachment; filename=\"202609_1792688597_race.zip\"",
+  "n_files": 3
+ },
+ "odds_202603": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=3",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 10293831,
+  "disp": "attachment; filename=\"202603_1780160703_odds.zip\"",
+  "n_files": 3
+ },
+ "odds_202604": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=4",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 9961302,
+  "disp": "attachment; filename=\"202604_1782752695_odds.zip\"",
+  "n_files": 3
+ },
+ "odds_202605": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=5",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 10901845,
+  "disp": "attachment; filename=\"202605_1785431121_odds.zip\"",
+  "n_files": 3
+ },
+ "odds_202606": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=6",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 10481574,
+  "disp": "attachment; filename=\"202606_1788109500_odds.zip\"",
+  "n_files": 3
+ },
+ "odds_202607": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=7",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 10905182,
+  "disp": "attachment; filename=\"202607_1790701525_odds.zip\"",
+  "n_files": 3
+ },
+ "odds_202608": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=8",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 9519221,
+  "disp": "attachment; filename=\"202608_1792688691_odds.zip\"",
+  "n_files": 3
  }
 }

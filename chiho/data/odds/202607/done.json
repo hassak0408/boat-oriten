@@ -1,0 +1,63 @@
+{
+ "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=7",
+ "code": 200,
+ "ctype": "application/zip",
+ "bytes": 10905182,
+ "disp": "attachment; filename=\"202607_1790701525_odds.zip\"",
+ "files": {
+  "202607_01_odds.csv": {
+   "enc": "utf-8-sig",
+   "rows": 574972,
+   "kept": 167091,
+   "venue_col": "競馬場",
+   "header": [
+    "競馬場",
+    "競走年月日",
+    "レース番号",
+    "賭式",
+    "番号1",
+    "番号2",
+    "番号3",
+    "オッズ",
+    "オッズ（最大）",
+    "人気"
+   ]
+  },
+  "202607_02_odds.csv": {
+   "enc": "utf-8-sig",
+   "rows": 547123,
+   "kept": 116274,
+   "venue_col": "競馬場",
+   "header": [
+    "競馬場",
+    "競走年月日",
+    "レース番号",
+    "賭式",
+    "番号1",
+    "番号2",
+    "番号3",
+    "オッズ",
+    "オッズ（最大）",
+    "人気"
+   ]
+  },
+  "202607_03_odds.csv": {
+   "enc": "utf-8-sig",
+   "rows": 563208,
+   "kept": 143240,
+   "venue_col": "競馬場",
+   "header": [
+    "競馬場",
+    "競走年月日",
+    "レース番号",
+    "賭式",
+    "番号1",
+    "番号2",
+    "番号3",
+    "オッズ",
+    "オッズ（最大）",
+    "人気"
+   ]
+  }
+ }
+}
