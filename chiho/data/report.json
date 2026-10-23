@@ -1,0 +1,18 @@
+{
+ "race_202510": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/RaceDataDownload?type=monthly&k_year=2025&k_month=10",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 1404534,
+  "disp": "attachment; filename=\"202510_1779801216_race.zip\"",
+  "n_files": 3
+ },
+ "odds_202609": {
+  "url": "https://www.keiba.go.jp/KeibaWeb/DataDownload/OddsDataDownload?type=monthly&k_year=2026&k_month=9",
+  "code": 200,
+  "ctype": "application/zip",
+  "bytes": 10925912,
+  "disp": "attachment; filename=\"202609_1792688597_odds.zip\"",
+  "n_files": 3
+ }
+}
