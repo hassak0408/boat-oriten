@@ -66,6 +66,7 @@ log('今日', today, 'レース', len(TR), '頭', len(TH), '／月ごとのデ�
 H = add_cats(feat.build(verbose=False, extra=extra)); log('材料1')
 H = feat2.add2(H, pd.concat([RM, extra['R']], ignore_index=True)); log('材料2')
 USE3 = False
+H['五場走数'] = H['走数']          # 5場だけで数えた前の走数（前の所属の直しに使う）
 try:
     if not glob.glob(f'{ALL}/race/2*'): raise FileNotFoundError(ALL)
     H = feat3.apply3(H, hist_all.build_hist(ALL, extra, verbose=False)); USE3 = True; log('材料3（全部の場の前の成績）')
@@ -113,6 +114,20 @@ for tgt, col, FE, P, rows in (('3着内', 'p3', FE3, BIG, TRN), ('勝', 'p1', FE
 
 # レースの中で足し合わせをそろえる（3着内は合計3、1着は合計1）
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+# 前の所属による直し（origin_fix.py で2021〜2025年から決めた値。全部の場の前の成績があるときだけ）
+H = H.sort_values(['馬', '日', 'レース番号'])
+first = np.select([(H['五場走数'] == 0) & (H['全走'] == 0), (H['五場走数'] == 0) & (H['初データ'] == 1) & (H['芝走'] > 0),
+                   (H['五場走数'] == 0) & (H['初データ'] == 1), (H['五場走数'] == 0) & (H['初データ'] == 0)], ['デビュー', '中央', '外（芝なし）', 'ほかの地方'], '')
+H['来かた'] = pd.Series(first, index=H.index).replace('', np.nan); H['来かた'] = H.groupby('馬')['来かた'].transform(lambda s: s.ffill())
+H['戦目'] = H['五場走数'] + 1
+H['組'] = np.where(H['来かた'].notna() & (H['戦目'] <= 3), H['来かた'].astype(str) + H['戦目'].astype(int).astype(str), '')
+TE = TE.drop(columns=[c for c in ('組', '来かた', '戦目') if c in TE]).merge(H.loc[H['予測'], KEY + ['馬番', '組', '来かた', '戦目']], on=KEY + ['馬番'], how='left')
+if USE3:
+    fix = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'origin_fix.json'), encoding='utf-8'))['掛ける値']
+    TE['p3'] = TE['p3'] * TE['組'].map(fix).fillna(1.0)
+    TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+TAG = {'中央': '中央から初戦', 'ほかの地方': 'ほかの地方から初戦', '外（芝なし）': '転入初戦', 'デビュー': '初出走'}
+TE['印'] = [TAG.get(k, '') if (isinstance(k, str) and s == 1) else '' for k, s in zip(TE['来かた'], TE['戦目'])]
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
@@ -121,7 +136,8 @@ RT = TR.drop_duplicates(KEY).set_index(KEY)
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '材料': 'B3（全部の場の前の成績あり）' if USE3 else 'B2', 'レース': []}
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
-         '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。', '']
+         '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
+         '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。', '']
 order = {'盛岡': 0, '水沢': 1, '園田': 2, '姫路': 3, '笠松': 4}
 for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv[0][0], 9), int(kv[0][2]))):
     info = RT.loc[(place, ymd, rno)] if (place, ymd, rno) in RT.index else {}
@@ -129,11 +145,11 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     post = f'{hhmm[:2]}:{hhmm[2:]}' if hhmm.strip('0') else ''
     head = f"{place} {int(rno)}R {post} {info.get('距離', '')}m {len(g)}頭"
     g = g.sort_values('順位')
-    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質']) for _, r in g.iterrows()]
+    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印']) for _, r in g.iterrows()]
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs))
     lines.append(head)
     for h in hs[:5]:
-        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{h['脚質']}".rstrip())
+        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{h['脚質']} {h['印']}".rstrip())
     lines.append('')
 os.makedirs(f'{store}/data/picks', exist_ok=True)
 json.dump(out, open(f'{store}/data/picks/{today}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
