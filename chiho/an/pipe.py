@@ -2,22 +2,25 @@
 STORE（非公開のリポジトリ）の data/race（月ごと）と data/daily/日付（毎日の記録）から、今日の出馬表の馬ごとに
 3着内・1着の見込みと脚質の予想を出し、STORE/data/picks/日付.json と 日付.txt に置く。
 - モデルは毎回作る（Y年はY−1年まで、2017年から。乱数0）。材料はレース前に分かるものだけで、人気・オッズは使わない。
-- 朝の出馬表には馬体重が無いレースがあるので、馬体重は使わない（cand3.py の「朝」と同じ材料）。
+- 朝の出馬表には馬体重が無いレースがあるので、馬体重は使わない。材料は cand3.py の「朝3」と同じ（B2＋全部の場の前の成績＝B3）。
+- 全部の場の前の成績は STORE/data_all（環境変数 CHIHO_ALL）から作る。
 - 月ごとのデータより後の日は、毎日の記録の最後の分（結果入り）で埋める。
 使い方：python chiho/an/pipe.py STORE [日付YYYYMMDD]   （環境変数 CHIHO_DATA が無ければ STORE/data を読む）"""
 import os, sys, glob, json, time, datetime as dt, numpy as np, pandas as pd
 store = sys.argv[1]
 os.environ.setdefault('CHIHO_DATA', f'{store}/data')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import feat, feat2
+import feat, feat2, feat3, hist_all
 from feat import FEATS, KEY, add_cats, corner_pos
 from feat2cols import NEW
+from feat3 import EXTRA3
 from load import _read
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 JST = dt.timezone(dt.timedelta(hours=9))
 today = sys.argv[2] if len(sys.argv) > 2 else dt.datetime.now(JST).strftime('%Y%m%d')
 DATA = os.environ['CHIHO_DATA']
+ALL = os.environ.get('CHIHO_ALL', f'{store}/data_all')
 BW = ('馬体重', '馬体重増減', '馬体重差')
 t0 = time.time()
 
@@ -45,7 +48,9 @@ for c, dflt in (('馬場', '良'), ('天候', '晴')):
 if len(TH) == 0:
     log('今日の5場の出馬表が無い', today); sys.exit(0)
 # 月ごとのデータより後で、今日より前の日（毎日の記録の最後の分）
-RM = _read('race', 'racelist'); last_month_day = RM['競走年月日'].max()
+RM = _read('race', 'racelist')
+PM = _read('race', 'payback')
+last_month_day = PM.loc[PM['単勝組番'] != '', '競走年月日'].max()     # 結果（払戻）が入っている最後の日（月ごとのファイルには先の日の出馬表も入っている）
 ER, EP, EH = [], [], []
 for d in sorted(glob.glob(f'{DATA}/daily/2*')):
     day = os.path.basename(d)
@@ -60,6 +65,12 @@ log('今日', today, 'レース', len(TR), '頭', len(TH), '／月ごとのデ�
 
 H = add_cats(feat.build(verbose=False, extra=extra)); log('材料1')
 H = feat2.add2(H, pd.concat([RM, extra['R']], ignore_index=True)); log('材料2')
+USE3 = False
+try:
+    if not glob.glob(f'{ALL}/race/2*'): raise FileNotFoundError(ALL)
+    H = feat3.apply3(H, hist_all.build_hist(ALL, extra, verbose=False)); USE3 = True; log('材料3（全部の場の前の成績）')
+except Exception as e:      # 全部の場のデータが使えないときは、B2の材料のまま作る
+    log('全部の場の前の成績は使わない：', type(e).__name__, str(e)[:200])
 
 # 脚質の材料（style.py と同じ）
 R = pd.concat([RM, extra['R']], ignore_index=True).drop_duplicates(KEY, keep='last')
@@ -85,12 +96,12 @@ mx = H.groupby(KEY)['先頭率5'].transform(lambda s: s.nlargest(2).iloc[-1] if 
 top = H.groupby(KEY)['先頭率5'].transform('max')
 H['他の最大先頭率'] = np.where(H['先頭率5'] >= top, mx, top)
 SF = ['先頭率5', '先行率5', '終角率1', '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '他の最大先頭率']
-log('材料3（脚質）')
+log('材料4（脚質）')
 
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測']]
 TE = H[H['予測']].copy()
-FE3 = [c for c in FEATS + NEW if c not in BW]
+FE3 = [c for c in FEATS + NEW + (EXTRA3 if USE3 else []) if c not in BW]
 FES = [c for c in FEATS + SF if c not in BW]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
@@ -108,7 +119,7 @@ TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
 RT = TR.drop_duplicates(KEY).set_index(KEY)
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
-out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), 'レース': []}
+out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '材料': 'B3（全部の場の前の成績あり）' if USE3 else 'B2', 'レース': []}
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。', '']
 order = {'盛岡': 0, '水沢': 1, '園田': 2, '姫路': 3, '笠松': 4}

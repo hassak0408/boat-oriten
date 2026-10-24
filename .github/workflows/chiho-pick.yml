@@ -1,7 +1,8 @@
 # 地方競馬の来そうな馬（毎朝の一覧）：今日の出馬表（chiho-rec が非公開のリポジトリに置く朝の分）から、
 #   馬ごとの3着内・1着の見込みと脚質の予想を出して、非公開のリポジトリ hassak0408/chiho-keiba の data/picks/日付.txt・.json に置く。
 #   毎朝9:25（日本時間。20〜40分ほど遅れることが多い）に動き出し、朝の出馬表が置かれるまで待つ（最大90分）。5場の開催が無い日は何もしない。
-#   月の途中のレース情報（今の月、10日より前は前の月も）は、ここで1日1回だけ読む（説明書の目安）。
+#   月の途中のレース情報（今の月、10日より前は前の月も。全部の場）は、ここで1日1回だけ読む（説明書の目安）。
+#   材料は B3（B2＋全部の場の前の成績）。馬体重は使わない。
 name: chiho-pick
 on:
   schedule:
@@ -49,10 +50,12 @@ jobs:
             sleep 120
           done
           echo "出馬表が来なかった"; exit 1
-      - name: 月の途中のレース情報を読む（1日1回）
+      - name: 月の途中のレース情報を読む（1日1回。全部の場を data_all に、5場の写しを data に）
         if: env.NONE != '1'
         env:
-          OUT: store/data
+          OUT: store/data_all
+          OUT5: store/data
+          VENUES: all
           ODDS_MONTHS: ''
         run: |
           export RACE_MONTHS=$(python -c "
@@ -63,6 +66,9 @@ jobs:
           python chiho/dl.py
       - name: 来そうな馬
         if: env.NONE != '1'
+        env:
+          CHIHO_DATA: store/data
+          CHIHO_ALL: store/data_all
         run: python chiho/an/pipe.py store "$DAY"
       - name: 保存
         if: env.NONE != '1'
@@ -70,7 +76,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/picks data/race data/report.json 2>/dev/null || true
+          git add data/picks data/race data_all/race data_all/report.json 2>/dev/null || true
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
           git commit -q -m "来そうな馬 $DAY"
           for i in 1 2 3 4 5; do

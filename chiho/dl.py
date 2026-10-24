@@ -1,11 +1,13 @@
 """地方競馬情報サイトの「データダウンロード」（月ごとのZIP）を落として、対象の場だけCSV（gzip）で残す。
 説明書（/pdf/manual/data_pdf_manual.pdf）の推奨（月次ファイルは1日1回まで）を守り、同じファイルは1回だけ読む。
 1回ごとに20秒あける（robots.txt の Crawl-delay 10 より長く）。
-環境変数：RACE_MONTHS / ODDS_MONTHS（YYYYMM の空白区切り、または YYYYMM-YYYYMM）、OUT（置き場所）、VENUES=all（全部の場を残す）。"""
+環境変数：RACE_MONTHS / ODDS_MONTHS（YYYYMM の空白区切り、または YYYYMM-YYYYMM）、OUT（置き場所）、VENUES=all（全部の場を残す）、OUT5（VENUES=all のとき、5場だけの写しの置き場所）。"""
 import os, io, sys, time, zipfile, gzip, json, csv, re, requests
 
 BASE = 'https://www.keiba.go.jp/KeibaWeb/DataDownload/'
-VENUES = None if os.environ.get('VENUES') == 'all' else ['盛岡', '水沢', '園田', '姫路', '笠松']   # VENUES=all なら全部の場を残す
+FIVE = ['盛岡', '水沢', '園田', '姫路', '笠松']
+VENUES = None if os.environ.get('VENUES') == 'all' else FIVE   # VENUES=all なら全部の場を残す
+OUT5 = os.environ.get('OUT5') if VENUES is None else None       # VENUES=all のとき、5場だけの写しの置き場所
 UA = 'Mozilla/5.0 (personal research; monthly data download, 1 request / 20s)'
 GAP = 20
 OUT = os.environ.get('OUT', 'chiho/data')
@@ -69,7 +71,7 @@ def handle(kind, ym, report):
     if r.status_code != 200 or not r.content.startswith(b'PK'):
         rep['head'] = r.content[:300].decode('utf-8', 'replace'); report[f'{kind}_{ym}'] = rep; return
     os.makedirs(out_dir, exist_ok=True)
-    zf = zipfile.ZipFile(io.BytesIO(r.content)); files = {}
+    zf = zipfile.ZipFile(io.BytesIO(r.content)); files = {}; files5 = {}
     for idx, name in enumerate(zf.namelist()):
         if not name.lower().endswith('.csv'):
             files[name] = {'skip': True}; continue
@@ -84,10 +86,19 @@ def handle(kind, ym, report):
         with gzip.open(f'{out_dir}/{safe}.gz', 'wt', encoding='utf-8', newline='') as f:
             f.write(buf.getvalue())
         files[name] = {'enc': enc, 'rows': len(body), 'kept': len(keep), 'venue_col': head[vcol] if vcol is not None else None, 'header': head}
+        if OUT5:   # 同じファイルから、5場だけの写しも作る（同じファイルを2回読まないため）
+            k5 = body if vcol is None else [x for x in body if len(x) > vcol and any(v in x[vcol] for v in FIVE)]
+            os.makedirs(f'{OUT5}/{kind}/{ym}', exist_ok=True)
+            buf = io.StringIO(); w = csv.writer(buf); w.writerow(head); w.writerows(k5)
+            with gzip.open(f'{OUT5}/{kind}/{ym}/{safe}.gz', 'wt', encoding='utf-8', newline='') as f:
+                f.write(buf.getvalue())
+            files5[name] = {'enc': enc, 'rows': len(body), 'kept': len(k5), 'venue_col': head[vcol] if vcol is not None else None, 'header': head}
     rep['files'] = files
     rep['partial'] = partial(ym)          # まだそろっていない月は、次の日にまた読む
     rep['取った日'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(time.time() + 9 * 3600))
     json.dump(rep, open(out_dir + '/done.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    if OUT5:
+        json.dump(rep | {'files': files5}, open(f'{OUT5}/{kind}/{ym}/done.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     report[f'{kind}_{ym}'] = {k: v for k, v in rep.items() if k != 'files'} | {'n_files': len(files)}
 
 def main():

@@ -3,17 +3,25 @@
 import numpy as np, pandas as pd
 KEY = ['競馬場', '競走年月日', 'レース番号']
 EXTRA3 = ['前場c', '前走外', '外走5']
-if __name__ == '__main__':
-    H = pd.read_pickle('/tmp/chiho_feat2.pkl'); A = pd.read_pickle('/tmp/chiho_hist_all.pkl')
-    H['馬番'] = H['馬番'].astype(float); A['馬番'] = A['馬番'].astype(float)
+
+def apply3(H, A):
+    """H（B2の材料の表）の前の成績の列を、A（hist_all.build_hist の表）に入れ替え、レースの中の順位を作り直す。"""
+    H = H.copy(); A = A.drop(columns=[c for c in ('予測',) if c in A])
+    H['馬番'] = H['馬番'].astype(float); A = A.copy(); A['馬番'] = A['馬番'].astype(float)
     cols = [c for c in A.columns if c not in KEY + ['馬番']]
-    old = H[KEY + ['馬番', '着x1', '差1', '指数1', '走数', '過去3差']].copy()
     H = H.drop(columns=[c for c in cols if c in H]).merge(A, on=KEY + ['馬番'], how='left')
-    for c in ['過去3差']:
-        H[c + '順率'] = H.groupby(KEY)[c].rank(ascending=True, method='min') / H['n']
+    H['過去3差順率'] = H.groupby(KEY)['過去3差'].rank(ascending=True, method='min') / H['n']
     H['指数最高3順率'] = H.groupby(KEY)['指数最高3'].rank(ascending=False, method='min') / H['n']
     H['指数最高3差'] = H.groupby(KEY)['指数最高3'].transform('max') - H['指数最高3']
     H['指数1順率'] = H.groupby(KEY)['指数1'].rank(ascending=False, method='min') / H['n']
+    return H
+
+
+if __name__ == '__main__':
+    H = pd.read_pickle('/tmp/chiho_feat2.pkl'); A = pd.read_pickle('/tmp/chiho_hist_all.pkl')
+    H['馬番'] = H['馬番'].astype(float); A['馬番'] = A['馬番'].astype(float)
+    old = H[KEY + ['馬番', '着x1', '差1', '指数1', '走数', '過去3差']].copy(); old['馬番'] = old['馬番'].astype(float)
+    H = apply3(H, A)
     H.to_pickle('/tmp/chiho_feat3.pkl')
     # 確かめ：5場の外を走っていない馬は、B2と同じ値になるはず
     M = old.merge(H[KEY + ['馬番', '着x1', '差1', '指数1', '走数', '過去3差', '外走5', '前走外', '外の走数', '初データ']], on=KEY + ['馬番'], suffixes=('_B2', ''))
