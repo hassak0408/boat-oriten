@@ -7,6 +7,7 @@ STORE（非公開のリポジトリ）の data/race（月ごと）と data/daily
 - 月ごとのデータより後の日は、毎日の記録の最後の分（結果入り）で埋める。
 使い方：python chiho/an/pipe.py STORE [日付YYYYMMDD]   （環境変数 CHIHO_DATA が無ければ STORE/data を読む）"""
 import os, sys, glob, json, time, datetime as dt, numpy as np, pandas as pd
+from itertools import combinations
 store = sys.argv[1]
 os.environ.setdefault('CHIHO_DATA', f'{store}/data')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -135,12 +136,26 @@ TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astyp
 # 勝ちきり度＝1着の見込み÷3着内の見込み（3着内に来たとき1着になる割合の見込み。kachikiri.py で合い方を確かめた）
 TE['勝ちきり度'] = TE['p1'] / TE['p3']
 TE['向き'] = np.where(TE['勝ちきり度'] >= 0.5, '頭向き', np.where(TE['勝ちきり度'] <= 0.2, 'ヒモ向き', ''))
+# 馬連の組の見込み（pair2.py の B：1着は1着の見込み、2着は3着内の見込みで割り振る。pair_calib.json で直す）
+CAL = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pair_calib.json'), encoding='utf-8'))
+GX, GY = np.array(CAL['見込み']), np.array(CAL['直した見込み'])
+
+
+def top_pairs(g, m=3):
+    nums = g['馬番'].astype(int).values; p1 = g['p1'].values / g['p1'].sum(); p3 = g['p3'].values / g['p3'].sum()
+    if len(nums) < 3: return []
+    P = {(i, j): p1[i] * p3[j] / (1 - p3[i]) + p1[j] * p3[i] / (1 - p3[j]) for i, j in combinations(range(len(nums)), 2)}
+    z = sum(P.values())
+    return [('-'.join(str(v) for v in sorted((nums[i], nums[j]))), float(np.interp(P[(i, j)] / z, GX, GY))) for i, j in sorted(P, key=P.get, reverse=True)[:m]]
+
+
 RT = TR.drop_duplicates(KEY).set_index(KEY)
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '材料': 'B3（全部の場の前の成績あり）' if USE3 else 'B2', 'レース': []}
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
          '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。',
+         '馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で合うことを確かめた）。',
          '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。', '']
 order = {'盛岡': 0, '水沢': 1, '園田': 2, '姫路': 3, '笠松': 4}
 for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv[0][0], 9), int(kv[0][2]))):
@@ -150,11 +165,15 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     head = f"{place} {int(rno)}R {post} {info.get('距離', '')}m {len(g)}頭"
     g = g.sort_values('順位')
     hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き']) for _, r in g.iterrows()]
-    out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs))
+    tp = top_pairs(g)
+    out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
+                            馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp]))
     lines.append(head)
     for h in hs[:5]:
         tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印']) if x)
         lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{tail}".rstrip())
+    if tp:
+        lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(sum(b for _, b in tp) * 100)}%）')
     lines.append('')
 os.makedirs(f'{store}/data/picks', exist_ok=True)
 json.dump(out, open(f'{store}/data/picks/{today}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
