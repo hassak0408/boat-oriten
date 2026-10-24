@@ -1,0 +1,81 @@
+# 地方競馬の来そうな馬（毎朝の一覧）：今日の出馬表（chiho-rec が非公開のリポジトリに置く朝の分）から、
+#   馬ごとの3着内・1着の見込みと脚質の予想を出して、非公開のリポジトリ hassak0408/chiho-keiba の data/picks/日付.txt・.json に置く。
+#   毎朝9:25（日本時間。20〜40分ほど遅れることが多い）に動き出し、朝の出馬表が置かれるまで待つ（最大90分）。5場の開催が無い日は何もしない。
+#   月の途中のレース情報（今の月、10日より前は前の月も）は、ここで1日1回だけ読む（説明書の目安）。
+name: chiho-pick
+on:
+  schedule:
+    - cron: '25 0 * * *'
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付 YYYYMMDD（空なら今日）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: chiho-pick
+  cancel-in-progress: false
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pandas scikit-learn scipy
+      - name: 今日の出馬表を待つ
+        env:
+          DAY: ${{ inputs.day }}
+        run: |
+          D="${DAY:-$(TZ=Asia/Tokyo date +%Y%m%d)}"; echo "DAY=$D" >> "$GITHUB_ENV"
+          for i in $(seq 1 45); do
+            git -C store fetch -q --depth 1 origin main && git -C store reset -q --hard origin/main
+            f="store/data/daily/$D"
+            if [ -f "$f/race_horselist_am.csv.gz" ]; then echo "出馬表あり"; exit 0; fi
+            if [ -f "$f/race_meta.json" ] && grep -q '"今日のレース": 0' "$f/race_meta.json"; then echo "5場の開催なし"; echo "NONE=1" >> "$GITHUB_ENV"; exit 0; fi
+            sleep 120
+          done
+          echo "出馬表が来なかった"; exit 1
+      - name: 月の途中のレース情報を読む（1日1回）
+        if: env.NONE != '1'
+        env:
+          OUT: store/data
+          ODDS_MONTHS: ''
+        run: |
+          export RACE_MONTHS=$(python -c "
+          import time; t=time.localtime(time.time()+9*3600); y,m=t.tm_year,t.tm_mon
+          p=(y*100+m-1) if m>1 else (y-1)*100+12
+          print(f'{y}{m:02d}' + ('' if t.tm_mday>=10 else f' {p}'))")
+          echo "読む月：$RACE_MONTHS"
+          python chiho/dl.py
+      - name: 来そうな馬
+        if: env.NONE != '1'
+        run: python chiho/an/pipe.py store "$DAY"
+      - name: 保存
+        if: env.NONE != '1'
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/picks data/race data/report.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "来そうな馬 $DAY"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1

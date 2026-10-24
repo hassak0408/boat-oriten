@@ -78,15 +78,27 @@ def roll365(H, ent, cols):
     return pd.concat(out, ignore_index=True)
 
 
-def build(verbose=True):
+CANCEL_STATUS = {'出走取消', '競走除外', '競走取止め'}
+
+
+def build(verbose=True, extra=None):
+    """extra：{'R': レース一覧, 'P': 払戻, 'H': 出馬表, 'T': 今日の出馬表}（毎朝の一覧用）。
+    R・P・H は月ごとのデータの後ろに足す（同じレース・同じ馬は後のものを残す）。T は結果の無い今日の出馬表で、列「予測」が True になる。"""
     t0 = time.time()
-    R = _read('race', 'racelist').drop_duplicates(KEY)
-    P = _read('race', 'payback')
-    H = _read('race', 'horselist')
+    R = _read('race', 'racelist'); P = _read('race', 'payback'); H = _read('race', 'horselist')
+    H['予測'] = False
+    if extra:
+        if extra.get('R') is not None: R = pd.concat([R, extra['R']], ignore_index=True)
+        if extra.get('P') is not None: P = pd.concat([P, extra['P']], ignore_index=True)
+        if extra.get('H') is not None: H = pd.concat([H, extra['H'].assign(予測=False)], ignore_index=True)
+        if extra.get('T') is not None: H = pd.concat([H, extra['T'].assign(予測=True)], ignore_index=True)
+        P = P.drop_duplicates(keep='last')
+        H = H.drop_duplicates(KEY + ['馬番'], keep='last')
+    R = R.drop_duplicates(KEY, keep='last' if extra else 'first')
     if verbose: print('読み込み', len(R), len(P), len(H), round(time.time() - t0), '秒', flush=True)
     H['着'] = pd.to_numeric(H['着順'], errors='coerce')
     st = H['着差'].where(H['着'].isna(), '')
-    H = H[H['着'].notna() | st.isin(LOSE_STATUS)].copy()
+    H = H[H['着'].notna() | st.isin(LOSE_STATUS) | (H['予測'] & ~H['着差'].isin(CANCEL_STATUS))].copy()
     H['中止'] = H['着'].isna()
     H['減量'] = H['負担重量'].str.contains(r'[☆▲△◇★]', regex=True).astype(float)
     H['負担重量'] = H['負担重量'].str.replace(r'[^0-9.]', '', regex=True)
@@ -100,7 +112,7 @@ def build(verbose=True):
     T, rw, rf = payouts(P)
     H = H.merge(T, on=KEY + ['馬番'], how='left')
     H = H.merge(rw.reset_index(), on=KEY, how='left').merge(rf.reset_index(), on=KEY, how='left')
-    H = H[H['単あり'].notna()].copy()        # 不成立・取りやめのレースは外す
+    H = H[H['単あり'].notna() | H['予測']].copy()        # 不成立・取りやめのレースは外す（今日の出馬表は残す）
     H['単払'] = H['単'].fillna(0.0) / 100
     H['複払'] = np.where(H['複あり'].notna(), H['複'].fillna(0.0) / 100, np.nan)
     H['勝'] = (H['着'] == 1).astype(int); H['3着内'] = (H['着'] <= 3).astype(int)

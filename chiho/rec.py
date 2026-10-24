@@ -185,11 +185,14 @@ def main():
     sched, last_race, last_odds, last_save, finished = None, -1e9, -1e9, time.time(), False
     while time.time() - t0 < minutes * 60 and now() < end:
         if sched is None or time.time() - last_race >= RACE_EVERY:
+            first = sched is None
             s = fetch_race(day_dir, day); last_race = time.time()
             if s is not None: sched = s
             elif sched is None: last_race = time.time() - RACE_EVERY + RETRY   # 読めなければ10分後にもう一度
             if sched == {}:
                 print('今日は対象の場のレースが無い', flush=True); finished = True; break
+            if first and sched:          # 朝の出馬表はすぐ保存する（来そうな馬の一覧が使う）
+                save(store, rel, f'毎日の記録 {day}（朝の出馬表）'); last_save = time.time()
         if sched:
             if now() > max(sched.values()) + dt.timedelta(minutes=AFTER_LAST):
                 fetch_race(day_dir, day); finished = True; break     # 結果入りを読んで終わる

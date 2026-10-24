@@ -43,10 +43,22 @@ def get(url):
         return r
     return None
 
+def partial(ym):
+    """今の月、または10日より前の前の月は、まだそろっていない（毎日読み直す）"""
+    t = time.localtime(time.time() + 9 * 3600); cur = t.tm_year * 100 + t.tm_mon
+    prev = cur - 1 if t.tm_mon > 1 else (t.tm_year - 1) * 100 + 12
+    return int(ym) >= cur or (int(ym) == prev and t.tm_mday < 10)
+
+
 def handle(kind, ym, report):
     out_dir = f'{OUT}/{kind}/{ym}'
     if os.path.exists(out_dir + '/done.json'):
-        print(kind, ym, 'もう取ってある', flush=True); return
+        prev = json.load(open(out_dir + '/done.json', encoding='utf-8'))
+        if not prev.get('partial'):
+            print(kind, ym, 'もう取ってある', flush=True); return
+        today = time.strftime('%Y-%m-%d', time.localtime(time.time() + 9 * 3600))
+        if str(prev.get('取った日', '')).startswith(today):
+            print(kind, ym, '今日はもう読んだ（月ごとのファイルは1日1回まで）', flush=True); return
     url = f'{BASE}{"RaceDataDownload" if kind == "race" else "OddsDataDownload"}?type=monthly&k_year={ym[:4]}&k_month={int(ym[4:])}'
     r = get(url)
     rep = {'url': url}
@@ -73,6 +85,8 @@ def handle(kind, ym, report):
             f.write(buf.getvalue())
         files[name] = {'enc': enc, 'rows': len(body), 'kept': len(keep), 'venue_col': head[vcol] if vcol is not None else None, 'header': head}
     rep['files'] = files
+    rep['partial'] = partial(ym)          # まだそろっていない月は、次の日にまた読む
+    rep['取った日'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(time.time() + 9 * 3600))
     json.dump(rep, open(out_dir + '/done.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     report[f'{kind}_{ym}'] = {k: v for k, v in rep.items() if k != 'files'} | {'n_files': len(files)}
 
