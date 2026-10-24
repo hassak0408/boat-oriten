@@ -1,25 +1,35 @@
 # 公式サイトの直前情報（beforeinfo）を読む確かめ（q12 の通知を早める・BoatraceOpenAPI が遅れたときの代わり）
 #   mode=probe：その日の数レースのページを見本として保存する（q12/before/samples）
+#   mode=log（毎朝8:10から）：公式のページに展示が出る時刻と v1 に出る時刻をくらべる記録（q12/before/log_日付.csv）。1回は最大5時間40分、残りがあれば次の回を動かす
+#   1週間ほどたまったら（2026-11-01ごろ）止める（schedule を消す）
 name: q12-before
 on:
+  schedule:
+    - cron: '10 23 * * *'
   workflow_dispatch:
     inputs:
       mode:
-        description: 'probe'
+        description: 'probe か log'
         required: false
-        default: 'probe'
+        default: 'log'
       ymd:
-        description: '日付（YYYYMMDD）'
-        required: true
+        description: '日付（probe のとき、YYYYMMDD）'
+        required: false
+        default: ''
+      minutes:
+        description: '1回で動く時間（分、log のとき、最大340）'
+        required: false
+        default: '340'
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: q12-before
   cancel-in-progress: false
 jobs:
   before:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,7 +39,9 @@ jobs:
         with:
           node-version: '22'
       - name: 読む
-        run: node q12/before_probe.js ${{ inputs.ymd }} 8
+        id: read
+        run: |
+          if [ "${{ inputs.mode || 'log' }}" = "probe" ]; then node q12/before_probe.js ${{ inputs.ymd }} 8; else node q12/before_log.js ${{ inputs.minutes || '340' }}; fi
       - name: 保存
         if: always()
         run: |
@@ -37,10 +49,15 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add q12/before
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
-          git commit -q -m "q12：公式の直前情報の見本 ${{ inputs.ymd }}"
+          git commit -q -m "q12：直前情報 ${{ steps.read.outputs.ymd || inputs.ymd }}"
           for i in 1 2 3 4 5; do
             if git push origin HEAD:main; then exit 0; fi
             git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
             sleep 5
           done
           echo "保存できなかった"; exit 1
+      - name: 次の回を動かす
+        if: steps.read.outputs.left != '' && steps.read.outputs.left != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run q12before.yml --repo ${{ github.repository }} --ref main -f mode=log -f minutes=${{ inputs.minutes || '340' }}
