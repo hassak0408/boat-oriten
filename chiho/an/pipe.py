@@ -149,7 +149,8 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs))
     lines.append(head)
     for h in hs[:5]:
-        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{h['脚質']} {h['印']}".rstrip())
+        tail = ' '.join(x for x in (h['脚質'], h['印']) if x)
+        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{tail}".rstrip())
     lines.append('')
 os.makedirs(f'{store}/data/picks', exist_ok=True)
 json.dump(out, open(f'{store}/data/picks/{today}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
