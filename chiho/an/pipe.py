@@ -132,11 +132,15 @@ TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
+# 勝ちきり度＝1着の見込み÷3着内の見込み（3着内に来たとき1着になる割合の見込み。kachikiri.py で合い方を確かめた）
+TE['勝ちきり度'] = TE['p1'] / TE['p3']
+TE['向き'] = np.where(TE['勝ちきり度'] >= 0.5, '頭向き', np.where(TE['勝ちきり度'] <= 0.2, 'ヒモ向き', ''))
 RT = TR.drop_duplicates(KEY).set_index(KEY)
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '材料': 'B3（全部の場の前の成績あり）' if USE3 else 'B2', 'レース': []}
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
+         '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。',
          '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。', '']
 order = {'盛岡': 0, '水沢': 1, '園田': 2, '姫路': 3, '笠松': 4}
 for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv[0][0], 9), int(kv[0][2]))):
@@ -145,11 +149,11 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     post = f'{hhmm[:2]}:{hhmm[2:]}' if hhmm.strip('0') else ''
     head = f"{place} {int(rno)}R {post} {info.get('距離', '')}m {len(g)}頭"
     g = g.sort_values('順位')
-    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印']) for _, r in g.iterrows()]
+    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き']) for _, r in g.iterrows()]
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs))
     lines.append(head)
     for h in hs[:5]:
-        tail = ' '.join(x for x in (h['脚質'], h['印']) if x)
+        tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印']) if x)
         lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{tail}".rstrip())
     lines.append('')
 os.makedirs(f'{store}/data/picks', exist_ok=True)
