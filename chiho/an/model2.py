@@ -1,13 +1,14 @@
 """1着の見込みのモデルのくらべ（検証計画「市場より劣る所の洗い出しと改善」）。人気・オッズは使わない。Y年はY−1年まで（2017年〜）で作る。
-使い方：python model2.py 名前   名前＝B0（前の材料・前の作り方）／B1（前の材料・木を大きく）／B2（足した材料・木を大きく）"""
+使い方：python model2.py 名前   名前＝B0（前の材料・前の作り方）／B1（前の材料・木を大きく）／B2（足した材料・木を大きく）／B3（B2＋全部の場の前の成績）"""
 import sys, time, numpy as np, pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from feat import FEATS
 from feat2cols import NEW
 KEY = ['競馬場', '競走年月日', 'レース番号']
 name = sys.argv[1]
-H = pd.read_pickle('/tmp/chiho_feat2.pkl')
-FE = FEATS + (NEW if name in ('B2', 'B3') else [])
+from feat3 import EXTRA3
+H = pd.read_pickle('/tmp/chiho_feat3.pkl' if name == 'B3' else '/tmp/chiho_feat2.pkl')
+FE = FEATS + (NEW if name in ('B2', 'B3') else []) + (EXTRA3 if name == 'B3' else [])
 cat = [FE.index(c) for c in ['場c', '馬場c', '天候c', '性c']]
 P = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500) if name == 'B0' else \
     dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)

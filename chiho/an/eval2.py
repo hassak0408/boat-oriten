@@ -7,6 +7,11 @@ from load import odds as load_odds
 KEY = ['競馬場', '競走年月日', 'レース番号']
 names = sys.argv[1:] or ['B0', 'B1', 'B2']
 H = pd.read_pickle('/tmp/chiho_feat2.pkl')[KEY + ['馬番', '勝', '人気', 'n', '年', '走数', '外を挟む', '間隔', '齢', 'クラス差', '馬体重増減']]
+try:
+    H3 = pd.read_pickle('/tmp/chiho_feat3.pkl')[KEY + ['馬番', '初データ', '前走外']].rename(columns={'初データ': '全部で初めて'})
+    H = H.merge(H3, on=KEY + ['馬番'], how='left')
+except FileNotFoundError:
+    H['全部で初めて'] = np.nan; H['前走外'] = np.nan
 qtab = H[(H['年'] <= 2020) & H['人気'].notna()].groupby(['n', '人気'])['勝'].mean()
 D = H[(H['年'] >= 2021) & H['人気'].notna()].copy()
 D['市場'] = [qtab.get((n, r), np.nan) for n, r in zip(D['n'], D['人気'])]
@@ -48,7 +53,9 @@ print(R.to_string(index=False))
 
 # 種類ごとの当て分け（2021〜2025年）
 A = D[D['年'] <= 2025].copy()
-segs = {'このデータで初めて': A['走数'] == 0, '前走とのあいだに外で走った': A['外を挟む'] > 0, '61日以上の休み明け': A['間隔'] > 60,
+segs = {'このデータで初めて': A['走数'] == 0, '　そのうち全部の場でも初めて': (A['走数'] == 0) & (A['全部で初めて'] == 1),
+        '　そのうちほかの地方の場から来た': (A['走数'] == 0) & (A['全部で初めて'] == 0), '前走が5場の外': A['前走外'] == 1,
+        '前走とのあいだに外で走った': A['外を挟む'] > 0, '61日以上の休み明け': A['間隔'] > 60,
         '2歳': A['齢'] == 2, '3歳': A['齢'] == 3, 'クラスが下がる': A['クラス差'] > 0.5, '馬体重±10以上': A['馬体重増減'].abs() >= 10, 'そのほか全部': None}
 rows = []
 for s, m in segs.items():
