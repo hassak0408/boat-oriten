@@ -1,0 +1,46 @@
+# 公式サイトの直前情報（beforeinfo）を読む確かめ（q12 の通知を早める・BoatraceOpenAPI が遅れたときの代わり）
+#   mode=probe：その日の数レースのページを見本として保存する（q12/before/samples）
+name: q12-before
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'probe'
+        required: false
+        default: 'probe'
+      ymd:
+        description: '日付（YYYYMMDD）'
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: q12-before
+  cancel-in-progress: false
+jobs:
+  before:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 読む
+        run: node q12/before_probe.js ${{ inputs.ymd }} 8
+      - name: 保存
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add q12/before
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "q12：公式の直前情報の見本 ${{ inputs.ymd }}"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
