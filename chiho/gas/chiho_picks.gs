@@ -4,7 +4,7 @@
  *
  * 使い方
  * 1. スクリプトのプロパティに GITHUB_TOKEN を入れる（chiho-keiba を読むだけのトークン。ここには書かない）。
- * 2. setup() を一度だけ実行する（10分ごとに check() が動くようになる）。
+ * 2. setup() を一度だけ実行する（10分ごとに check() が動くようになる）。試しに送るときは sendLatest() を実行する。
  * 3. 9:30〜13:00 のあいだ、今日の一覧ができていれば1回だけ送る。5場の開催が無い日は送らない。
  */
 const REPO = 'hassak0408/chiho-keiba';
@@ -39,10 +39,18 @@ function readFile_(path) {
   return res.getContentText('UTF-8');
 }
 
-/** 試し：今日（なければ指定した日）の一覧をすぐ送る。例：sendNow('20261025') */
-function sendNow(day) {
-  day = day || Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
-  const text = readFile_('data/picks/' + day + '.txt');
-  if (!text) { Logger.log('一覧がまだ無い：' + day); return; }
+/** 試し：いちばん新しい一覧をすぐ送る（設定を確かめるとき、これを選んで「実行」） */
+function sendLatest() {
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) throw new Error('スクリプトのプロパティに GITHUB_TOKEN がありません');
+  const res = UrlFetchApp.fetch('https://api.github.com/repos/' + REPO + '/contents/data/picks', {
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) { Logger.log('読めない：' + res.getResponseCode() + '（トークンの権限を確かめる）'); return; }
+  const names = JSON.parse(res.getContentText()).map(f => f.name).filter(n => /^\d{8}\.txt$/.test(n)).sort();
+  if (!names.length) { Logger.log('一覧がまだ1つも無い'); return; }
+  const text = readFile_('data/picks/' + names[names.length - 1]);
   GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), text.split('\n')[0], text);
+  Logger.log('送った：' + names[names.length - 1]);
 }
