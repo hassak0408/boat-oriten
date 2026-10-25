@@ -3,7 +3,7 @@
 2) レースごとの出馬表（pw01dde…）：馬主・生産者・調教師の所属・父・母・母の父
 オッズは読まない（予測に使わないため）。読み込みは10秒に1回まで。
 使い方：python chiho/jra/card.py STORE [日付YYYYMMDD]   → 開催が無い日は何も置かない"""
-import os, re, sys, html, time, datetime as dt, requests, pandas as pd
+import os, re, sys, html, time, unicodedata, datetime as dt, requests, pandas as pd
 
 BASE = 'https://www.jra.go.jp'
 UA = 'Mozilla/5.0 (personal research; 1 request / 10s)'
@@ -51,9 +51,12 @@ def parse_des(page, ymd):
         name = cell(title, 'race_name')
         grade = ''
         for g in re.findall(r'alt="([^"]*)"', title):
-            g2 = g.replace('Ｇ', 'G').replace('Ⅰ', 'I').replace('Ⅱ', 'II').replace('Ⅲ', 'III')
+            g2 = unicodedata.normalize('NFKC', html.unescape(g)).replace(' ', '')     # 「G&#8544;」→「GI」
+            g2 = {'G1': 'GI', 'G2': 'GII', 'G3': 'GIII'}.get(g2, g2)
             if re.fullmatch(r'G(I{1,3})', g2): grade = g2
-            elif 'リステッド' in g or g2 == 'L': grade = 'L'
+            elif 'リステッド' in g2 or g2 == 'L': grade = 'L'
+        fm = re.search(r'icon_grade_\w*?_(g1|g2|g3|l)\.png', title)
+        if fm and not grade: grade = {'g1': 'GI', 'g2': 'GII', 'g3': 'GIII', 'l': 'L'}[fm.group(1)]
         cls = cell(title, 'class'); rule = cell(title, 'rule')
         cm = re.search(r'([\d,]+)\s*メートル.*?（([^）]*)）', text(re.search(r'<div class="cell course">(.*?)</div>', title, re.S).group(1)) if 'cell course' in title else '')
         dist = int(cm.group(1).replace(',', '')) if cm else None
@@ -63,7 +66,7 @@ def parse_des(page, ymd):
         prize = int(pm.group(1).replace(',', '')) * 10000 if pm else None
         race = dict(年月日=ymd, 場=place, 回=kai, 日目=nichi, R=rno, レース名=name, 芝ダ=surf, コース=f'({course})', 距離=dist,
                     条件=CLS.get(cls, 'オープン' if cls else ''), 年齢=cell(title, 'category'), 重量=cell(title, 'weight'),
-                    牝限=int('牝' in rule), 格=grade, 発走=(f'{int(tm.group(1)):02d}{int(tm.group(2)):02d}' if tm else ''), 賞金=prize)
+                    牝限=int('牝' in rule and '牡' not in rule), 格=grade, 発走=(f'{int(tm.group(1)):02d}{int(tm.group(2)):02d}' if tm else ''), 賞金=prize)
         rows = re.findall(r'<tr>(.*?)</tr>', b[b.find('<tbody'):], re.S)
         hs = []
         for r in rows:
