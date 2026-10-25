@@ -1,0 +1,51 @@
+# 中央競馬の下調べ（1回だけ手で動かす）：JRA公式サイトの成績表のPDFの一覧と、いくつかのPDFを、非公開のリポジトリ hassak0408/chiho-keiba の jra/ に置く。
+name: jra-sample
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: '年（空白区切り）'
+        required: false
+        default: '2016 2020 2024 2026'
+permissions:
+  contents: read
+concurrency:
+  group: chiho-store
+  cancel-in-progress: false
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 下調べ
+        env:
+          YEARS: ${{ inputs.years }}
+        run: python chiho/jra/sample.py store $YEARS
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jra
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬の下調べ（成績表のPDFの一覧と見本）"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 20 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          exit 1
