@@ -147,19 +147,24 @@ def fetch_odds(day_dir, sched, force=False):
     return True
 
 
+GIT_ID = ['-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com']
+
+
 def save(store, rel, msg):
-    def run(*a): return subprocess.run(['git', '-C', store] + list(a), capture_output=True, text=True)
+    # 名前の設定は commit だけでなく rebase にも要る（2026-10-25：無かったため、ほかの仕組みが先に保存すると rebase が失敗し、10時すぎから保存できなかった）
+    def run(*a): return subprocess.run(['git', '-C', store] + GIT_ID + list(a), capture_output=True, text=True)
     if not os.path.isdir(f'{store}/{rel}'): return True
     run('add', rel)
     if run('diff', '--cached', '--quiet').returncode == 0: return True
-    run('-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-q', '-m', msg)
+    run('commit', '-q', '-m', msg)
     for _ in range(5):
         r = run('push', '-q', 'origin', 'HEAD:main')
         if r.returncode == 0:
             print(now().strftime('%H:%M'), '保存した', flush=True); return True
         print('push できなかった', r.stderr[-300:], flush=True)
-        run('fetch', '-q', '--depth', '5', 'origin', 'main'); r = run('rebase', '-q', 'origin/main')
-        if r.returncode != 0: run('rebase', '--abort')
+        run('fetch', '-q', '--depth', '20', 'origin', 'main'); r = run('rebase', '-q', 'origin/main')
+        if r.returncode != 0:
+            print('rebase できなかった', r.stderr[-300:], flush=True); run('rebase', '--abort')
         time.sleep(5)
     print('保存できなかった', flush=True); return False
 
