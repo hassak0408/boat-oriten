@@ -10,6 +10,20 @@ SEX = {'牡': '牡', '牝': '牝', 'セ': 'セ'}
 WEATHER = ('小雨', '小雪', '晴', '曇', '雨', '雪')
 GOING = ('稍重', '不良', '良', '重')
 STATUS = ('競走中止', '中止', '出走取消', '取消', '競走除外', '除外', '失格')
+MARK = r'[▲△☆◇★]'      # 騎手の減量の印（名前の前にも後ろにも付く）
+CLS = [('新馬', '新馬'), ('未出走', '新馬'), ('未勝利', '未勝利'), ('1勝クラス', '1勝'), ('500万円以下', '1勝'), ('2勝クラス', '2勝'), ('1000万円以下', '2勝'),
+       ('3勝クラス', '3勝'), ('1600万円以下', '3勝'), ('オープン', 'オープン')]
+
+
+def cond_of(h, grade):
+    """見出しから、クラス・年齢・重量の種類・牝馬限定を読む"""
+    t = h.replace('除未出走馬および未勝利馬', '★').replace('、', ',')
+    t = t[t.find('第競走') + 3:] if '第競走' in t else t      # 見出しの「第○競走」から後ろ（ページの上の欄の名前「増減」などを除く）
+    cls = 'オープン' if grade else next((v for k, v in CLS if k in t), 'オープン')      # クラスの書いていないレースはオープン
+    am = re.search(r'(\d歳(?:以上)?)', t)
+    wt = 'ハンデ' if 'ハンデ' in t else '別定' if ('別定' in t or '増' in t) else '馬齢' if '馬齢' in t else '定量' if '負担重量' in t else ''   # 賞金や勝ち数で重くなるのは別定
+    fem = bool(re.search(r'(^|[;,)〓\d])牝[;,]', t)) or ('牝馬限定' in t)
+    return cls, (am.group(1) if am else ''), wt, int(fem)
 # 欄の境目（枠番の数字の左端からの距離）
 COLS = [('枠', -6, 5), ('馬番', 5, 22), ('馬名', 22, 88), ('性', 88, 93), ('齢', 93, 100), ('毛色', 100, 110), ('斤量', 110, 125),
         ('騎手', 125, 171), ('馬主', 171, 213), ('調教師', 213, 241), ('産地', 241, 253), ('生産', 253, 284), ('馬装具', 284, 287),
@@ -54,18 +68,20 @@ def parse_block(chars, meta=None):
     year, kai, place, nichi = meta['年'], meta['回'], meta['場'], meta['日目']
     mon = mon[5:] if len(mon) >= 6 else mon[-2:] if len(mon) > 2 else mon     # 頭の5けたは通し番号（例 12061＋5月）
     if not 1 <= int(mon) <= 12: mon = mon[-1:]
-    race = dict(年月日=f'{int(year):04d}{int(mon):02d}{int(day):02d}', 場=place, 回=int(kai), 日目=int(nichi), R=None, 天候=wx or '', 馬場=gd or '')
+    race = dict(年月日=f'{int(year):04d}{int(mon):02d}{int(day):02d}', 場=place, 回=int(kai), 日目=int(nichi), R=None, レース名='', 天候=wx or '', 馬場=gd or '')
     # レース番号：見出しの1つ上の行の先頭の数字（大きな字）
     hl = next((i for i, (t, cs) in enumerate(L) if re.search(r'月\d+日', z2h(''.join(ctext(c['text']) for c in cs)))), None)
     if hl is not None:
         for t, cs in L[max(0, hl - 3):hl][::-1]:
-            mm = re.match(r'^(\d{1,2})(?!\d)', z2h(''.join(ctext(c['text']) for c in cs)))
-            if mm: race['R'] = int(mm.group(1)); break
-    sm = re.search(r'\((芝|ダート|障害)[^)]*\)', head); race['芝ダ'] = sm.group(1) if sm else ''
+            s0 = z2h(''.join(ctext(c['text']) for c in cs))
+            mm = re.match(r'^(\d{1,2})(?!\d)', s0)
+            if mm: race['R'] = int(mm.group(1)); race['レース名'] = s0[mm.end():].replace('〓', '').replace(' ', ''); break
+    sm = re.search(r'\((芝|ダート|障害)[^)]*\)', head); race['芝ダ'] = '障害' if '競走障害' in head else sm.group(1) if sm else ''
     race['コース'] = sm.group(0) if sm else ''
-    cm = re.search(r'(\d歳(?:以上)?)(新馬|未出走|未勝利|1勝クラス|2勝クラス|3勝クラス|オープン)', head)
-    race['条件'] = (cm.group(1) + cm.group(2)) if cm else ''
     gm = re.search(r'\((G[I]{1,3}|GⅠ|GⅡ|GⅢ|L|JpnI+|J・G[I]+)\)', head); race['格'] = gm.group(1) if gm else ''
+    # 見出し（レース名から賞金の行まで）をそのまま残す（あとで条件を読み直せるように）
+    k = head.find('本賞'); race['見出し'] = head[:k + 80] if k > 0 else head[:300]
+    race['条件'], race['年齢'], race['重量'], race['牝限'] = cond_of(race['見出し'], race['格'])
     hd = head[m.end():m.end() + 120]
     ds = [int(x.replace(',', '')) for x in re.findall(r'(?<![\d(])(\d,\d{3}|\d{4})(?![年\d])', hd)]
     ds = [d for d in ds if 1000 <= d <= 4250 and d % 10 == 0]
@@ -115,15 +131,16 @@ def parse_block(chars, meta=None):
         try: wk = int(h['枠'][:1]); ub = int(re.sub(r'\D', '', h['馬番']) or h['枠'][1:])
         except ValueError: continue
         w = [x for x in h.get('斤量s', []) if 40 <= x <= 70]
-        tm = re.search(r'(\d):(\d{2})\.(\d)', h['タイム'])
+        tm = re.search(r'(?:(\d):)?(\d{2})\.(\d)', h['タイム'])      # 1分を切るときは分が無い
         od = re.search(r'(\d+\.\d)', h['単勝'])
         bw = re.search(r'(\d{3})', h['馬体重']); dw = re.search(r'([+\-±−―]?)(\d+)', h['増減'])
         sign = -1 if dw and dw.group(1) in ('-', '−') else 1
         out.append(dict(行=k, 枠=wk, 馬番=ub, 馬名=h['馬名'].replace('〓', ''), 性=h['性'][:1], 齢=int(h['齢']) if h['齢'].isdigit() else None,
-                        毛色=h['毛色'], 斤量=min(w) if w else None, 騎手=h['騎手'], 減量=(h['騎手'][:1] if h['騎手'][:1] in '▲△☆◇★' else ''),
-                        馬主=h['馬主'], 調教師=h['調教師'], 産地=h['産地'], 生産=h['生産'], 馬体重=int(bw.group(1)) if bw else None,
+                        毛色=h['毛色'], 斤量=min(w) if w else None, 騎手=re.sub(MARK, '', h['騎手']), 減量=''.join(re.findall(MARK, h['騎手']))[:1],
+                        馬主=h['馬主'], 調教師=h['調教師'], 産地=h['産地'], 生産=re.sub(r'B$', '', h['生産']),
+                        ブリンカー=int(h['生産'].endswith('B') or 'B' in h['馬装具']), 馬体重=int(bw.group(1)) if bw else None,
                         増減=(sign * int(dw.group(2)) if dw and dw.group(1) != '―' else None),
-                        タイム=(int(tm.group(1)) * 60 + int(tm.group(2)) + int(tm.group(3)) / 10) if tm else None,
+                        タイム=(int(tm.group(1) or 0) * 60 + int(tm.group(2)) + int(tm.group(3)) / 10) if tm else None,
                         着差=h['着差'], 単勝オッズ=float(od.group(1)) if od else None, 状態=h['状態']))
     # タイムが「〃」の馬は、1つ上の馬と同じタイム
     for k, o in enumerate(out):
