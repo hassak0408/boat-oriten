@@ -1,0 +1,50 @@
+# 中央競馬の下調べ（手で動かす）：JRA公式サイトのページをいくつか読み、そのまま非公開のリポジトリ hassak0408/chiho-keiba の jra/probe/ に置く。
+name: jra-probe
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: '手順（空白区切り。chiho/jra/probe.py の説明のとおり）'
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: jra-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 下調べ
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: python chiho/jra/probe.py store $STEPS
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jra
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬の下調べ（ページの見本）"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 20 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          exit 1
