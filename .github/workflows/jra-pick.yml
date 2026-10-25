@@ -1,0 +1,63 @@
+# 中央競馬の来そうな馬（開催日の朝の一覧）：JRA公式サイトの今日の出馬表を読み、馬ごとの3着内・1着の見込みと脚質の予想を出して、
+#   非公開のリポジトリ hassak0408/chiho-keiba の jra/card/日付.csv.gz と data/picks/日付_jra.txt・.json に置く。
+#   毎朝7:20（日本時間。20〜40分ほど遅れることが多い）に動く。中央の開催が無い日は、出馬表の入口のページを1回読むだけ。
+#   成績（前の成績）は jra-dl が置いた表（jra/data）。オッズ・馬体重は使わない。
+name: jra-pick
+on:
+  schedule:
+    - cron: '20 22 * * *'
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付 YYYYMMDD（空なら今日）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: jra-pick
+  cancel-in-progress: false
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pandas scikit-learn scipy
+      - name: 今日の出馬表
+        env:
+          DAY: ${{ inputs.day }}
+        run: |
+          D="${DAY:-$(TZ=Asia/Tokyo date +%Y%m%d)}"; echo "DAY=$D" >> "$GITHUB_ENV"
+          python chiho/jra/card.py store "$D"
+          if [ ! -f "store/jra/card/$D.csv.gz" ]; then echo "中央の開催なし"; echo "NONE=1" >> "$GITHUB_ENV"; fi
+      - name: 来そうな馬
+        if: env.NONE != '1'
+        run: python chiho/jra/jpipe.py store "$DAY"
+      - name: 保存
+        if: env.NONE != '1'
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jra/card data/picks 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬の来そうな馬 $DAY"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
