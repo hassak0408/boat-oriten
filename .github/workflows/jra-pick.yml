@@ -12,6 +12,10 @@ on:
         description: '日付 YYYYMMDD（空なら今日）'
         required: false
         default: ''
+      card_only:
+        description: '1なら出馬表を読んで置くだけ（試し）'
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -44,7 +48,7 @@ jobs:
           python chiho/jra/card.py store "$D"
           if [ ! -f "store/jra/card/$D.csv.gz" ]; then echo "中央の開催なし"; echo "NONE=1" >> "$GITHUB_ENV"; fi
       - name: 来そうな馬
-        if: env.NONE != '1'
+        if: env.NONE != '1' && inputs.card_only != '1'
         run: python chiho/jra/jpipe.py store "$DAY"
       - name: 保存
         if: env.NONE != '1'
