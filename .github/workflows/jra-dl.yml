@@ -1,0 +1,52 @@
+# 中央競馬の成績表（JRA公式サイトのPDF）を落として読み、レースと馬の表にして、非公開のリポジトリ hassak0408/chiho-keiba の jra/data/年/ に置く。
+#   PDFそのものは残さない。読み込みは10秒に1回まで。1回は最大5時間20分で、残りがあれば自分で次の回を動かす。
+#   毎週月曜6:10（日本時間）に、今年の分の新しい日を足す。
+name: jra-dl
+on:
+  schedule:
+    - cron: '10 21 * * 0'
+  workflow_dispatch:
+    inputs:
+      years:
+        description: '年（空白区切り。空なら今年）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: jra-dl
+  cancel-in-progress: false
+jobs:
+  dl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pdfplumber
+      - name: 落として読む
+        id: dl
+        env:
+          YEARS: ${{ inputs.years }}
+          LIMIT_MIN: '320'
+        run: |
+          Y="${YEARS:-$(TZ=Asia/Tokyo date +%Y)}"
+          python chiho/jra/dl.py store $Y
+      - name: 次の回を動かす
+        if: steps.dl.outputs.left != '' && steps.dl.outputs.left != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          YEARS: ${{ inputs.years }}
+        run: gh workflow run jra-dl.yml --repo "$GITHUB_REPOSITORY" --ref main -f years="$YEARS"
