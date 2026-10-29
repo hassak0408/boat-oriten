@@ -244,6 +244,8 @@ function topU(R, end, CADO, PV) {   // summary.md のいちばん上：いまの
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
     ...(CADO ? [`4号艇のきまり（版12：4号艇が展示で4コースに入り、4コースを得意なら買わない）：このきまりに当てはまる分は、10月1日からの全部で ${SC.length}レース・${sumU(SC).n}点・的中${sum(SC).hit}・回収${sumU(SC).n ? (sumU(SC).ret / sumU(SC).n * 100).toFixed(1) + '%' : '-'}（勝負2点で数える。確かめでは99%前後で、外してももうけはほぼ同じ・点数が15%減る）` +
       (CADO_FROM ? `。${CADO_FROM}から、この分は買った分に入れていない` : '。版12を貼るまでは、この分も買った分に入れている')] : []),
+    ...(R.W1 ? (() => { const X = R.W1.filter(r => ok(r) && r['印'] === '★★'), t1 = sum(X), last = X.filter(r => r['日付'] >= addDays(end, -6));
+      return [`単勝1（記録だけ。1号艇の単勝を1点100円、★★・締切10:00〜20:50。2026-10-30 に見つけた）：10月1日から ${t1.n}点・的中${t1.hit}・回収${roi(t1)}・${yen(t1.ret - t1.n)}（直近7日 ${last.length}点・的中${sum(last).hit}）。確かめでは112%前後（1日2.5点・的中54%）。通知に入れるときは BETS に '単勝1'`]; })() : []),
     ...(PV ? (() => { const PF = '2026-10-25', a = [...Upv.values()].filter(r => r['日付'] >= PF && PV.has(r['日付'] + '|' + r['場'] + '|' + r['R'])), b = [...Ufin.values()].filter(r => r['日付'] >= PF && PV.has(r['日付'] + '|' + r['場'] + '|' + r['R']));
       const both = a.filter(r => Ufin.has(r['日付'] + '|' + r['場'] + '|' + r['R'])).length, ua = sumU(a), ub = sumU(b);
       return [`気象のずれの見張り（${PF}から、公式の preview の記録があるレース）：公式の preview（締切16分前ごろの気象＝版12の通知と同じ）で選ぶと ${a.length}レース・${ua.n}点・的中${sum(a).hit}・回収${ua.n ? (ua.ret / ua.n * 100).toFixed(1) + '%' : '-'}、確定の preview（確かめと同じ）で選ぶと ${b.length}レース・${ub.n}点・的中${sum(b).hit}・回収${ub.n ? (ub.ret / ub.n * 100).toFixed(1) + '%' : '-'}（同じレース ${both}）。確かめにずれを足すと回収は2ポイントほど下がる見込み（第16章「版12」）`]; })() : []),
@@ -304,7 +306,7 @@ function topU(R, end, CADO, PV) {   // summary.md のいちばん上：いまの
     }
     await fillOdds(c, end);
     const all = readAll(c.csv);
-    if (c.key === '12') ROWS.A = all; if (c.key === '12c10') ROWS.B = all; if (c.key === '12c6') ROWS.C = all;
+    if (c.key === '12') ROWS.A = all; if (c.key === '12c10') ROWS.B = all; if (c.key === '12c6') ROWS.C = all; if (c.key === 'w1') ROWS.W1 = all;
     parts.push(...section(c, M, all, PM));
     console.log(c.label, '足した行', added);
   }
