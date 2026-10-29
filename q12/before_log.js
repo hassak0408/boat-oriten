@@ -35,7 +35,8 @@ function save(msg) {
   if (!fs.existsSync(LOG)) fs.writeFileSync(LOG, 'date,v,rno,closed_at,official_seen,official_mins,v1_seen,v1_mins,first_read\n');
   const rec = {};   // key → {official, offMins, v1, v1Mins, first}
   let races = [], lastSched = 0, firstSched = true, lastSave = Date.now();
-  const lastPoll = {};
+  const POLL = 120e3;   // 公式を読む間あい（10/25〜29は1分。版12の判定のあとは2分）
+const lastPoll = {};
   const flush = () => {   // 両方そろった（または締切を過ぎた）レースを書き出す
     const lines = [];
     for (const r of races) {
@@ -62,8 +63,8 @@ function save(msg) {
       lastSched = t;
     }
     if (races.every(r => r.close < t)) { console.log('今日のレースはすべて締め切られた'); flush(); break; }
-    // 締切25〜5分前で、公式でまだ見つけていないレースを、1分ごとに読む（締切の早い順）
-    const due = races.filter(r => { const k = `${r.v}-${r.rno}`; return !(rec[k] || {}).official && t >= r.close - 25 * 60e3 && t <= r.close - 5 * 60e3 && (!lastPoll[k] || t - lastPoll[k] >= 60e3); }).sort((a, b) => a.close - b.close);
+    // 締切25〜5分前で、公式でまだ見つけていないレースを、POLL ごとに読む（締切の早い順。2026-10-30から2分ごと：時刻のくらべは済んだので、版12の通知が使う preview を残すのが目当て）
+    const due = races.filter(r => { const k = `${r.v}-${r.rno}`; return !(rec[k] || {}).official && t >= r.close - 25 * 60e3 && t <= r.close - 5 * 60e3 && (!lastPoll[k] || t - lastPoll[k] >= POLL); }).sort((a, b) => a.close - b.close);
     for (const r of due) {
       const k = `${r.v}-${r.rno}`; lastPoll[k] = Date.now();
       const html = await get(`${BR}?rno=${r.rno}&jcd=${pad(r.v)}&hd=${ymd}`, false); if (!html) continue;
