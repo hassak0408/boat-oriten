@@ -165,7 +165,9 @@ function section(c, M, rows, PM) {
   out.push('');
   return out;
 }
-function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買い方（全部＝安定型B＋配当型A＋的中型C）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行。CADO＝4号艇のきまりの判定（日付|場|R → 行）
+function topU(R, end, CADO, PV) {   // summary.md のいちばん上：いまの買い方（全部＝安定型B＋配当型A＋的中型C）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行。CADO＝4号艇のきまりの判定、PV＝公式の preview での印（どちらも 日付|場|R → 行）
+  // 版12を貼った日（はっさくさんに聞いて入れる）。この日から ①4号艇がカド得意の分を買った分から外す ②印を、通知と同じ公式の preview（展示を見つけたとき）で出したものに替える（その記録が無いレースは v1 の確定した preview のまま）
+  const CADO_FROM = process.env.Q12_CADO_FROM || '';
   const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
   const ok = r => r['結果'] !== '中止' && r['結果'] !== '' && win(r);
   const pick = { B: r => r['印'] === '★★' && Number(r['的中見込み']) >= 0.25, A: r => r['印'] === '★★', C: r => r['印'] === '★★' };
@@ -177,8 +179,18 @@ function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買�
     const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '', 強さ: 0 });
     u['選ばれ方'] += (u['選ばれ方'] ? '・' : '') + TAG[k]; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝お得度（選ばれた形の線との比の一番高いもの）
   }));
+  if (CADO_FROM && PV) {   // 版12から：公式の preview の印があるレースは、その印で選び直す
+    for (const key of [...U.keys()]) if (U.get(key)['日付'] >= CADO_FROM && PV.has(key)) U.delete(key);
+    for (const [key, p] of PV) {
+      if (p['日付'] < CADO_FROM || !ok(p)) continue;
+      const tags = [], st = [];
+      if (p['安定'] === '★★' && Number(p['来る確率']) >= 0.25) { tags.push('安定'); st.push(Number(p['安定比'])); }
+      if (p['配当'] === '★★') { tags.push('配当'); st.push(Number(p['配当比'])); }
+      if (p['的中'] === '★★') { tags.push('的中'); st.push(Number(p['的中比'])); }
+      if (tags.length) U.set(key, { '日付': p['日付'], '場': p['場'], '場名': p['場名'], 'R': p['R'], '締切': p['締切'], '結果': p['結果'], '戻り': p['戻り'], '的中見込み': p['来る確率'], '選ばれ方': tags.join('・'), '強さ': Math.max(...st), '公式': 1 });
+    }
+  }
   // 4号艇のきまり（版12）：4号艇がカド得意なら買わない。CADO_FROM（版12を貼った日）から、その分を「買った分」から外す。それまでは参考に数えるだけ
-  const CADO_FROM = '';
   const isCado = r => { const c = (CADO || new Map()).get(r['日付'] + '|' + r['場'] + '|' + r['R']); return !!(c && c['得意'] === '1'); };
   const S0 = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
   const S = S0.filter(r => !(CADO_FROM && r['日付'] >= CADO_FROM && isCado(r)));
@@ -228,6 +240,7 @@ function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買�
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
     ...(CADO ? [`4号艇のきまり（版12：4号艇が展示で4コースに入り、4コースを得意なら買わない）：このきまりに当てはまる分は、10月1日からの全部で ${SC.length}レース・${sumU(SC).n}点・的中${sum(SC).hit}・回収${sumU(SC).n ? (sumU(SC).ret / sumU(SC).n * 100).toFixed(1) + '%' : '-'}（勝負2点で数える。確かめでは99%前後で、外してももうけはほぼ同じ・点数が15%減る）` +
       (CADO_FROM ? `。${CADO_FROM}から、この分は買った分に入れていない` : '。版12を貼るまでは、この分も買った分に入れている')] : []),
+    ...(CADO_FROM && PV ? [`版12（${CADO_FROM}から）は、通知と同じく公式の直前情報の preview（展示を見つけたとき・締切16分前ごろの気象）で印を出して数えている（その記録が無いレースは v1 の確定した preview）。${CADO_FROM}からの買った分のうち公式の preview で選んだもの ${S.filter(r => r['日付'] >= CADO_FROM && r['公式']).length}レース`] : []),
     `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う・7〜9月は1点）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
       `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
     '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点（7〜9月は1点）にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
@@ -288,6 +301,36 @@ function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買�
     parts.push(...section(c, M, all, PM));
     console.log(c.label, '足した行', added);
   }
+  // 版12の通知と同じ判断：公式の直前情報の preview（q12/before/pv_日付.jsonl、展示を見つけたとき）で3つの型の印を出す → q12/record_pv_年.csv（2026-10-25から）
+  let PV = null;
+  try {
+    const rd = f => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8'));
+    const MA = rd('model_2026A.json'), MB = rd('model_2026A_c10.json'), MC = rd('model_2026A_c6.json'), PMh = rd('model_2026A_hit.json');
+    const c12 = CFG.find(c => c.key === '12');
+    const PH = ['日付', '場', '場名', 'R', '締切', '配当', '配当比', '安定', '安定比', '的中', '的中比', '来る確率', '結果', '戻り'];
+    const done = new Set(readAll('record_pv').map(r => r['日付']));
+    const mk = s => s.tier === 2 ? '★★' : s.tier === 1 ? '★' : (s.absent12 ? '欠場' : '');
+    for (let d = process.env.Q12_PV_START || '2026-10-25'; d <= end; d = addDays(d, 1)) {   // Q12_PV_START は確かめ用
+      if (done.has(d)) continue;
+      const f = path.join(DIR, 'before', `pv_${d.replace(/-/g, '')}.jsonl`); if (!fs.existsSync(f)) continue;
+      const J = await loadDay(d); if (!J) continue;
+      const S = (J.programs || {}).stadiums || {}, rows = [];
+      for (const line of fs.readFileSync(f, 'utf8').split('\n').filter(x => x)) {
+        let o; try { o = JSON.parse(line); } catch (e) { continue; }
+        const r = ((S[String(o.v)] || {}).races || {})[String(o.rno)]; if (!r) continue;
+        const ro = Object.assign({}, r, { preview: o.preview });
+        const a = Q12.score(MA, ro, null), b = Q12.score(MB, ro, PMh), c = Q12.score(MC, ro, null); if (!a || !b || !c) continue;
+        const oc = outcome(r, c12) || ['中止', 0];
+        rows.push([d, r.stadium_number, VN[r.stadium_number] || '', r.race_number, String(r.closed_at || '').slice(11, 16), mk(a), a.ratio[1].toFixed(4), mk(b), b.ratio[1].toFixed(4), mk(c), c.ratio[1].toFixed(4), b.hitp.toFixed(4), oc[0], oc[1]].join(','));
+      }
+      if (!rows.length) continue;
+      const g = path.join(DIR, `record_pv_${d.slice(0, 4)}.csv`);
+      if (!fs.existsSync(g)) fs.writeFileSync(g, PH.join(',') + '\n');
+      fs.appendFileSync(g, rows.map(x => x + '\n').join(''));
+      console.log('公式の preview の印', d, 'レース', rows.length, '★★（どれか）', rows.filter(x => x.includes(',★★,')).length);
+    }
+    PV = new Map(readAll('record_pv').map(r => [r['日付'] + '|' + r['場'] + '|' + r['R'], r]));
+  } catch (e) { console.log('公式の preview の印：' + e); }
   // 4号艇のきまり（版12）：4号艇が展示で4コース・前の365日に4コースから10走以上のレースの判定を q12/cado_年.csv に足す（2026-10-01から。コースの記録は course4.js）
   let CADO = null;
   try {
@@ -313,7 +356,7 @@ function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買�
     }
     CADO = new Map(readAll('cado').map(r => [r['日付'] + '|' + r['場'] + '|' + r['R'], r]));
   } catch (e) { console.log('4号艇のきまり：' + e); }
-  if (ROWS.B) parts.splice(4, 0, ...topU(ROWS, end, CADO));
+  if (ROWS.B) parts.splice(4, 0, ...topU(ROWS, end, CADO, PV));
   parts.push(`最終更新：${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')}（日本時間）`);
   fs.writeFileSync(path.join(DIR, 'summary.md'), parts.join('\n') + '\n');
 })().catch(e => { console.error(e); process.exit(1); });
