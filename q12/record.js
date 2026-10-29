@@ -179,17 +179,21 @@ function topU(R, end, CADO, PV) {   // summary.md のいちばん上：いまの
     const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '', 強さ: 0 });
     u['選ばれ方'] += (u['選ばれ方'] ? '・' : '') + TAG[k]; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝お得度（選ばれた形の線との比の一番高いもの）
   }));
-  if (CADO_FROM && PV) {   // 版12から：公式の preview の印があるレースは、その印で選び直す
-    for (const key of [...U.keys()]) if (U.get(key)['日付'] >= CADO_FROM && PV.has(key)) U.delete(key);
+  // 公式の preview の印があるレースは、その印で選び直した形（Upv、版12の通知と同じ判断）。CADO_FROM（版12を貼った日）から、買った分はこちらで数える
+  const Upv = new Map(U);
+  if (PV) {
+    for (const key of [...Upv.keys()]) if (PV.has(key)) Upv.delete(key);
     for (const [key, p] of PV) {
-      if (p['日付'] < CADO_FROM || !ok(p)) continue;
+      if (!ok(p)) continue;
       const tags = [], st = [];
       if (p['安定'] === '★★' && Number(p['来る確率']) >= 0.25) { tags.push('安定'); st.push(Number(p['安定比'])); }
       if (p['配当'] === '★★') { tags.push('配当'); st.push(Number(p['配当比'])); }
       if (p['的中'] === '★★') { tags.push('的中'); st.push(Number(p['的中比'])); }
-      if (tags.length) U.set(key, { '日付': p['日付'], '場': p['場'], '場名': p['場名'], 'R': p['R'], '締切': p['締切'], '結果': p['結果'], '戻り': p['戻り'], '的中見込み': p['来る確率'], '選ばれ方': tags.join('・'), '強さ': Math.max(...st), '公式': 1 });
+      if (tags.length) Upv.set(key, { '日付': p['日付'], '場': p['場'], '場名': p['場名'], 'R': p['R'], '締切': p['締切'], '結果': p['結果'], '戻り': p['戻り'], '的中見込み': p['来る確率'], '選ばれ方': tags.join('・'), '強さ': Math.max(...st), '公式': 1 });
     }
   }
+  const Ufin = new Map(U);   // 確定の preview で選んだ形（確かめと同じ）
+  if (CADO_FROM && PV) { for (const key of [...U.keys()]) if (U.get(key)['日付'] >= CADO_FROM) U.delete(key); for (const [key, u] of Upv) if (u['日付'] >= CADO_FROM) U.set(key, u); }
   // 4号艇のきまり（版12）：4号艇がカド得意なら買わない。CADO_FROM（版12を貼った日）から、その分を「買った分」から外す。それまでは参考に数えるだけ
   const isCado = r => { const c = (CADO || new Map()).get(r['日付'] + '|' + r['場'] + '|' + r['R']); return !!(c && c['得意'] === '1'); };
   const S0 = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
@@ -240,6 +244,9 @@ function topU(R, end, CADO, PV) {   // summary.md のいちばん上：いまの
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
     ...(CADO ? [`4号艇のきまり（版12：4号艇が展示で4コースに入り、4コースを得意なら買わない）：このきまりに当てはまる分は、10月1日からの全部で ${SC.length}レース・${sumU(SC).n}点・的中${sum(SC).hit}・回収${sumU(SC).n ? (sumU(SC).ret / sumU(SC).n * 100).toFixed(1) + '%' : '-'}（勝負2点で数える。確かめでは99%前後で、外してももうけはほぼ同じ・点数が15%減る）` +
       (CADO_FROM ? `。${CADO_FROM}から、この分は買った分に入れていない` : '。版12を貼るまでは、この分も買った分に入れている')] : []),
+    ...(PV ? (() => { const PF = '2026-10-25', a = [...Upv.values()].filter(r => r['日付'] >= PF && PV.has(r['日付'] + '|' + r['場'] + '|' + r['R'])), b = [...Ufin.values()].filter(r => r['日付'] >= PF && PV.has(r['日付'] + '|' + r['場'] + '|' + r['R']));
+      const both = a.filter(r => Ufin.has(r['日付'] + '|' + r['場'] + '|' + r['R'])).length, ua = sumU(a), ub = sumU(b);
+      return [`気象のずれの見張り（${PF}から、公式の preview の記録があるレース）：公式の preview（締切16分前ごろの気象＝版12の通知と同じ）で選ぶと ${a.length}レース・${ua.n}点・的中${sum(a).hit}・回収${ua.n ? (ua.ret / ua.n * 100).toFixed(1) + '%' : '-'}、確定の preview（確かめと同じ）で選ぶと ${b.length}レース・${ub.n}点・的中${sum(b).hit}・回収${ub.n ? (ub.ret / ub.n * 100).toFixed(1) + '%' : '-'}（同じレース ${both}）。確かめにずれを足すと回収は2ポイントほど下がる見込み（第16章「版12」）`]; })() : []),
     ...(CADO_FROM && PV ? [`版12（${CADO_FROM}から）は、通知と同じく公式の直前情報の preview（展示を見つけたとき・締切16分前ごろの気象）で印を出して数えている（その記録が無いレースは v1 の確定した preview）。${CADO_FROM}からの買った分のうち公式の preview で選んだもの ${S.filter(r => r['日付'] >= CADO_FROM && r['公式']).length}レース`] : []),
     `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う・7〜9月は1点）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
       `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
