@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const Q12 = require('./q12core.js');
+const C4 = require('./course4.js');   // 4号艇のきまり（版12）
 const DIR = __dirname;
 const CFG = JSON.parse(fs.readFileSync(path.join(DIR, 'models.json'), 'utf8'));
 const UA = 'boat-oriten (+https://github.com/hassak0408/boat-oriten)';
@@ -164,7 +165,7 @@ function section(c, M, rows, PM) {
   out.push('');
   return out;
 }
-function topU(R, end) {   // summary.md のいちばん上：いまの買い方（全部＝安定型B＋配当型A＋的中型C）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行
+function topU(R, end, CADO) {   // summary.md のいちばん上：いまの買い方（全部＝安定型B＋配当型A＋的中型C）の通算・月ごと・直近7日のレース。R＝{A,B,C}：各モデルの行。CADO＝4号艇のきまりの判定（日付|場|R → 行）
   const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
   const ok = r => r['結果'] !== '中止' && r['結果'] !== '' && win(r);
   const pick = { B: r => r['印'] === '★★' && Number(r['的中見込み']) >= 0.25, A: r => r['印'] === '★★', C: r => r['印'] === '★★' };
@@ -176,7 +177,12 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
     const u = U.get(key) || Object.assign({}, r, { 選ばれ方: '', 強さ: 0 });
     u['選ばれ方'] += (u['選ばれ方'] ? '・' : '') + TAG[k]; u['強さ'] = Math.max(u['強さ'], Number(r['線比2']) || 0); U.set(key, u);   // 強さ＝お得度（選ばれた形の線との比の一番高いもの）
   }));
-  const S = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
+  // 4号艇のきまり（版12）：4号艇がカド得意なら買わない。CADO_FROM（版12を貼った日）から、その分を「買った分」から外す。それまでは参考に数えるだけ
+  const CADO_FROM = '';
+  const isCado = r => { const c = (CADO || new Map()).get(r['日付'] + '|' + r['場'] + '|' + r['R']); return !!(c && c['得意'] === '1'); };
+  const S0 = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
+  const S = S0.filter(r => !(CADO_FROM && r['日付'] >= CADO_FROM && isCado(r)));
+  const SC = S0.filter(isCado);   // 4号艇がカド得意の分（10月1日から。版12で買わない分）
   const sum = X => ({ n: X.length, hit: X.filter(r => r['結果'] === '的中').length, ret: X.reduce((a, r) => a + Number(r['戻り']), 0) });
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
@@ -220,6 +226,8 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
     (t.n ? `この形で買った分（${FROM}〜${end}）：${t.n}レース・${tu.n}点（うち勝負レース${sum(S.filter(r => r['日付'] >= FROM && strong(r))).n}）・的中${t.hit}・回収${(tu.ret / tu.n * 100).toFixed(1)}%・損益${yen(tu.ret - tu.n)}（1点100円、勝負レースは2点・7〜9月は1点）` : `この形で買った分（${FROM}〜）：まだありません（毎朝7:20に前の日の分が入ります）`) +
       '。見込み：決まりを毎年、前の年までのデータだけで選び直す厳しい数え方（2023〜2026年9月）で回収109.5%・1か月+1,400円前後（いまの決まりの決め打ちなら111.1%・+1,800円）。ただし2026年は100〜105%。月ごとのぶれは大きい',
     `参考：その前（〜${addDays(FROM, -1)}）も同じ形で数えると ${t0.n}点・的中${t0.hit}・回収${roi(t0)}・${yen(t0.ret - t0.n)}。10月1日からの全部のうち安定型は ${tb.n}点・的中${tb.hit}・回収${roi(tb)}`,
+    ...(CADO ? [`4号艇のきまり（版12：4号艇が展示で4コースに入り、4コースを得意なら買わない）：このきまりに当てはまる分は、10月1日からの全部で ${SC.length}レース・${sumU(SC).n}点・的中${sum(SC).hit}・回収${sumU(SC).n ? (sumU(SC).ret / sumU(SC).n * 100).toFixed(1) + '%' : '-'}（勝負2点で数える。確かめでは99%前後で、外してももうけはほぼ同じ・点数が15%減る）` +
+      (CADO_FROM ? `。${CADO_FROM}から、この分は買った分に入れていない` : '。版12を貼るまでは、この分も買った分に入れている')] : []),
     `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${STRONG_UNITS}点で買う・7〜9月は1点）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
       `勝負レースを${STRONG_UNITS}点にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
     '| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを2点（7〜9月は1点）にした損益 |', '| --- | --- | --- | --- | --- | --- | --- |'];
@@ -230,8 +238,10 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
   if (!last.length) out.push('（この7日はありませんでした）');
   else {
     out.push('| 日付 | 場 | R | 締切 | 選ばれ方 | お得度 | 点 | 来る確率 | 結果 | 払戻（100円） |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
-    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']} | ${r['強さ'].toFixed(3)} | ${units(r)} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
+    last.forEach(r => out.push(`| ${r['日付'].slice(5)} | ${r['場名']} | ${r['R']} | ${r['締切']} | ${r['選ばれ方']}${isCado(r) ? '（4号艇カド得意）' : ''} | ${r['強さ'].toFixed(3)} | ${units(r)} | ${r['的中見込み'] !== undefined && r['的中見込み'] !== '' ? Math.round(Number(r['的中見込み']) * 100) + '%' : '-'} | ${r['結果']} | ${Math.round(Number(r['戻り']) * 100)}円 |`));
   }
+  const lastC = SC.filter(r => r['日付'] >= from && CADO_FROM && r['日付'] >= CADO_FROM);
+  if (lastC.length) out.push('', '4号艇がカド得意で買わなかったレース（この7日）：' + lastC.map(r => `${r['日付'].slice(5)} ${r['場名']}${r['R']}R ${r['結果']}${r['結果'] === '的中' ? Math.round(Number(r['戻り']) * 100) + '円×' + units(r) : ''}`).join('、'));
   out.push('');
   return out;
 }
@@ -278,7 +288,32 @@ function topU(R, end) {   // summary.md のいちばん上：いまの買い方�
     parts.push(...section(c, M, all, PM));
     console.log(c.label, '足した行', added);
   }
-  if (ROWS.B) parts.splice(4, 0, ...topU(ROWS, end));
+  // 4号艇のきまり（版12）：4号艇が展示で4コース・前の365日に4コースから10走以上のレースの判定を q12/cado_年.csv に足す（2026-10-01から。コースの記録は course4.js）
+  let CADO = null;
+  try {
+    const curve = JSON.parse(fs.readFileSync(path.join(DIR, 'course4_curve.json'), 'utf8'));
+    const CH = ['日付', '場', 'R', '4号艇', '全国勝率', '出走', '2着以内', '2連対率', 'ふつう', 'ずれ', '得意'];
+    const done = new Set(readAll('cado').map(r => r['日付']));
+    for (let d = '2026-10-01'; d <= end; d = addDays(d, 1)) {
+      if (done.has(d)) continue;
+      const y8 = d.replace(/-/g, '');
+      if (!fs.existsSync(path.join(DIR, 'course', C4.addDays8(y8, -1) + '.csv'))) { console.log('4号艇のきまり', d, 'コースの記録がまだ無い'); continue; }
+      const J = await loadDay(d); if (!J) continue;
+      const { R } = C4.windowStats(y8, 4), rows = [];
+      for (const S of Object.values((J.programs || {}).stadiums || {})) for (const r of Object.values(S.races || {})) {
+        const j = C4.judge(r, R, curve); if (!j) continue;
+        rows.push([d, r.stadium_number, r.race_number, j.reg, j.natw, j.n, j.top2, j.w2.toFixed(4), j.normal.toFixed(4), j.d.toFixed(4), j.skip ? 1 : 0].join(','));
+      }
+      if (!rows.length) continue;
+      rows.sort((a, b) => { const x = a.split(','), z = b.split(','); return (+x[1] - +z[1]) || (+x[2] - +z[2]); });
+      const f = path.join(DIR, `cado_${d.slice(0, 4)}.csv`);
+      if (!fs.existsSync(f)) fs.writeFileSync(f, CH.join(',') + '\n');
+      fs.appendFileSync(f, rows.map(x => x + '\n').join(''));
+      console.log('4号艇のきまり', d, '判定', rows.length, '得意', rows.filter(x => x.endsWith(',1')).length);
+    }
+    CADO = new Map(readAll('cado').map(r => [r['日付'] + '|' + r['場'] + '|' + r['R'], r]));
+  } catch (e) { console.log('4号艇のきまり：' + e); }
+  if (ROWS.B) parts.splice(4, 0, ...topU(ROWS, end, CADO));
   parts.push(`最終更新：${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')}（日本時間）`);
   fs.writeFileSync(path.join(DIR, 'summary.md'), parts.join('\n') + '\n');
 })().catch(e => { console.error(e); process.exit(1); });
