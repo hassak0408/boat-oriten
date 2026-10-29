@@ -20,11 +20,12 @@ jobs:
           node-version: '22'
       - run: node q12/before_cmp.js
       - run: node q12/before_cmp2.js
+      - run: node q12/before_cmp3.js
       - name: 保存
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add q12/before/cmp.txt q12/before/cmp2.txt
+          git add q12/before/cmp.txt q12/before/cmp2.txt q12/before/cmp3.csv
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
           git commit -q -m "q12：公式の直前情報と v1 の preview のくらべ"
           for i in 1 2 3 4 5; do
