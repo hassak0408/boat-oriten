@@ -21,6 +21,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: 4号艇のきまりの表（選手×コースの365日。足りない日を v1 から足す）
+        run: node q12/course4.js fill
+        continue-on-error: true
       - name: 記録する
         run: node q12/record.js
       - name: 保存
