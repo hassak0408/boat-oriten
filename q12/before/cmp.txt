@@ -1,0 +1,5 @@
+くらべたレース 747（v1 に無い 0）
+選手の数字が全部同じ 747（100.0%）
+気象が全部同じ 197（26.4%）
+違った項目（のべ）：{"wind_speed":369,"wind_direction_number":285,"wave_height":213,"weather_number":103,"air_temperature":263,"water_temperature":53}
+選手の数字が違った例：
