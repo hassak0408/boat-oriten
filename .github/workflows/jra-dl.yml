@@ -49,6 +49,12 @@ jobs:
         run: |
           Y="${YEARS:-$(TZ=Asia/Tokyo date +%Y)}"
           python chiho/jra/dl.py store $Y
+      - name: 発売票数（掲載は約60日なので、毎朝新しい分を読んでためる。検証計画 J4）
+        if: inputs.redo != '1'
+        continue-on-error: true
+        run: |
+          Y="$(TZ=Asia/Tokyo date +%Y)"
+          python chiho/jra/hyo.py store $Y
       - name: 次の回を動かす
         if: steps.dl.outputs.left != '' && steps.dl.outputs.left != '0'
         env:
