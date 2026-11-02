@@ -60,9 +60,11 @@ def main():
         if r is None or r.status_code != 200: print(y, '一覧を読めない', flush=True); left += 1; continue
         r.encoding = r.apparent_encoding or 'utf-8'
         names = sorted(set(re.findall(r'(%s-\d+[a-z]+\d+)\.pdf' % y, r.text)))
-        print(y, 'PDFの数', len(names), 'うち済み', sum(1 for n in names if idx.get(n, {}).get('済')), flush=True)
+        redo = os.environ.get('REDO') == '1'      # 合わないレースがあった日を、直した読み取りで読み直す
+        done = lambda n: idx.get(n, {}).get('済') and not (redo and idx[n].get('合わないレース'))
+        print(y, 'PDFの数', len(names), 'うち済み', sum(1 for n in names if done(n)), flush=True)
         for name in names:
-            if idx.get(name, {}).get('済'): continue
+            if done(name): continue
             if time.time() - t0 > limit or (mx and n_done >= mx): left += 1; continue
             p = get(f'{BASE}/datafile/seiseki/report/{y}/{name}.pdf')
             rec = {'済': False}

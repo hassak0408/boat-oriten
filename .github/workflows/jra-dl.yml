@@ -1,14 +1,18 @@
 # 中央競馬の成績表（JRA公式サイトのPDF）を落として読み、レースと馬の表にして、非公開のリポジトリ hassak0408/chiho-keiba の jra/data/年/ に置く。
 #   PDFそのものは残さない。読み込みは10秒に1回まで。1回は最大5時間20分で、残りがあれば自分で次の回を動かす。
-#   毎週月曜6:10（日本時間）に、今年の分の新しい日を足す。
+#   毎朝6:40（日本時間）に、今年の分の新しい日を足す（一覧のページを1回読むだけの日が多い）。
 name: jra-dl
 on:
   schedule:
-    - cron: '10 21 * * 0'
+    - cron: '40 21 * * *'
   workflow_dispatch:
     inputs:
       years:
         description: '年（空白区切り。空なら今年）'
+        required: false
+        default: ''
+      redo:
+        description: '1なら、合わないレースがあった日を読み直す'
         required: false
         default: ''
 permissions:
@@ -40,6 +44,7 @@ jobs:
         id: dl
         env:
           YEARS: ${{ inputs.years }}
+          REDO: ${{ inputs.redo }}
           LIMIT_MIN: '320'
         run: |
           Y="${YEARS:-$(TZ=Asia/Tokyo date +%Y)}"
@@ -49,4 +54,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           YEARS: ${{ inputs.years }}
-        run: gh workflow run jra-dl.yml --repo "$GITHUB_REPOSITORY" --ref main -f years="$YEARS"
+          REDO: ${{ inputs.redo }}
+        run: gh workflow run jra-dl.yml --repo "$GITHUB_REPOSITORY" --ref main -f years="$YEARS" -f redo="$REDO"

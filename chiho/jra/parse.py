@@ -101,7 +101,7 @@ def parse_block(chars, meta=None):
         f = cs[0]
         if ctext(f['text']).isdigit() and f['x0'] - x0 < 18 and len(cs) >= 6:
             body = ''.join(ctext(c['text']) for c in cs)
-            if re.search(r'[ァ-ヶ一-龥]', body) and not any(k in body for k in ('本賞', 'レコード', '発走', '頭)', '売得', '払戻', '票数', 'ハロン', '通過', '勝馬', 'デビュー', '負担重量', '万円', '賞品')) \
+            if re.search(r'[ァ-ヶ一-龥]', body) and not any(k in body for k in ('本賞', 'コースレコード', '中央レコード', '発走', '頭)', '売得', '払戻', '票数', 'ハロンタイム', '通過タイム', '通過順位', '勝馬の', '負担重量', '万円', '賞品')) \
                     and not re.search(r'\d{4}[.．]\d+[.．]\d+生', body):
                 cand.append((t, f['x0']))
     if not cand: return race | {'馬': [], '払戻': {}, '角': {}}
