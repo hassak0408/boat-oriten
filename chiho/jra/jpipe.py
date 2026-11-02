@@ -8,7 +8,7 @@ import os, sys, json, time, datetime as dt, numpy as np, pandas as pd
 from itertools import combinations
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jfeat
-from jfeat import FEATS, CATF, KEY
+from jfeat import FEATS, CATF, KEY, EXTRA
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 JST = dt.timezone(dt.timedelta(hours=9))
@@ -37,11 +37,11 @@ log('今日', today, 'レース', C.groupby(['場', 'R']).ngroups, '頭', len(C)
 
 H = jfeat.build(f'{store}/jra/data', card=C, verbose=False); log('材料')
 Y = int(today[:4])
-TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測']]
+TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わない'] == 0)]
 TE = H[H['予測']].copy()
 if not len(TE):
     log('今日の馬の行が作れなかった'); sys.exit(1)
-FE = [c for c in FEATS if c in H]
+FE = [c for c in FEATS + EXTRA if c in H]       # EXTRA は2021〜2023年で選んだ（検証計画「中央：直してみること」）
 FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
                    '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
@@ -80,9 +80,10 @@ wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), 'レース': []}
 lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
-         '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。逃げ・先行＝前に行く見込み。',
-         '馬連＝1・2着に来る見込みの高い組。' + ('' if CAL else '（見込みの直しはまだ。目安）'),
-         '「初出走」「中央で初」は中央の前の成績が無い馬（見込みがぶれやすい）。', '']
+         '見方：来る馬・勝つ馬は人気（オッズ）のほうがよく当たる。1番手が1番人気と同じなら信頼できる。違うときは1番人気を重く。',
+         '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み（同じオッズの馬どうしでも少し見分けられる）。逃げ・先行＝前に行く見込み。',
+         '馬連＝1・2着に来る見込みの高い組。' + ('（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた）' if CAL else '（見込みの直しはまだ。目安）'),
+         '新馬は血統の情報が無く、モデルが弱い（人気を重く）。「初出走」「中央で初」は中央の前の成績が無い馬。', '']
 order = {p: i for i, p in enumerate(['札幌', '函館', '福島', '新潟', '東京', '中山', '中京', '京都', '阪神', '小倉'])}
 TE['Ri'] = TE['R'].astype(int)
 for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.get(kv[0][0], 9), kv[0][1])):
@@ -92,6 +93,7 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     nm = str(info.get('レース名', '')) if len(info) else ''
     grade = str(info.get('格', '')) if len(info) else ''
     head = f"{place}{rno}R {post} {nm}{('（' + grade + '）') if grade else ''} {info.get('芝ダ', '')}{info.get('距離', '')}m {len(g)}頭"
+    if len(info) and info.get('条件', '') == '新馬': head += '［新馬：人気を重く］'
     g = g.sort_values('順位')
     hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'])
           for _, r in g.iterrows()]

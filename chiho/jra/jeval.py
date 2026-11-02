@@ -2,29 +2,35 @@
 物差し：①見込みの上位3頭に1着が入る率、②上位3頭のBOXの馬連の的中、③見込みと実際の合い方、④1着の当て分け（対数の損失）を確定オッズの見込みとくらべる、
 ⑤見込みと確定オッズの見込みを混ぜて良くなるか（混ぜ方は2021〜2023年で決め、2024年からで確かめる）。
 使い方：python jeval.py 材料.pkl 出力の見込み.pkl"""
-import sys, time, json, numpy as np, pandas as pd
+import os, sys, time, json, numpy as np, pandas as pd
 from itertools import combinations
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
-from jfeat import FEATS, CATF, KEY
+from jfeat import FEATS, CATF, KEY, EXTRA
 
 t0 = time.time()
 H = pd.read_pickle(sys.argv[1])
 H = H[~H['予測']].copy()
+H = H[H['合わない'] == 0]      # 頭数か払戻が合わなかったレースは、学習にも答え合わせにも使わない（前走としては使う）
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
-FE = [c for c in FEATS if c in H and H[c].notna().any()]
+FE = [c for c in FEATS + (EXTRA if os.environ.get('JEVAL_BASE') != '1' else []) if c in H and H[c].notna().any()]
 cat = [FE.index(c) for c in CATF if c in FE]
 YEARS = [y for y in range(2021, 2027) if (H['年'] == y).any()]
 P = []
-for y in YEARS:
+OUT = sys.argv[2] if len(sys.argv) > 2 else '/tmp/jra_pred.pkl'
+import os
+REUSE = os.environ.get('JEVAL_REUSE') == '1' and os.path.exists(OUT)      # 見込みを作り直さずに数えるだけ
+for y in ([] if REUSE else YEARS):
     tr = H[(H['年'] >= 2017) & (H['年'] < y)]; te = H[H['年'] == y].copy()
     for tgt, col in (('3着内', 'p3'), ('勝', 'p1')):
         m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=0, categorical_features=cat, **BIG)
         m.fit(tr[FE], tr[tgt]); te[col] = m.predict_proba(te[FE])[:, 1]
         print(y, tgt, '学習', len(tr), '回数', m.n_iter_, round(time.time() - t0), '秒', flush=True)
-    P.append(te[KEY + ['馬番', '馬名', '年', '日', 'n', '着', '勝', '3着内', '人気', '単勝オッズ', '芝ダ', '条件', '場', 'p1', 'p3']])
-D = pd.concat(P, ignore_index=True)
-D.to_pickle(sys.argv[2] if len(sys.argv) > 2 else '/tmp/jra_pred.pkl')
+    P.append(te[KEY + ['馬番', '馬名', '年', '日', 'n', '着', '勝', '3着内', '人気', '単勝オッズ', '芝ダ', '条件', 'クラス', '新馬', '走数', 'p1', 'p3']])
+if REUSE:
+    D = pd.read_pickle(OUT); D = D.loc[:, ~D.columns.duplicated()]
+else:
+    D = pd.concat(P, ignore_index=True); D.to_pickle(OUT)
 
 # レースの中でそろえる
 ok = D.groupby(KEY)['単勝オッズ'].transform(lambda s: s.notna().all())

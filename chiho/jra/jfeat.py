@@ -47,8 +47,13 @@ def read_all(root, years=None):
     rs, hs = [], []
     for y in sorted(os.listdir(root)):
         if not y.isdigit() or (years and int(y) not in years): continue
+        ip = f'{root}/{y}/index.json'
+        idx = json.load(open(ip, encoding='utf-8')) if os.path.exists(ip) else {}
         for f in sorted(glob.glob(f'{root}/{y}/*_races.csv.gz')):
-            rs.append(pd.read_csv(f, dtype=str, keep_default_na=False))
+            r = pd.read_csv(f, dtype=str, keep_default_na=False)
+            bad = {str(x) for x in idx.get(os.path.basename(f)[:-len('_races.csv.gz')], {}).get('合わないレース', [])}
+            r['合わない'] = r['R'].isin(bad).astype(int).astype(str)     # 頭数か払戻が合わなかったレース（答え合わせ・学習には使わない）
+            rs.append(r)
             hf = f.replace('_races.csv.gz', '_horses.csv.gz')
             if os.path.exists(hf): hs.append(pd.read_csv(hf, dtype=str, keep_default_na=False))
     R = pd.concat(rs, ignore_index=True) if rs else pd.DataFrame()
@@ -101,12 +106,19 @@ def build(root, card=None, verbose=True, years=None):
     H = H[H['着'].notna() | H['状態'].isin(['競走中止', '中止', '失格']) | H['予測']].copy()
     for c in ['枠', '馬番', '齢', '斤量', '馬体重', '増減', 'タイム', '単勝オッズ', '人気', 'ブリンカー']:
         H[c] = num(H[c])
-    H = H.dropna(subset=['馬番'])
+    H = H[H['馬番'].between(1, 18)].copy()             # 読み違えた行（馬番が2つくっついたもの）を除く
+    H.loc[~H['枠'].between(1, 8), '枠'] = np.nan
+    H.loc[~H['齢'].between(2, 12), '齢'] = np.nan
     H['馬番'] = H['馬番'].astype(int)
     H = H.drop_duplicates(KEY + ['馬番'], keep='last')
+    R['合わない'] = num(R.get('合わない', 0)).fillna(0)
     H = H.merge(R[KEY + ['回', '日目', '芝ダ', '距離', '馬場', '天候', '条件', '格', '格n', 'クラス', '新馬', '牝限', 'ハンデ', '年齢c', '時', '賞金',
-                         '上り3Fレース', '角']], on=KEY, how='inner')
+                         '上り3Fレース', '角', '合わない']], on=KEY, how='inner')
     H['馬'] = H['馬名'].map(clean_name)
+    # 同じ名前でも3年以上あいたら別の馬（名前の使い回し）
+    H = H.sort_values(['馬', '年月日', 'R']).reset_index(drop=True)
+    gap = pd.to_datetime(H['年月日'], format='%Y%m%d').groupby(H['馬']).diff().dt.days
+    H['馬'] = H['馬'] + '#' + (gap > 1095).groupby(H['馬']).cumsum().astype(str)
     for c in ['騎手', '調教師', '馬主', '生産']:
         H[c] = H[c].map(clean_person)
         if H['予測'].any():
@@ -121,7 +133,7 @@ def build(root, card=None, verbose=True, years=None):
     H['日'] = pd.to_datetime(H['年月日'], format='%Y%m%d')
     H['年'] = H['日'].dt.year; H['月'] = H['日'].dt.month
     # 走りの記録（前走として使う）
-    H['差'] = H['タイム'] - H.groupby(KEY)['タイム'].transform('min')
+    H['差'] = (H['タイム'] - H.groupby(KEY)['タイム'].transform('min')).clip(upper=10)
     H.loc[H['中止'], '差'] = np.nan
     H['着率'] = H['着x'] / H['n']
     cl = {k: corner_lists(v) for k, v in zip(map(tuple, R[KEY].values), R['角'])}
@@ -142,7 +154,7 @@ def build(root, card=None, verbose=True, years=None):
     W = H[(H['着'] == 1) & H['タイム'].notna()].copy(); W['ずれ'] = (W['タイム'] - W['基準']) / W['距離'] * 1000
     var = W.groupby(['場', '日', '芝ダ'])['ずれ'].median().rename('当日の速さ').reset_index()
     H = H.merge(var, on=['場', '日', '芝ダ'], how='left')
-    H['指数'] = (H['基準'] - H['タイム']) / H['距離'] * 1000 + H['当日の速さ']
+    H['指数'] = ((H['基準'] - H['タイム']) / H['距離'] * 1000 + H['当日の速さ']).clip(-30, 30)
     H.loc[H['中止'], '指数'] = np.nan
     if verbose: print('走りの記録', round(time.time() - t0), '秒', flush=True)
 
@@ -213,6 +225,22 @@ def build(root, card=None, verbose=True, years=None):
     H['騎場'] = H['騎手'] + '|' + H['場'] + '|' + H['芝ダ']
     S = prior(H, '騎場', 365); k = 20
     H['騎場3率'] = ((S['t'] + k * H['3着内'].mean()) / (S['n'] + k)).values
+    # （EXTRA）中央で初めて走る馬の成績（騎手・調教師・馬主・生産者、前の日まで全部）と、騎手・調教師の30日
+    first = H['走数'] == 0
+    f1, f3 = H.loc[first & ~H['予測'], '勝'].mean(), H.loc[first & ~H['予測'], '3着内'].mean()
+    for ent, pre in (('騎手', '騎初'), ('調教師', '調初'), ('馬主', '主初'), ('生産', '牧初')):
+        S = prior(H, ent, None, mask=first); k = 10
+        H[pre + '数'] = S['n'].values; H[pre + '勝率'] = ((S['w'] + k * f1) / (S['n'] + k)).values; H[pre + '3率'] = ((S['t'] + k * f3) / (S['n'] + k)).values
+    a1, a3 = H['勝'].mean(), H['3着内'].mean()
+    for ent, pre in (('騎手', '騎30'), ('調教師', '調30')):
+        S = prior(H, ent, 30); k = 10
+        H[pre + '勝率'] = ((S['w'] + k * a1) / (S['n'] + k)).values; H[pre + '3率'] = ((S['t'] + k * a3) / (S['n'] + k)).values
+    # （EXTRA）同じ芝ダでの前の走り（H は日の順なので、馬と芝ダの組の中も日の順）
+    g2 = H.groupby(['馬', '芝ダ'], sort=False)
+    H['同指数1'] = g2['指数'].shift(1)
+    H['同指数最高3'] = g2['指数'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).max())
+    H['同着率3'] = g2['着率'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())
+    H['斤量差レース'] = H['斤量'] - H.groupby(KEY)['斤量'].transform('mean')
     # レースの中の順位
     for c, asc in (('過去3差', True), ('騎勝率', False), ('全3率', False), ('調勝率', False), ('指数最高3', False), ('指数1', False),
                    ('獲得計', False), ('主勝率', False), ('牧勝率', False)):
@@ -235,10 +263,13 @@ CATS = {'場c': {p: i for i, p in enumerate(['札幌', '函館', '福島', '新�
         '天候c': {'晴': 0, '曇': 1, '小雨': 2, '雨': 3, '小雪': 4, '雪': 5}, '性c': {'牡': 0, '牝': 1, 'セ': 2}}
 
 
-def prior(H, ent, days=None):
-    """ent ごとに、前の日までの（days 日の、または全部の）乗った数・勝ち・3着内・単勝の払戻の合計。H は日の順に並んでいること"""
+def prior(H, ent, days=None, mask=None):
+    """ent ごとに、前の日までの（days 日の、または全部の）乗った数・勝ち・3着内・単勝の払戻の合計。H は日の順に並んでいること。
+    mask を渡すと、その行（例：中央で初めて走る馬）だけを数える"""
     X = H[[ent, '日', '勝', '3着内', '単払']].copy(); X['_n'] = 1
-    X = X[~H['予測']] if '予測' in H else X
+    keep = ~H['予測'] if '予測' in H else pd.Series(True, index=H.index)
+    if mask is not None: keep = keep & mask
+    X = X[keep]
     day = X.groupby([ent, '日'])[['_n', '勝', '3着内', '単払']].sum().reset_index().sort_values([ent, '日'])
     day[['c_n', 'c_w', 'c_t', 'c_p']] = day.groupby(ent)[['_n', '勝', '3着内', '単払']].cumsum().values
     Q = H[[ent, '日']].reset_index()
@@ -269,6 +300,8 @@ FEATS = ['場c', '芝ダc', '馬場c', '天候c', '性c', '月', '時', '距離'
          '先頭率5', '先行率5', '終角率1', '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順',
          '過去3差順率', '騎勝率順率', '全3率順率', '調勝率順率', '指数最高3順率', '指数1順率', '獲得計順率', '主勝率順率', '牧勝率順率']
 CATF = ['場c', '芝ダc', '馬場c', '天候c', '性c']
+EXTRA = ['騎初数', '騎初勝率', '騎初3率', '調初数', '調初勝率', '調初3率', '主初数', '主初勝率', '主初3率', '牧初数', '牧初勝率', '牧初3率',
+         '騎30勝率', '騎303率', '調30勝率', '調303率', '同指数1', '同指数最高3', '同着率3', '斤量差レース']
 
 if __name__ == '__main__':
     H = build(sys.argv[1])
