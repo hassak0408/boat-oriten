@@ -55,6 +55,10 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, 
     m.fit(rows[F], rows[tgt]); TE[col] = m.predict_proba(TE[F])[:, 1]; log('モデル', tgt, '学習', len(rows), '回数', m.n_iter_)
 
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+fx = f'{HERE}/jra_fix.json'
+if os.path.exists(fx):      # 中央で初めて走る馬（新馬以外）は、1着を高く見すぎる（検証計画「中央：評価のかたよりを直す」F1）
+    k1 = json.load(open(fx, encoding='utf-8'))['中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値']
+    TE.loc[(TE['走数'] == 0) & (TE['新馬'] == 0), 'p1'] *= k1
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))

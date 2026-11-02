@@ -200,6 +200,11 @@ def build(root, card=None, verbose=True, years=None):
     for c in ['先頭', '先行']:
         H[c + '率5'] = g[c].transform(lambda s: s.shift(1).rolling(5, min_periods=1).mean())
     H['上げ3'] = g['上げ'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())
+    # （PASTM）前のレースの市場の評価（終わったレースのオッズ。そのレースのオッズは使わない）
+    H['_lo'] = np.log(H['単勝オッズ'].clip(lower=1.0)); H['_pr'] = H['人気'] / H['n']
+    H['前オッズ'] = g['_lo'].shift(1)
+    H['過去3オッズ'] = pd.concat([g['_lo'].shift(k) for k in (1, 2, 3)], axis=1).mean(axis=1)
+    H['過去3人気率'] = pd.concat([g['_pr'].shift(k) for k in (1, 2, 3)], axis=1).mean(axis=1)
     # 休み明け（90日以上あいた）から何戦目か
     brk = (H['間隔'].isna() | (H['間隔'] >= 90)).astype(int)
     H['叩き'] = brk.groupby(H['馬']).cumsum()
@@ -309,6 +314,7 @@ FEATS = ['場c', '芝ダc', '馬場c', '天候c', '性c', '月', '時', '距離'
          '過去3差順率', '騎勝率順率', '全3率順率', '調勝率順率', '指数最高3順率', '指数1順率', '獲得計順率', '主勝率順率', '牧勝率順率']
 CATF = ['場c', '芝ダc', '馬場c', '天候c', '性c']
 PACE = ['前ペース比', '前上り差', '初角率1']
+PASTM = ['前オッズ', '過去3オッズ', '過去3人気率']
 EXTRA = ['騎初数', '騎初勝率', '騎初3率', '調初数', '調初勝率', '調初3率', '主初数', '主初勝率', '主初3率', '牧初数', '牧初勝率', '牧初3率',
          '騎30勝率', '騎303率', '調30勝率', '調303率', '同指数1', '同指数最高3', '同着率3', '斤量差レース']
 
