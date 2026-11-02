@@ -6,14 +6,14 @@ import os, sys, time, json, numpy as np, pandas as pd
 from itertools import combinations
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
-from jfeat import FEATS, CATF, KEY, EXTRA
+from jfeat import FEATS, CATF, KEY, EXTRA, PACE
 
 t0 = time.time()
 H = pd.read_pickle(sys.argv[1])
 H = H[~H['予測']].copy()
 H = H[H['合わない'] == 0]      # 頭数か払戻が合わなかったレースは、学習にも答え合わせにも使わない（前走としては使う）
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
-FE = [c for c in FEATS + (EXTRA if os.environ.get('JEVAL_BASE') != '1' else []) if c in H and H[c].notna().any()]
+FE = [c for c in FEATS + (EXTRA + PACE if os.environ.get('JEVAL_BASE') != '1' else []) if c in H and H[c].notna().any()]
 cat = [FE.index(c) for c in CATF if c in FE]
 YEARS = [y for y in range(2021, 2027) if (H['年'] == y).any()]
 P = []

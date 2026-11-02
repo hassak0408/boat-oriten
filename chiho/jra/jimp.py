@@ -3,14 +3,15 @@
 使い方：python jimp.py 材料.pkl"""
 import os, sys, time, numpy as np, pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
-from jfeat import FEATS, CATF, EXTRA, KEY
+from jfeat import FEATS, CATF, EXTRA, PACE, KEY
 
 t0 = time.time()
 H = pd.read_pickle(sys.argv[1]); H = H[~H['予測'] & (H['合わない'] == 0)].copy()
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 YEARS = [2024, 2025, 2026] if os.environ.get('PERIOD') == 'check' else [2021, 2022, 2023]
 res = {}
-for lab, FE in (('今の材料', FEATS), ('EXTRAを足す', FEATS + EXTRA)):
+VARS = (('今の材料', FEATS), ('EXTRAを足す', FEATS + EXTRA)) if os.environ.get('VARS') != 'pace' else (('今の材料（EXTRA込み）', FEATS + EXTRA), ('PACEを足す', FEATS + EXTRA + PACE))
+for lab, FE in VARS:
     FE = [c for c in FE if c in H and H[c].notna().any()]; cat = [FE.index(c) for c in CATF if c in FE]
     P = []
     for y in YEARS:

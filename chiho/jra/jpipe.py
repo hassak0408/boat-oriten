@@ -8,7 +8,7 @@ import os, sys, json, time, datetime as dt, numpy as np, pandas as pd
 from itertools import combinations
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jfeat
-from jfeat import FEATS, CATF, KEY, EXTRA
+from jfeat import FEATS, CATF, KEY, EXTRA, PACE
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 JST = dt.timezone(dt.timedelta(hours=9))
@@ -41,7 +41,7 @@ TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わな�
 TE = H[H['予測']].copy()
 if not len(TE):
     log('今日の馬の行が作れなかった'); sys.exit(1)
-FE = [c for c in FEATS + EXTRA if c in H]       # EXTRA は2021〜2023年で選んだ（検証計画「中央：直してみること」）
+FE = [c for c in FEATS + EXTRA + PACE if c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）
 FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
                    '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
