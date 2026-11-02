@@ -77,7 +77,8 @@ def parse_block(chars, meta=None):
             s0 = z2h(''.join(ctext(c['text']) for c in cs))
             mm = re.match(r'^(\d{1,2})(?!\d)', s0)
             if mm: race['R'] = int(mm.group(1)); race['レース名'] = s0[mm.end():].replace('〓', '').replace(' ', ''); break
-    sm = re.search(r'\((芝|ダート|障害)[^)]*\)', head); race['芝ダ'] = '障害' if '競走障害' in head else sm.group(1) if sm else ''
+    sm = re.search(r'\((芝|ダート|障害)[^)]*\)', head)
+    race['芝ダ'] = '障害' if ('競走障害' in head or (sm and not re.search('右|左|直', sm.group(0)))) else sm.group(1) if sm else ''   # 障害のコースには向きが無い
     race['コース'] = sm.group(0) if sm else ''
     gm = re.search(r'\((G[I]{1,3}|GⅠ|GⅡ|GⅢ|L|JpnI+|J・G[I]+)\)', head); race['格'] = gm.group(1) if gm else ''
     # 見出し（レース名から賞金の行まで）をそのまま残す（あとで条件を読み直せるように）

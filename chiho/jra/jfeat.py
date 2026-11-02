@@ -73,6 +73,8 @@ def corner_lists(js):
 
 def prep_races(R):
     R = R.copy()
+    # 障害：コースに向き（右・左・直線）が無いレース（古い年や名前のある障害は「競走障害」と書いていないので、コースで見分ける）
+    R.loc[~R['コース'].fillna('').astype(str).str.contains('右|左|直'), '芝ダ'] = '障害'
     R['R'] = num(R['R']).astype('Int64')
     R = R.drop_duplicates(KEY, keep='last')
     R['距離'] = num(R['距離']); R['賞金'] = num(R['賞金'])
