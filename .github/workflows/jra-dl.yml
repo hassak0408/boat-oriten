@@ -12,7 +12,7 @@ on:
         required: false
         default: ''
       redo:
-        description: '1なら、合わないレースがあった日を読み直す'
+        description: '1なら合わないレースがあった日を、allなら全部の日を読み直す'
         required: false
         default: ''
 permissions:
@@ -50,7 +50,7 @@ jobs:
           Y="${YEARS:-$(TZ=Asia/Tokyo date +%Y)}"
           python chiho/jra/dl.py store $Y
       - name: 発売票数（掲載は約60日なので、毎朝新しい分を読んでためる。検証計画 J4）
-        if: inputs.redo != '1'
+        if: inputs.redo == ''
         continue-on-error: true
         run: |
           Y="$(TZ=Asia/Tokyo date +%Y)"

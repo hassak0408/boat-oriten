@@ -161,6 +161,10 @@ def parse_block(chars, meta=None):
     for o in out:
         o['人気'] = (ods.index(o['単勝オッズ']) + 1) if o['単勝オッズ'] else None
     race['馬'] = out
+    # 注記（〔制裁〕〔発走状況〕〔その他〕など。不利・出遅れ・疾病が書いてある）：ブロックの下の「〔」で始まる行から後ろ。「※」から後ろ（出馬投票などの注）は除く
+    k0 = next((i for i, (t, cs) in enumerate(L) if z2h(''.join(ctext(c['text']) for c in cs)).replace(' ', '').startswith('〔')), None)
+    notes = ''.join(z2h(''.join(ctext(c['text']) for c in cs)).replace(' ', '') for t, cs in L[k0:]) if k0 is not None else ''
+    race['注記'] = notes.split('※')[0][:1500]
     race['払戻'] = payouts(L)
     race['角'] = corners(L, xref)
     m3 = re.search(r'上り4F([\d.]+)―3F([\d.]+)', head)

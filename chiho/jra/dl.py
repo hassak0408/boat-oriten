@@ -11,7 +11,7 @@ GAP = 10
 S = requests.Session(); S.headers.update({'User-Agent': UA, 'Accept-Language': 'ja'})
 last = [0.0]
 RC = ['年月日', '場', '回', '日目', 'R', 'レース名', '芝ダ', 'コース', '距離', '天候', '馬場', '条件', '年齢', '重量', '牝限', '格', '発走', '頭数', '上り3F', '賞金',
-      '角', '払戻', '見出し']
+      '角', '払戻', '見出し', '注記']
 HC = ['年月日', '場', 'R', '行', '枠', '馬番', '馬名', '性', '齢', '毛色', '斤量', '騎手', '減量', '馬主', '調教師', '産地', '生産', 'ブリンカー', '馬体重', '増減',
       'タイム', '着差', '単勝オッズ', '人気', '状態', '着順']
 GIT_ID = ['-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com']
@@ -60,8 +60,8 @@ def main():
         if r is None or r.status_code != 200: print(y, '一覧を読めない', flush=True); left += 1; continue
         r.encoding = r.apparent_encoding or 'utf-8'
         names = sorted(set(re.findall(r'(%s-\d+[a-z]+\d+)\.pdf' % y, r.text)))
-        redo = os.environ.get('REDO') == '1'      # 合わないレースがあった日を、直した読み取りで読み直す
-        done = lambda n: idx.get(n, {}).get('済') and not (redo and idx[n].get('合わないレース'))
+        redo = os.environ.get('REDO', '')      # 1：合わないレースがあった日を読み直す。all：全部の日を読み直す（読み取りを足したとき）
+        done = lambda n: idx.get(n, {}).get('済') and redo != 'all' and not (redo == '1' and idx[n].get('合わないレース'))
         print(y, 'PDFの数', len(names), 'うち済み', sum(1 for n in names if done(n)), flush=True)
         for name in names:
             if done(name): continue
