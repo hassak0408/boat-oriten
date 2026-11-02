@@ -105,7 +105,9 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
         tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印']) if x)
         lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{tail}".rstrip())
     if tp:
-        lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(sum(b for _, b in tp) * 100)}%）')
+        any3 = sum(b for _, b in tp)
+        if CAL and '3組の和' in CAL: any3 = float(np.interp(any3, CAL['3組の和'], CAL['3組の和の直した見込み']))     # 和は高い所で言いすぎるので直す
+        lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(any3 * 100)}%）')
     lines.append('')
 os.makedirs(f'{store}/data/picks', exist_ok=True)
 json.dump(out, open(f'{store}/data/picks/{today}_jra.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

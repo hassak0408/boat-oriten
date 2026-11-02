@@ -10,7 +10,7 @@ D = pd.read_pickle(sys.argv[1] if len(sys.argv) > 1 else '/tmp/jra_pred.pkl')
 D = D[D['n'] >= 5].copy()
 D['p1'] = D['p1'] / D.groupby(KEY)['p1'].transform('sum')
 D['p3'] = (D['p3'] * np.minimum(3, D['n']) / D.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
-cal, rows = [], []
+cal, rows, top3 = [], [], []
 for k, g in D.groupby(KEY, sort=False):
     fin = g['着'].values
     if (fin <= 2).sum() < 2 or g['人気'].isna().any(): continue
@@ -21,6 +21,7 @@ for k, g in D.groupby(KEY, sort=False):
     y = int(g['年'].iloc[0])
     for o in order[:10]:
         cal.append((y, P[o] / z, hit(o)))
+    top3.append((y, [P[o] / z for o in order[:3]], any(hit(o) for o in order[:3])))
     r = np.argsort(g['人気'].values)
     pp = lambda a, b: tuple(sorted((a, b)))
     rows.append(dict(年=y, 上位1組=hit(order[0]), 上位3組=any(hit(o) for o in order[:3]), 人気1点=hit(pp(r[0], r[1])),
@@ -29,9 +30,17 @@ CA = pd.DataFrame(cal, columns=['年', '見込み', '的中'])
 fit = CA[CA['年'] <= 2023]
 ir = IsotonicRegression(out_of_bounds='clip', y_min=0, y_max=1).fit(fit['見込み'], fit['的中'].astype(float))
 grid = np.round(np.arange(0, 0.801, 0.005), 3); mapped = ir.predict(grid)
+# 「3組のどれか」：直した3組の見込みの和 → 実際（和は高い所で言いすぎるので、2021〜2023年で直す）
+T3 = pd.DataFrame([(y, sum(np.interp(v, grid, mapped) for v in vs), h) for y, vs, h in top3], columns=['年', '和', '的中'])
+ir3 = IsotonicRegression(out_of_bounds='clip', y_min=0, y_max=1).fit(T3.loc[T3['年'] <= 2023, '和'], T3.loc[T3['年'] <= 2023, '的中'].astype(float))
+grid3 = np.round(np.arange(0, 1.501, 0.01), 2); mapped3 = ir3.predict(grid3)
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jra_pair_calib.json')
-json.dump({'見込み': grid.tolist(), '直した見込み': np.round(mapped, 4).tolist(), '作り方': '中央競馬 2021〜2023年の各レースの上位10組（jpair.py）'},
-          open(out, 'w', encoding='utf-8'), ensure_ascii=False)
+json.dump({'見込み': grid.tolist(), '直した見込み': np.round(mapped, 4).tolist(), '3組の和': grid3.tolist(), '3組の和の直した見込み': np.round(mapped3, 4).tolist(),
+           '作り方': '中央競馬 2021〜2023年の各レースの上位10組と、上位3組の和（jpair.py）'}, open(out, 'w', encoding='utf-8'), ensure_ascii=False)
+t3 = T3[T3['年'] >= 2024].copy(); t3['直した'] = np.interp(t3['和'], grid3, mapped3)
+print('■ 3組のどれか：2024〜2026年での確かめ')
+print(t3.groupby(pd.cut(t3['直した'], [0, .2, .3, .4, .5, .6, .7, 1]), observed=True).agg(レース=('的中', 'size'), 和=('和', lambda s: round(s.mean() * 100, 1)),
+      直した=('直した', lambda s: round(s.mean() * 100, 1)), 実際=('的中', lambda s: round(s.mean() * 100, 1))).to_string())
 te = CA[CA['年'] >= 2024].copy(); te['直した'] = np.interp(te['見込み'], grid, mapped)
 b = pd.cut(te['直した'], [0, .02, .05, .1, .15, .2, .3, .4, 1])
 print('■ 組の見込みの直し：2024〜2026年での確かめ（直した見込みの帯ごと）')
