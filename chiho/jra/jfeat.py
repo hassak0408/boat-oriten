@@ -43,6 +43,32 @@ def align(card_vals, hist_vals):
     return out
 
 
+TOP = r'〔(制裁|発走状況|その他|競走中止|競走除外|出走取消|発走時刻の変更|騎手変更|調教再審査|馬の出走停止・調教再審査|タイムオーバーによる出走制限|降着|失格|審議|競走中の出来事)〕'
+START = ('出遅れ', '立上る', '躓', 'つまず', '発進不良', '駐立不良', '枠入り不良', '突進', '逃避', '暴れる', '落馬')
+ILL = ('疾病', '鼻出血', '心房細動', '跛行', '骨折', '挫跖', '疝痛', '熱中症')
+NAME = r'([ァ-ヴー]{2,})号'
+
+
+def parse_notes(t):
+    """注記 → {'被害番': 馬番の集まり, '被害': 名前, '発走': 名前, '疾病': 名前, '加害': 名前}"""
+    out = {'被害番': set(), '被害': set(), '発走': set(), '疾病': set(), '加害': set()}
+    if not isinstance(t, str) or not t: return out
+    pos = [(m.start(), m.end(), m.group(1)) for m in re.finditer(TOP, t)]
+    for k, (a, b, lab) in enumerate(pos):
+        seg = t[b:pos[k + 1][0] if k + 1 < len(pos) else len(t)]
+        if lab == '制裁':
+            for v in re.findall(r'被害馬[:：]([0-9・、,番]+)', seg):
+                out['被害番'] |= {int(x) for x in re.findall(r'\d+', v)}
+            for m in re.finditer(NAME + r'の騎手[^。]*?(斜行|進路|妨害)', seg): out['加害'].add(m.group(1))
+        # 「X号・Y号は,…。」の形の文ごと
+        for m in re.finditer(r'((?:[ァ-ヴー]{2,}号[・、]?)+)は[,、]?([^。]*)', seg):
+            names = set(re.findall(NAME, m.group(1))); body = m.group(2)
+            if lab == '発走状況' and any(w in body for w in START): out['発走'] |= names
+            if lab in ('その他', '競走中止', '競走除外') and ('他の馬の影響' in body or '不利' in body or '接触' in body): out['被害'] |= names
+            if lab in ('その他', '競走中止') and any(w in body for w in ILL): out['疾病'] |= names
+    return out
+
+
 def read_all(root, years=None):
     rs, hs = [], []
     for y in sorted(os.listdir(root)):
@@ -164,6 +190,17 @@ def build(root, card=None, verbose=True, years=None):
     H.loc[~H['ペース比'].between(0.7, 1.5), 'ペース比'] = np.nan
     u = H[(H['年'] <= 2018) & H['上り3Fレース'].notna()].drop_duplicates(KEY).groupby(['場', '芝ダ', '距離'])['上り3Fレース'].median()
     H['上り差'] = H['上り3Fレース'] - [u.get((a, b, c), np.nan) for a, b, c in zip(H['場'], H['芝ダ'], H['距離'])]
+    # 不利の印（K1）：レースの下の注記から、馬ごとに 被害・発走の不利・疾病・加害（注記の無い古い表なら空）
+    if '注記' in R.columns and R['注記'].astype(str).str.len().sum() > 0:
+        notes = {k: parse_notes(v) for k, v in zip(map(tuple, R[KEY].values), R['注記']) if isinstance(v, str) and v}
+        nm = H['馬名'].map(clean_name)
+        for c in ('被害', '発走', '疾病', '加害'):
+            H['不利' + c] = [float((c == '被害' and b in notes[k]['被害番']) or (n in notes[k][c])) if k in notes else 0.0
+                           for k, b, n in zip(map(tuple, H[KEY].values), H['馬番'], nm)]
+        H.loc[H['予測'], ['不利被害', '不利発走', '不利疾病', '不利加害']] = np.nan
+    else:
+        for c in ('被害', '発走', '疾病', '加害'): H['不利' + c] = np.nan
+    H['不利あり'] = H[['不利被害', '不利発走', '不利疾病']].max(axis=1)
     if verbose: print('走りの記録', round(time.time() - t0), '秒', flush=True)
 
     # 前走まで
@@ -200,6 +237,10 @@ def build(root, card=None, verbose=True, years=None):
     for c in ['先頭', '先行']:
         H[c + '率5'] = g[c].transform(lambda s: s.shift(1).rolling(5, min_periods=1).mean())
     H['上げ3'] = g['上げ'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())
+    # （K1）前走・過去3走の不利
+    for c in ('被害', '発走', '疾病', '加害', 'あり'):
+        H['前不利' + c] = g['不利' + c].shift(1)
+    H['過去3不利'] = pd.concat([g['不利あり'].shift(k) for k in (1, 2, 3)], axis=1).sum(axis=1, min_count=1)
     # （PASTM）前のレースの市場の評価（終わったレースのオッズ。そのレースのオッズは使わない）
     H['_lo'] = np.log(H['単勝オッズ'].clip(lower=1.0)); H['_pr'] = H['人気'] / H['n']
     H['前オッズ'] = g['_lo'].shift(1)
