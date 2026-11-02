@@ -24,11 +24,23 @@ def clean_person(s):
     """騎手・調教師・馬主・生産者：印・空白・国名・会社の印を取る。読めない字（〓）はそのまま残す（同じ人は同じ形になる）"""
     s = str(s) if isinstance(s, str) else ''
     s = re.sub(MARK, '', s)
-    s = re.sub(r'\((?:株|有|豪|英|仏|愛|独|伊|米|香|南ア|新|加|首|UAE)\)', '', s)
+    s = re.sub(r'\((?:株|有|同|合|社|財|豪|英|仏|愛|独|伊|米|香|南ア|新|加|首|UAE)\)', '', s)
     s = s.replace('株式会社', '').replace('有限会社', '').replace('合同会社', '').replace(' ', '').replace('　', '')
     s = re.sub(r'氏$', '', s)
     s = re.sub(r'^〓+|〓+$', '', s)          # 頭や後ろの（株）（有）が読めない字になったもの
     return s
+
+
+def align(card_vals, hist_vals):
+    """今日の出馬表の名前（ふつうの字）を、成績表の名前（読めない字が〓）に合わせる：同じ長さで、〓以外の字が全部同じもの"""
+    hist = set(hist_vals); by_len = {}
+    for h in hist:
+        if '〓' in h: by_len.setdefault(len(h), []).append(h)
+    out = {}
+    for c in set(card_vals) - hist:
+        cands = [h for h in by_len.get(len(c), []) if all(a == b or b == '〓' for a, b in zip(c, h))]
+        if cands: out[c] = max(cands, key=lambda h: sum(a == b for a, b in zip(c, h)))
+    return out
 
 
 def read_all(root, years=None):
@@ -97,6 +109,9 @@ def build(root, card=None, verbose=True, years=None):
     H['馬'] = H['馬名'].map(clean_name)
     for c in ['騎手', '調教師', '馬主', '生産']:
         H[c] = H[c].map(clean_person)
+        if H['予測'].any():
+            mp = align(H.loc[H['予測'], c], H.loc[~H['予測'], c])
+            H.loc[H['予測'], c] = H.loc[H['予測'], c].replace(mp)
     H['減量'] = H['減量'].isin(['▲', '△', '☆', '◇', '★']).astype(float)
     H['n'] = H.groupby(KEY)['馬番'].transform('size')
     H['中止'] = H['着'].isna() & ~H['予測']
