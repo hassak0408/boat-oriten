@@ -60,8 +60,13 @@ def main():
         if r is None or r.status_code != 200: print(y, '一覧を読めない', flush=True); left += 1; continue
         r.encoding = r.apparent_encoding or 'utf-8'
         names = sorted(set(re.findall(r'(%s-\d+[a-z]+\d+)\.pdf' % y, r.text)))
-        redo = os.environ.get('REDO', '')      # 1：合わないレースがあった日を読み直す。all：全部の日を読み直す（読み取りを足したとき）
-        done = lambda n: idx.get(n, {}).get('済') and redo != 'all' and not (redo == '1' and idx[n].get('合わないレース'))
+        redo = os.environ.get('REDO', '')      # 1：合わないレースがあった日を読み直す。all：注記の欄の無い日（前の読み取りの日）を読み直す
+
+        def has_note(n):
+            p = f'{out}/{n}_races.csv.gz'
+            if not os.path.exists(p): return False
+            with gzip.open(p, 'rt', encoding='utf-8') as fh: return '注記' in fh.readline()
+        done = lambda n: idx.get(n, {}).get('済') and (redo != 'all' or has_note(n)) and not (redo == '1' and idx[n].get('合わないレース'))
         print(y, 'PDFの数', len(names), 'うち済み', sum(1 for n in names if done(n)), flush=True)
         for name in names:
             if done(name): continue
