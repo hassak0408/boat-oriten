@@ -50,9 +50,12 @@ NAME = r'([ァ-ヴー]{2,})号'
 
 
 def parse_notes(t):
-    """注記 → {'被害番': 馬番の集まり, '被害': 名前, '発走': 名前, '疾病': 名前, '加害': 名前}"""
+    """注記 → {'被害番': 馬番の集まり, '被害': 名前, '発走': 名前, '疾病': 名前, '加害': 名前, '前の': {同じ形（前のレースについての追加記事）}}"""
     out = {'被害番': set(), '被害': set(), '発走': set(), '疾病': set(), '加害': set()}
     if not isinstance(t, str) or not t: return out
+    if '追加記事' in t:          # 「追加記事(第○回○○競馬第○日第○競走)」から後ろは、前のレースのこと
+        t, extra = t.split('追加記事', 1)
+        out['前の'] = parse_notes(re.sub(r'^\([^)]*\)', '', extra))
     pos = [(m.start(), m.end(), m.group(1)) for m in re.finditer(TOP, t)]
     for k, (a, b, lab) in enumerate(pos):
         seg = t[b:pos[k + 1][0] if k + 1 < len(pos) else len(t)]
@@ -197,6 +200,23 @@ def build(root, card=None, verbose=True, years=None):
         for c in ('被害', '発走', '疾病', '加害'):
             H['不利' + c] = [float((c == '被害' and b in notes[k]['被害番']) or (n in notes[k][c])) if k in notes else 0.0
                            for k, b, n in zip(map(tuple, H[KEY].values), H['馬番'], nm)]
+        # そのレースの馬に無い名前（追加記事など）は、その馬の14日以内の前のレースにつける
+        inrace = H.groupby(KEY)['馬名'].apply(lambda s: set(s.map(clean_name))).to_dict()
+        H['_d'] = pd.to_datetime(H['年月日'], format='%Y%m%d'); H['_n'] = nm
+        byname = {n: g[['_d']].sort_values('_d') for n, g in H[~H['予測']].groupby('_n')}
+        moved = 0
+        for k, p in notes.items():
+            d0 = pd.Timestamp(k[0])
+            for src in (p, p.get('前の', {})):
+                for c in ('被害', '発走', '疾病', '加害'):
+                    for n in src.get(c, ()):
+                        if src is p and n in inrace.get(k, ()): continue
+                        g = byname.get(n)
+                        if g is None: continue
+                        prev = g[(g['_d'] < d0) & (g['_d'] >= d0 - pd.Timedelta(days=14))]
+                        if len(prev): H.loc[prev.index[-1], '不利' + c] = 1.0; moved += 1
+        H = H.drop(columns=['_d', '_n'])
+        if verbose: print('不利の印 前のレースにつけた', moved, flush=True)
         H.loc[H['予測'], ['不利被害', '不利発走', '不利疾病', '不利加害']] = np.nan
     else:
         for c in ('被害', '発走', '疾病', '加害'): H['不利' + c] = np.nan
