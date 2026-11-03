@@ -19,7 +19,7 @@ const ODDS_COL = '確定オッズ';
 const TM_URL = 'https://raw.githubusercontent.com/turnmark/api/gh-pages/docs/v1/';
 const ODDS_DAYS = 60;   // 確定オッズの空きを埋めにいく日数（さかのぼり）
 
-function jstToday() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
+function jstToday() { return process.env.Q12_TODAY || new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }   // Q12_TODAY は確かめ用
 function addDays(d, n) { const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); }
 const dayCache = {};
 async function loadDay(d) {
@@ -173,6 +173,8 @@ function topU(R, end, CADO, PV, KYU) {   // summary.md のいちばん上：い�
   // 版14を貼った日（はっさくさんに聞いて入れる）。この日から勝負レースは3点（7〜9月は1点）で数え、級のきまりは使わない（版13の級のきまりは KYU_FROM〜この日の前の日まで）
   const STRONG3_FROM = process.env.Q12_STRONG3_FROM || '';
   const KYU_TO = process.env.Q12_KYU_TO || '';
+  // 「勝負レースだけ」（通知の ONLY_STRONG＝true）にした日。この日から、勝負でないレースは買った分に入れない
+  const ONLY_FROM = process.env.Q12_ONLY_STRONG_FROM || '';
   const win = r => { const hm = (r['締切'] || '').slice(0, 5); return hm >= '10:00' && hm <= '20:50'; };
   const ok = r => r['結果'] !== '中止' && r['結果'] !== '' && win(r);
   const pick = { B: r => r['印'] === '★★' && Number(r['的中見込み']) >= 0.25, A: r => r['印'] === '★★', C: r => r['印'] === '★★' };
@@ -203,7 +205,7 @@ function topU(R, end, CADO, PV, KYU) {   // summary.md のいちばん上：い�
   const isCado = r => { const c = (CADO || new Map()).get(r['日付'] + '|' + r['場'] + '|' + r['R']); return !!(c && c['得意'] === '1'); };
   const STRONG = 1.1, SWEET = [0.25, 0.32], STRONG_UNITS = 2, SUMMER_ONE = true;   // 勝負レース（お得度1.10以上・または来る確率25〜32%）は2点（版14を貼った日 STRONG3_FROM から3点）・7〜9月は1点（通知の STRONG・SWEET・STRONG_UNITS・SUMMER_ONE と同じ）
   const suOf = r => (STRONG3_FROM && r['日付'] >= STRONG3_FROM) ? 3 : STRONG_UNITS;   // その日の通知の勝負レースの点数
-  const SU_TXT = STRONG3_FROM ? `${STRONG_UNITS}点（${STRONG3_FROM}から3点）` : `${STRONG_UNITS}点`;
+  const SU_TXT = STRONG3_FROM ? `${STRONG_UNITS}点（${STRONG3_FROM}から3点・値段の見張りで2点か1点に下げる日あり）` : `${STRONG_UNITS}点`;
   const pOf = r => Number(r['的中見込み']);
   const strong = r => r['強さ'] >= STRONG || (pOf(r) >= SWEET[0] && pOf(r) < SWEET[1]);
   const summer = r => SUMMER_ONE && ['07', '08', '09'].includes(String(r['日付']).slice(5, 7));   // 7〜9月は勝負レースも1点（5年とも7〜9月の勝負レースは100%未満。前の年までで決める確かめで損益が増えた、2026-10-23 夜）
@@ -216,14 +218,35 @@ function topU(R, end, CADO, PV, KYU) {   // summary.md のいちばん上：い�
   const kyuOn = r => !!KYU_FROM && r['日付'] >= KYU_FROM && !(KYU_TO && r['日付'] >= KYU_TO);
   const S0 = [...U.values()].sort((a, b) => (a['日付'] + a['締切']).localeCompare(b['日付'] + b['締切']));
   const S1 = S0.filter(r => !(CADO_FROM && r['日付'] >= CADO_FROM && isCado(r)));
-  const S = S1.filter(r => !(kyuOn(r) && kaOf(r)));
+  const SG = S1.filter(r => !(kyuOn(r) && kaOf(r)));   // 通知が送る形（値段の見張りはこの全部で見る）
+  const S = SG.filter(r => !(ONLY_FROM && r['日付'] >= ONLY_FROM && !strong(r)));   // 買った分（勝負レースだけにした日からは勝負でないレースを外す）
   const SC = S0.filter(isCado);   // 4号艇がカド得意の分（10月1日から。版12で買わない分）
   const SK1 = S1.filter(kbOf), SK2 = S1.filter(kaOf);   // 級のきまりの分（10月1日から）：版13で2点目を足す分・買わない分
   const sum = X => ({ n: X.length, hit: X.filter(r => r['結果'] === '的中').length, ret: X.reduce((a, r) => a + Number(r['戻り']), 0) });
   const yen = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x) * 100).toLocaleString('ja-JP') + '円';
   const roi = t => t.n ? (t.ret / t.n * 100).toFixed(1) + '%' : '-';
   const FROM = '2026-10-23';   // 全部（安定＋配当＋的中）にした日（その前は安定型だけで買っていた）
-  const units = r => ((strong(r) && !summer(r)) || (kyuOn(r) && kbOf(r))) ? suOf(r) : 1;   // 版13（KYU_FROM〜KYU_TO の前の日）は、2艇ともB級も勝負でなくても2点。版14（STRONG3_FROM）から勝負レースは3点
+  // 値段の見張り（版14）：通知のレースの「来る確率×確定オッズ」の平均＝値段から見た見込みの回収（結果を使わないので、実際の回収よりずっとぶれが小さい）。
+  //   毎朝、前の日までの60日で出し（100レースに足りなければ120日まで広げる）、104%以上→勝負3点・100〜104%→2点まで・100%未満→1点。
+  //   2022年3月〜2026年9月の60日の値は 真ん中112.0%・下5% 107.0%・一番低くて104.7%（ideas の tsukkomi7.py）。今日の分を q12/units.json に書き、通知（PRICE_GUARD）が読む
+  const GUARD = [[1.04, 3], [1.00, 2], [-1, 1]];
+  const GS = S0.filter(r => !isCado(r));   // 見張りで見るレース＝確かめ（tsukkomi7.py）と同じ：通知の形（全部）から4号艇カド得意を外したもの（級のきまり・勝負だけは入れない）
+  const oddsOf = new Map();
+  ['B', 'A', 'C'].forEach(k => (R[k] || []).forEach(r => { const o = Number(r['確定オッズ']); if (o > 0) oddsOf.set(r['日付'] + '|' + r['場'] + '|' + r['R'], o); }));
+  const pxo = r => { const o = oddsOf.get(r['日付'] + '|' + r['場'] + '|' + r['R']), p = Number(r['的中見込み']); return (o > 0 && p > 0 && r['結果'] !== '返還') ? p * o : NaN; };
+  const gMemo = new Map();
+  const guardAt = day => {   // day の朝に使う上限（day の前の日まで）
+    if (gMemo.has(day)) return gMemo.get(day);
+    let g = null;
+    for (const w of [60, 120]) {
+      const from = addDays(day, -w), to = addDays(day, -1);
+      const X = GS.filter(r => r['日付'] >= from && r['日付'] <= to), v = X.map(pxo).filter(Number.isFinite), vs = X.filter(strong).map(pxo).filter(Number.isFinite);
+      if (v.length >= 100) { const x = v.reduce((a, b) => a + b, 0) / v.length; g = { x, n: v.length, xs: vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : NaN, ns: vs.length, from, to, w, cap: GUARD.find(q => x >= q[0])[1] }; break; }
+    }
+    gMemo.set(day, g); return g;
+  };
+  const capOf = r => { if (!(STRONG3_FROM && r['日付'] >= STRONG3_FROM)) return 99; const g = guardAt(r['日付']); return g ? g.cap : 99; };   // 版14を貼った日からだけ（その前の通知は見張りなし）
+  const units = r => ((strong(r) && !summer(r)) || (kyuOn(r) && kbOf(r))) ? Math.min(suOf(r), capOf(r)) : 1;   // 版13（KYU_FROM〜KYU_TO の前の日）は、2艇ともB級も勝負でなくても2点。版14（STRONG3_FROM）から勝負レースは3点
   const sumU = X => ({ n: X.reduce((a, r) => a + units(r), 0), ret: X.reduce((a, r) => a + units(r) * Number(r['戻り']), 0) });
   const t = sum(S.filter(r => r['日付'] >= FROM)), t0 = sum(S.filter(r => r['日付'] < FROM)), tb = sum(S.filter(r => r['選ばれ方'].includes('安定')));
   const tu = sumU(S.filter(r => r['日付'] >= FROM)), ts = sum(S.filter(r => strong(r))), tsu = sumU(S);
@@ -239,6 +262,16 @@ function topU(R, end, CADO, PV, KYU) {   // summary.md のいちばん上：い�
     lineTxt = (tu.n ? `撤退ライン：${FROM}から ${tu.n}点で ${yen(st / 100)}（注意ライン ${yen(wa / 100)}）。いまの損益 ${yen(pl / 100)} → ${state}。` : `撤退ライン：${FROM}からの通算の損益で見る（${keys}。まだ買っていない）。`) +
       (J.p_stop ? `（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約${J.p_stop}%・注意ラインは約${J.p_warn}%。${J.dd || ''}）` : '（効いていても、2,000点までに一度でも撤退ラインを割る見込みは約6%・注意ラインは約11%。75点で−2,000円ほどの負けは確かめの5年でも年に3〜4回あった）');
   } catch (e) { lineTxt = ''; }
+  const today = addDays(end, 1), gt = guardAt(today);
+  try {
+    fs.writeFileSync(path.join(DIR, 'units.json'), JSON.stringify({ for: today, cap: gt ? gt.cap : null, x: gt ? Math.round(gt.x * 10000) / 10000 : null, n: gt ? gt.n : 0,
+      x_strong: gt && gt.ns ? Math.round(gt.xs * 10000) / 10000 : null, n_strong: gt ? gt.ns : 0, from: gt ? gt.from : null, to: addDays(today, -1),
+      rule: '前の日までの60日の通知の「来る確率×確定オッズ」の平均：104%以上→勝負3点・100〜104%→2点まで・100%未満→1点（100レースに足りなければ120日まで広げる）' }) + '\n');
+  } catch (e) { console.log('units.json を書けなかった：' + e); }
+  const pc1 = x => (x * 100).toFixed(1) + '%';
+  const gTxt = gt ? `値段の見張り（版14）：前の日までの${gt.w}日（${gt.from}〜${gt.to}）の通知 ${gt.n}レースの「来る確率×確定オッズ」の平均（値段から見た見込みの回収）${pc1(gt.x)}（勝負レース ${gt.ns}レース・${gt.ns ? pc1(gt.xs) : '-'}）→ ${today}の勝負レースは${gt.cap}点まで` +
+      '（104%以上で3点・100〜104%で2点・100%未満で1点。2022年3月〜2026年9月の60日の値は 真ん中112.0%・下5% 107.0%・一番低くて104.7%。実際の回収は、この値より平均2ポイントほど低い）' + (STRONG3_FROM ? '' : '。版14を貼るまでは、記録の点数には入れていない')
+    : '値段の見張り（版14）：通知の記録がまだ100レースに足りない（足りるまで、勝負レースは STRONG_UNITS 点のまま）';
   // 勝ち幅がある見込み（edge_prior.json）：確かめから置いた「本当の回収」の見込み（平均・ばらつき）を、10月1日からの実際の成績で更新し、100%より上である見込みを出す
   let edgeTxt = '';
   try {
@@ -269,7 +302,8 @@ function topU(R, end, CADO, PV, KYU) {   // summary.md のいちばん上：い�
       return [`気象のずれの見張り（${PF}から、公式の preview の記録があるレース）：公式の preview（締切16分前ごろの気象＝版12の通知と同じ）で選ぶと ${a.length}レース・${ua.n}点・的中${sum(a).hit}・回収${ua.n ? (ua.ret / ua.n * 100).toFixed(1) + '%' : '-'}、確定の preview（確かめと同じ）で選ぶと ${b.length}レース・${ub.n}点・的中${sum(b).hit}・回収${ub.n ? (ub.ret / ub.n * 100).toFixed(1) + '%' : '-'}（同じレース ${both}）。確かめにずれを足すと回収は2ポイントほど下がる見込み（第16章「版12」）`]; })() : []),
     ...(CADO_FROM && PV ? [`版12（${CADO_FROM}から）は、通知と同じく公式の直前情報の preview（展示を見つけたとき・締切16分前ごろの気象）で印を出して数えている（その記録が無いレースは v1 の確定した preview）。${CADO_FROM}からの買った分のうち公式の preview で選んだもの ${S.filter(r => r['日付'] >= CADO_FROM && r['公式']).length}レース`] : []),
     `勝負レース（お得度${STRONG.toFixed(2)}以上・または来る確率${Math.round(SWEET[0] * 100)}〜${Math.round(SWEET[1] * 100)}%、${SU_TXT}で買う・7〜9月は1点）：10月1日からの全部で ${ts.n}点・的中${ts.hit}・回収${roi(ts)}（確かめでは1日1.3R・回収118%前後。外れが続くこともある）。` +
-      `勝負レースを${SU_TXT}にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
+      `勝負レースを${SU_TXT}にした損益は、` + (t.n ? `${FROM}からで ${yen(tu.ret - tu.n)}（全部1点なら ${yen(t.ret - t.n)}）・` : '') + `10月1日からの全部で ${yen(tsu.ret - tsu.n)}（全部1点なら ${yen(sum(S).ret - S.length)}）`, gTxt,
+    ...(ONLY_FROM ? [`勝負レースだけ（通知の ONLY_STRONG、${ONLY_FROM}から）：この日からの買った分は勝負レースだけ。知らせなかった勝負でないレースは ${SG.filter(r => r['日付'] >= ONLY_FROM && !strong(r)).length}レース・回収${roi(sum(SG.filter(r => r['日付'] >= ONLY_FROM && !strong(r))))}`] : []), ...(lineTxt ? [lineTxt] : []), ...(edgeTxt ? [edgeTxt] : []), '',
     `| 月 | 点 | 的中 | 回収 | 損益（1点100円） | 勝負レース | 勝負レースを${SU_TXT}（7〜9月は1点）にした損益 |`, '| --- | --- | --- | --- | --- | --- | --- |'];
   [...new Set(S.map(r => r['日付'].slice(0, 7)))].sort().forEach(m => { const X = S.filter(r => r['日付'].startsWith(m)), u = sum(X), w = sum(X.filter(strong)), uu = sumU(X);
     out.push(`| ${m} | ${u.n} | ${u.hit} | ${roi(u)} | ${yen(u.ret - u.n)} | ${w.n}点・的中${w.hit} | ${yen(uu.ret - uu.n)} |`); });
