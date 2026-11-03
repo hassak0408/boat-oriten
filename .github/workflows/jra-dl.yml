@@ -1,6 +1,7 @@
 # 中央競馬の成績表（JRA公式サイトのPDF）を落として読み、レースと馬の表にして、非公開のリポジトリ hassak0408/chiho-keiba の jra/data/年/ に置く。
 #   PDFそのものは残さない。読み込みは10秒に1回まで。1回は最大5時間20分で、残りがあれば自分で次の回を動かす。
 #   毎朝6:40（日本時間）に、今年の分の新しい日を足す（一覧のページを1回読むだけの日が多い）。
+#   新しい成績が入った日は、不利明けの馬の前向きの記録（data/fwd/jra_furiake.txt、検証計画 F3）も作り直す。
 name: jra-dl
 on:
   schedule:
@@ -40,6 +41,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests pdfplumber
+      - name: 前の状態
+        id: before
+        run: echo "head=$(git -C store rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: 落として読む
         id: dl
         env:
@@ -55,6 +59,15 @@ jobs:
         run: |
           Y="$(TZ=Asia/Tokyo date +%Y)"
           python chiho/jra/hyo.py store $Y
+      - name: 不利明けの馬の前向きの記録（検証計画 F3。新しい成績が入った日だけ）
+        if: inputs.redo == '' && (steps.dl.outputs.left == '' || steps.dl.outputs.left == '0')
+        continue-on-error: true
+        env:
+          BEFORE: ${{ steps.before.outputs.head }}
+        run: |
+          if git -C store diff --quiet "$BEFORE" HEAD -- jra/data && [ -f store/data/fwd/jra_furiake.txt ]; then echo "新しい成績なし"; exit 0; fi
+          pip install pandas
+          python chiho/jra/jfwd.py store
       - name: 次の回を動かす
         if: steps.dl.outputs.left != '' && steps.dl.outputs.left != '0'
         env:
