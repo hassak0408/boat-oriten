@@ -118,27 +118,34 @@ def run_ses():
         k = f'{y % 100:02d}{m:02d}'
         if k in obj: months.append((y, m, f'pw01skl10{y}{m:02d}/{obj[k]}'))
         y, m = (y, m - 1) if m > 1 else (y - 1, 12)
-    print('月', len(months), flush=True)
+    mpath = f'{store}/jra/ses/months.json'      # 全部読み終えた月（先月より前だけ。読み直さない）
+    mdone = set(json.load(open(mpath))) if os.path.exists(mpath) else set()
+    old = (now.year, now.month - 1) if now.month > 1 else (now.year - 1, 12)
+    print('月', len(months), '読み終えた月', len(mdone), flush=True)
     left = 0; last_save = time.time(); n_done = 0
     for y, m, cname in months:
+        if f'{y}{m:02d}' in mdone: continue
         if time_up(): left += 1; continue
         page = fetch('POST', '/JRADB/accessS.html', cname)
         if not page: continue
+        ok = True
         srl = sorted(set(re.findall(r"doAction\('/JRADB/accessS.html',\s*'(pw01srl10(\d{2})(\d{4})(\d{2})(\d{2})(\d{8})/[0-9A-F]{2})'\)", page)))
         for cn, pl, yy, kai, nichi, ymd in srl:
             if pl not in CODE: continue
             name = f'{yy}-{int(kai)}{CODE[pl][0]}{int(nichi)}'; path = f'{store}/jra/ses/{yy}/{name}.csv.gz'
             if os.path.exists(path): continue
-            if time_up(): left += 1; continue
+            if time_up(): left += 1; ok = False; continue
             sp = fetch('POST', '/JRADB/accessS.html', cn)
             ses = re.search(r"doAction\('/JRADB/accessS.html',\s*'(pw01ses10\d+/[0-9A-F]{2})'\)", sp or '')
-            if not ses: print('全てのレースのリンクが無い', name, flush=True); continue
+            if not ses: print('全てのレースのリンクが無い', name, flush=True); ok = False; continue
             pg = fetch('POST', '/JRADB/accessS.html', ses.group(1))
             rows = parse_ses(pg or '', ymd, CODE[pl][1], int(kai), int(nichi))
-            if not rows: print('馬が読めない', name, flush=True); continue
+            if not rows: print('馬が読めない', name, flush=True); ok = False; continue
             write(path, SES_COLS, rows); n_done += 1
             print(name, 'レース', len(set(r[4] for r in rows)), '頭', len(rows), flush=True)
             if time.time() - last_save > 1800: save(f'中央競馬の過去のレース結果（途中） {y}年{m}月'); last_save = time.time()
+        if ok and (y, m) < old:
+            mdone.add(f'{y}{m:02d}'); os.makedirs(os.path.dirname(mpath), exist_ok=True); json.dump(sorted(mdone), open(mpath, 'w'))
     save('中央競馬の過去のレース結果'); print('開催', n_done, '残り（月）', left, flush=True)
     return left
 
