@@ -19,7 +19,7 @@ REUSE = os.environ.get('REUSE') == '1' and os.path.exists(sys.argv[3])      # �
 for y in ([] if REUSE else range(2021, 2027)):
     tr = H[(H['年'] >= 2017) & (H['年'] < y)]; te = H[H['年'] == y].copy()
     for tgt, col in (('3着内', 'p3'), ('勝', 'p1')):
-        m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=0, categorical_features=cat, **BIG)
+        m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=int(os.environ.get('SEED', '0')), categorical_features=cat, **BIG)      # SEED：K8（いくつか作って平均）
         m.fit(tr[FE], tr[tgt]); te[col] = m.predict_proba(te[FE])[:, 1]
     P.append(te[KEY + ['馬番', '年', 'n', '着', '勝', '3着内', '人気', '単勝オッズ', '新馬', '走数', 'p1', 'p3']])
     print('純粋な評価', y, round(time.time() - t0), '秒', flush=True)
