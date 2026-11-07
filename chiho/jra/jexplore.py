@@ -2,7 +2,7 @@
 読んだページを STORE/jra/explore/ に置く（非公開の置き場。下調べが終わったら消す）。
 使い方：python chiho/jra/jexplore.py STORE 手順…
   手順の書き方：S:cname（accessS.html に POST）／U:cname（accessU.html に POST）／D:cname（accessD.html に POST）／G:パス?CNAME=…（GET）
-  特別な手順：horse（今の出馬表から馬のページを3つ読む）"""
+  特別な手順：horse（今の出馬表から馬のページを3つ読む）、F:頭の文字（前のページの、その文字で始まる最初のリンクを読む）"""
 import os, re, sys, time, requests
 
 BASE = 'https://www.jra.go.jp'
@@ -29,6 +29,7 @@ def save(name, page):
     open(f'{out}/{name}.html', 'w', encoding='utf-8').write(page)
 
 
+prev = ''
 for step in sys.argv[2:]:
     if step == 'horse':
         top = get('POST', '/JRADB/accessD.html', 'pw01dli00/F3'); save('dli00', top)
@@ -44,5 +45,12 @@ for step in sys.argv[2:]:
             save('dud_' + h.split('CNAME=')[1], get('GET', h if h.startswith('/') else '/JRADB/' + h.split('/JRADB/')[-1], ''))
         continue
     kind, arg = step.split(':', 1)
-    if kind == 'G': save('G_' + arg.split('CNAME=')[-1], get('GET', arg, ''))
-    else: save(f'{kind}_' + arg, get('POST', {'S': '/JRADB/accessS.html', 'U': '/JRADB/accessU.html', 'D': '/JRADB/accessD.html'}[kind], arg))
+    if kind == 'F':      # 前のページのリンクをたどる（doAction でも href でも）
+        m = re.search(r"doAction\('(/JRADB/access\w+\.html)',\s*'(%s[0-9A-Fa-f/]*)'\)" % re.escape(arg), prev)
+        h = re.search(r'href="(/JRADB/access\w+\.html\?CNAME=%s[0-9A-Fa-f/]*)"' % re.escape(arg), prev)
+        if m: pg = get('POST', m.group(1), m.group(2)); save('F_' + m.group(2), pg)
+        elif h: pg = get('GET', h.group(1), ''); save('F_' + h.group(1).split('CNAME=')[1], pg)
+        else: print('たどるリンクが無い', arg, flush=True); continue
+    elif kind == 'G': pg = get('GET', arg, ''); save('G_' + arg.split('CNAME=')[-1], pg)
+    else: pg = get('POST', {'S': '/JRADB/accessS.html', 'U': '/JRADB/accessU.html', 'D': '/JRADB/accessD.html'}[kind], arg); save(f'{kind}_' + arg, pg)
+    prev = pg or ''
