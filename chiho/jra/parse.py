@@ -169,6 +169,16 @@ def parse_block(chars, meta=None):
     race['角'] = corners(L, xref)
     m3 = re.search(r'上り4F([\d.]+)―3F([\d.]+)', head)
     race['上り3F'] = float(m3.group(2)) if m3 else None
+    # ハロンタイム：先頭の馬の200mごとのラップ（距離が100m余る時は最初が100m）。行が分かれた時は、数字だけの続きの行をつなぐ
+    texts = [z2h(''.join(ctext(c['text']) for c in cs)).replace(' ', '') for t, cs in L]
+    i = next((k for k, x in enumerate(texts) if x.startswith('ハロンタイム')), None)
+    lap = ''
+    if i is not None:
+        lap = texts[i]
+        for x in texts[i + 1:i + 3]:
+            if not re.fullmatch(r'[―\d.]+', x): break
+            lap += x
+    race['ラップ'] = [float(x) for x in re.findall(r'\d+\.\d', lap)]
     return race
 
 

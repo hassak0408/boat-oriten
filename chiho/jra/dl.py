@@ -11,7 +11,7 @@ GAP = 10
 S = requests.Session(); S.headers.update({'User-Agent': UA, 'Accept-Language': 'ja'})
 last = [0.0]
 RC = ['年月日', '場', '回', '日目', 'R', 'レース名', '芝ダ', 'コース', '距離', '天候', '馬場', '条件', '年齢', '重量', '牝限', '格', '発走', '頭数', '上り3F', '賞金',
-      '角', '払戻', '見出し', '注記']
+      '角', '払戻', '見出し', '注記', 'ラップ']
 HC = ['年月日', '場', 'R', '行', '枠', '馬番', '馬名', '性', '齢', '毛色', '斤量', '騎手', '減量', '馬主', '調教師', '産地', '生産', 'ブリンカー', '馬体重', '増減',
       'タイム', '着差', '単勝オッズ', '人気', '状態', '着順']
 GIT_ID = ['-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com']
@@ -60,13 +60,14 @@ def main():
         if r is None or r.status_code != 200: print(y, '一覧を読めない', flush=True); left += 1; continue
         r.encoding = r.apparent_encoding or 'utf-8'
         names = sorted(set(re.findall(r'(%s-\d+[a-z]+\d+)\.pdf' % y, r.text)))
-        redo = os.environ.get('REDO', '')      # 1：合わないレースがあった日を読み直す。all：注記の欄の無い日（前の読み取りの日）を読み直す
+        redo = os.environ.get('REDO', '')      # 1：合わないレースがあった日を読み直す。all：いちばん新しい欄（今は「ラップ」）の無い日（前の読み取りの日）を読み直す
 
-        def has_note(n):
+        def has_new(n):
             p = f'{out}/{n}_races.csv.gz'
             if not os.path.exists(p): return False
-            with gzip.open(p, 'rt', encoding='utf-8') as fh: return '注記' in fh.readline()
-        done = lambda n: idx.get(n, {}).get('済') and (redo != 'all' or has_note(n)) and not (redo == '1' and idx[n].get('合わないレース'))
+            with gzip.open(p, 'rt', encoding='utf-8') as fh: return RC[-1] in next(csv.reader([fh.readline()]))
+        done = lambda n: idx.get(n, {}).get('済') and (redo != 'all' or has_new(n)) and not (redo == '1' and idx[n].get('合わないレース')) \
+            and not (redo == 'lap' and idx[n].get('ラップが合わない'))      # lap：ラップの数が距離と合わないレースがあった日を読み直す
         print(y, 'PDFの数', len(names), 'うち済み', sum(1 for n in names if done(n)), flush=True)
         for name in names:
             if done(name): continue
@@ -98,16 +99,17 @@ def process(name, content, out):
     finally:
         try: os.remove(path); os.rmdir(d)
         except OSError: pass
-    rows_r, rows_h, bad = [], [], []
+    rows_r, rows_h, bad, lapbad = [], [], [], []
     for x in rs:
-        rows_r.append([x.get(c) if c not in ('角', '払戻') else json.dumps(x.get(c), ensure_ascii=False) for c in RC])
+        rows_r.append([x.get(c) if c not in ('角', '払戻', 'ラップ') else json.dumps(x.get(c), ensure_ascii=False) for c in RC])
         for h in x['馬']:
             rows_h.append([x['年月日'], x['場'], x['R']] + [h.get(c) for c in HC[3:]])
         n_ok = len([h for h in x['馬'] if h['状態'] not in ('出走取消', '取消', '競走除外', '除外')])
         if x['頭数'] != n_ok or '読めない' in x['払戻'] or not x['払戻']: bad.append(x['R'])
+        if x.get('芝ダ') in ('芝', 'ダート') and x.get('距離') and len(x.get('ラップ') or []) != -(-int(x['距離']) // 200): lapbad.append(x['R'])
     write(f'{out}/{name}_races.csv.gz', RC, rows_r); write(f'{out}/{name}_horses.csv.gz', HC, rows_h)
-    print(name, 'レース', len(rs), '頭', len(rows_h), '合わない', bad, flush=True)
-    return {'済': True, 'レース': len(rs), '頭': len(rows_h), '合わないレース': bad, 'バイト': len(content)}
+    print(name, 'レース', len(rs), '頭', len(rows_h), '合わない', bad, 'ラップが合わない', lapbad, flush=True)
+    return {'済': True, 'レース': len(rs), '頭': len(rows_h), '合わないレース': bad, 'ラップが合わない': lapbad, 'バイト': len(content)}
 
 
 if __name__ == '__main__':
