@@ -1,0 +1,52 @@
+# 中央競馬：JRA公式サイトのページの形を確かめる（血統を集める前の下調べ。手で動かすだけ）。
+#   読んだページは非公開のリポジトリ hassak0408/chiho-keiba の jra/explore/ に置く（下調べが終わったら消す）。
+name: jra-explore
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: '手順（空白で区切る。jexplore.py の説明を見る）'
+        required: true
+        default: 'horse S:pw01skl00999999/B3'
+permissions:
+  contents: read
+concurrency:
+  group: jra-explore
+  cancel-in-progress: false
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 読む
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: python chiho/jra/jexplore.py store $STEPS
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jra/explore 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬 ページの形の下調べ"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
