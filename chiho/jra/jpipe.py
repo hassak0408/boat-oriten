@@ -1,7 +1,7 @@
 """中央競馬の来そうな馬（開催日の朝の一覧。検証計画「中央競馬」）。
 STORE/jra/data（成績表を読んだ表）と STORE/jra/card/日付.csv.gz（今日の出馬表）から、今日の馬ごとに3着内・1着の見込みと脚質の予想を出し、
 STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
-- モデルは毎回作る（Y年はY−1年まで、2017年から。乱数0）。材料はレース前に分かるものだけ。人気・オッズは、そのレースの分も前のレースの分も使わない
+- モデルは毎回作る（Y年はY−1年まで、2017年から）。3着内と1着は乱数0・1・2の3つを作って平均する（検証計画 K8）。脚質は乱数0の1つ。材料はレース前に分かるものだけ。人気・オッズは、そのレースの分も前のレースの分も使わない
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
 使い方：python chiho/jra/jpipe.py STORE [日付YYYYMMDD]"""
@@ -52,8 +52,11 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, 
     F = [c for c in F if rows[c].notna().any()]      # 全部空の列は使わない（試しのときだけ起きる）
     cat = [F.index(c) for c in CATF if c in F]
     P = dict(P, min_samples_leaf=min(P['min_samples_leaf'], max(20, len(rows) // 50)))      # 学習の行が少ないとき（試しのとき）だけ小さくする
-    m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=0, categorical_features=cat, **P)
-    m.fit(rows[F], rows[tgt]); TE[col] = m.predict_proba(TE[F])[:, 1]; log('モデル', tgt, '学習', len(rows), '回数', m.n_iter_)
+    ps = []
+    for sd in ((0, 1, 2) if tgt in ('3着内', '勝') else (0,)):      # 3つの平均で、作り直すたびの揺れを減らす（K8）
+        m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=sd, categorical_features=cat, **P)
+        m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
+    TE[col] = np.mean(ps, axis=0)
 
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
 fx = f'{HERE}/jra_fix.json'
@@ -85,7 +88,7 @@ def top_pairs(g, m=3):
 
 RC = C.drop_duplicates(['場', 'R']).set_index(['場', 'R'])
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
-out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印を使う）', 'レース': []}
+out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印を使う。3つのモデルの平均）', 'レース': []}
 lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。馬の走りと成績だけの評価で、人気・オッズは前走の分も見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
          '見方：来る馬・勝つ馬は人気（オッズ）のほうがよく当たる。1番手が1番人気と同じなら信頼できる。違うときは1番人気を重く。',
