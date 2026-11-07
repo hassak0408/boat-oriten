@@ -53,7 +53,7 @@ def cell(block, cls):
 
 def save(msg):
     def run(*a): return subprocess.run(['git', '-C', store] + GIT_ID + list(a), capture_output=True, text=True)
-    run('add', 'jra/ses', 'jra/horse')
+    run('add', 'jra')      # jra/ses と jra/horse（無い方があっても止まらないように、jra ごと足す）
     if run('diff', '--cached', '--quiet').returncode == 0: return
     run('commit', '-q', '-m', msg)
     for _ in range(5):
