@@ -19,17 +19,24 @@ def one(laps, d):
 
 
 def lap_table(root):
-    rows = []
+    rs = []
     for f in sorted(glob.glob(f'{root}/*/*_races.csv.gz')):
         r = pd.read_csv(f, dtype=str, keep_default_na=False)
-        if 'ラップ' not in r: continue
-        for a, b, c, sd, dist, lp in r[KEY + ['芝ダ', '距離', 'ラップ']].itertuples(index=False, name=None):
-            if sd not in ('芝', 'ダート') or not lp: continue
-            try: laps = json.loads(lp); d = int(dist)
-            except ValueError: continue
-            v = one(laps, d)
-            if v: rows.append((a, b, c, sd, d) + v)
+        if 'ラップ' in r: rs.append(r[KEY + ['芝ダ', '距離', 'ラップ']])
+    return lap_from_races(pd.concat(rs, ignore_index=True))
+
+
+def lap_from_races(R):
+    """レースの表（年月日・場・R・芝ダ・距離・ラップ）から。jfeat.build からも使う"""
+    rows = []
+    for a, b, c, sd, dist, lp in R[KEY + ['芝ダ', '距離', 'ラップ']].itertuples(index=False, name=None):
+        if sd not in ('芝', 'ダート') or not isinstance(lp, str) or not lp: continue
+        try: laps = json.loads(lp); d = int(float(dist))
+        except (ValueError, TypeError): continue
+        v = one(laps, d)
+        if v: rows.append((str(a), str(b), str(c), sd, d) + v)
     T = pd.DataFrame(rows, columns=KEY + ['芝ダ', '距離', '前半3F', '後半3F'] + LAPC)
+    T = T[~T.duplicated(KEY, keep=False)].copy()      # 同じ日・場・Rが2つあるレース（読み取りの食いちがい、36組）は使わない
     T['年'] = T['年月日'].str[:4].astype(int)
     T['距帯3'] = pd.cut(T['距離'], [0, 1400, 1800, 9999], labels=['〜1400', '1401〜1800', '1801〜']).astype(str)
     base = T[T['年'] <= 2018]

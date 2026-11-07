@@ -5,6 +5,8 @@
 - card（今日の出馬表、結果なし）を渡すと、その行は「予測」が True になる。
 使い方：python jfeat.py STORE/jra/data 出力.pkl"""
 import os, re, sys, glob, json, time, warnings, numpy as np, pandas as pd
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import jlap
 warnings.simplefilter('ignore', pd.errors.PerformanceWarning)
 
 KEY = ['年月日', '場', 'R']
@@ -122,6 +124,7 @@ def build(root, card=None, verbose=True, years=None):
     """root：jra/data。card：今日の出馬表（レースの列と馬の列を1つにした表。結果なし）"""
     t0 = time.time()
     R, H = read_all(root, years)
+    R0 = R      # ラップ（L3）は読み取ったままのレースの表から作る
     H['予測'] = False
     if card is not None and len(card):
         cr = card.drop_duplicates(KEY)[[c for c in R.columns if c in card.columns]]
@@ -327,6 +330,18 @@ def build(root, card=None, verbose=True, years=None):
     H['馬番率'] = H['馬番'] / H['n']
     for c, src in (('場c', '場'), ('芝ダc', '芝ダ'), ('馬場c', '馬場'), ('天候c', '天候'), ('性c', '性')):
         H[c] = H[src].map(CATS[c]).astype(float)
+    # ラップ（検証計画「中央：ラップタイム」L3）：前走と過去3走の平均の、前後半差・中盤のゆるみ・最後の失速（ふだんとのちがい）
+    if 'ラップ' in R0.columns:      # H を作り直さない（メモリを食わない）ように、そのレースの値は別の表に置く
+        T = jlap.lap_from_races(R0); T['R'] = num(T['R']).astype('Int64')
+        lt = T.set_index(KEY)[jlap.LAPC]; idx = pd.MultiIndex.from_arrays([H[k] for k in KEY])
+        lap = {c: lt[c].reindex(idx).values for c in jlap.LAPC}
+    else:
+        lap = {c: np.full(len(H), np.nan) for c in jlap.LAPC}
+    S = pd.DataFrame({'馬': H['馬'].values, '日': H['日'].values, 'R': H['R'].values} | lap, index=H.index).sort_values(['馬', '日', 'R'])
+    g = S.groupby('馬', sort=False)
+    for c, nm in (('前後半差', '前後半差'), ('中盤ゆるみ', '中盤'), ('失速', '失速')):
+        H['前' + nm] = g[c].shift(1).reindex(H.index)
+        H['過去3' + nm] = g[c].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean()).reindex(H.index)
     H = H.copy()
     if verbose: print('できあがり', len(H), '行', round(time.time() - t0), '秒', flush=True)
     return H
@@ -376,6 +391,7 @@ FEATS = ['場c', '芝ダc', '馬場c', '天候c', '性c', '月', '時', '距離'
 CATF = ['場c', '芝ダc', '馬場c', '天候c', '性c']
 PACE = ['前ペース比', '前上り差', '初角率1']
 PASTM = ['前オッズ', '過去3オッズ', '過去3人気率']
+LAPF = ['前前後半差', '過去3前後半差', '前中盤', '過去3中盤', '前失速', '過去3失速']      # 前走・過去3走のラップ（検証計画 L3。jlap.py）
 MKT = ['前人気', '前人気率', '前人気着差', '騎単回', '調単回']      # 市場から来る材料（一覧の純粋な評価では使わない。検証計画 K3）
 TROUBLE = ['前不利被害', '前不利発走', '前不利疾病', '前不利加害', '前不利あり', '過去3不利']      # 前走・過去3走の不利の印（K1。注記から）
 EXTRA = ['騎初数', '騎初勝率', '騎初3率', '調初数', '調初勝率', '調初3率', '主初数', '主初勝率', '主初3率', '牧初数', '牧初勝率', '牧初3率',

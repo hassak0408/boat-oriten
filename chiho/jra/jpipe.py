@@ -5,11 +5,11 @@ STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
 使い方：python chiho/jra/jpipe.py STORE [日付YYYYMMDD]"""
-import os, sys, json, time, datetime as dt, numpy as np, pandas as pd
+import os, sys, gc, json, time, datetime as dt, numpy as np, pandas as pd
 from itertools import combinations
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jfeat
-from jfeat import FEATS, CATF, KEY, EXTRA, PACE, MKT, TROUBLE
+from jfeat import FEATS, CATF, KEY, EXTRA, PACE, MKT, TROUBLE, LAPF
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 JST = dt.timezone(dt.timedelta(hours=9))
@@ -37,14 +37,16 @@ for c in ('着順', 'タイム', '単勝オッズ', '人気', '馬体重', '増�
 log('今日', today, 'レース', C.groupby(['場', 'R']).ngroups, '頭', len(C))
 
 H = jfeat.build(f'{store}/jra/data', card=C, verbose=False); log('材料')
+FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップの材料を足す（L3）
+FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
+                   '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
+NEED = set(FE + FES + KEY + ['年', '予測', '合わない', '3着内', '勝', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病'])
+H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わない'] == 0)]
 TE = H[H['予測']].copy()
 if not len(TE):
     log('今日の馬の行が作れなかった'); sys.exit(1)
-FE = [c for c in FEATS + EXTRA + PACE + TROUBLE if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）
-FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
-                   '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
 for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, BIG, TRN),
