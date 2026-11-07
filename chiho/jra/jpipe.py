@@ -60,12 +60,21 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, 
         m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
 
-TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
-fx = f'{HERE}/jra_fix.json'
-if os.path.exists(fx):      # 中央で初めて走る馬（新馬以外）は、1着を高く見すぎる（検証計画「中央：評価のかたよりを直す」F1）
-    k1 = json.load(open(fx, encoding='utf-8'))['中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値']
-    TE.loc[(TE['走数'] == 0) & (TE['新馬'] == 0), 'p1'] *= k1
+TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(1e-4, 0.97)
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
+fx = f'{HERE}/jra_fix.json'
+FIX = json.load(open(fx, encoding='utf-8')) if os.path.exists(fx) else {}
+grp = [TE[k] for k in KEY]
+if '1着の付け直し' in FIX:      # 1着 ∝ exp(a×log 1着 + b×log 3着内)（検証計画 M2a。3着内の見込みにも1着の手がかりがある）
+    a, b = FIX['1着の付け直し']['a'], FIX['1着の付け直し']['b']
+    sc = a * np.log(TE['p1'].clip(1e-6)) + b * np.log(TE['p3'].clip(1e-6)); sc = sc - sc.groupby(grp).transform('max')
+    TE['p1'] = np.exp(sc)
+if '中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値' in FIX:      # F1（M2aで要らなくなった。値があるときだけ）
+    TE.loc[(TE['走数'] == 0) & (TE['新馬'] == 0), 'p1'] *= FIX['中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値']
+TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
+if '3着内の付け直し' in FIX:      # 3着内 ∝ 3着内^c（足して3、M2a）
+    e = TE['p3'] ** FIX['3着内の付け直し']['c']
+    TE['p3'] = (e * np.minimum(3, TE['n']) / e.groupby(grp).transform('sum')).clip(1e-4, 0.97)
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
