@@ -248,6 +248,8 @@ def parse_pdf(path):
                 r = parse_block([c for c in p.chars if a <= c['x0'] < b], meta)
                 if r and r.get('馬'):
                     if r['R'] is None: r['R'] = (races[-1]['R'] + 1) if races else 1
+                    elif 'レース目' in r['レース名'] and races and r['R'] <= races[-1]['R']:      # 開催の最後の日の10Rなどで、番号の行を読み違える（「3レース目」）
+                        r['R'] = races[-1]['R'] + 1; r['レース名'] = ''
                     races.append(r)
     return races
 

@@ -85,9 +85,11 @@ def read_all(root, years=None):
             r = pd.read_csv(f, dtype=str, keep_default_na=False)
             bad = {str(x) for x in idx.get(os.path.basename(f)[:-len('_races.csv.gz')], {}).get('合わないレース', [])}
             r['合わない'] = r['R'].isin(bad).astype(int).astype(str)     # 頭数か払戻が合わなかったレース（答え合わせ・学習には使わない）
-            rs.append(r)
             hf = f.replace('_races.csv.gz', '_horses.csv.gz')
-            if os.path.exists(hf): hs.append(pd.read_csv(hf, dtype=str, keep_default_na=False))
+            h = pd.read_csv(hf, dtype=str, keep_default_na=False) if os.path.exists(hf) else None
+            if 'レース名' in r and r['レース名'].str.contains('レース目').any(): r, h = fix_race_no(r, h)
+            rs.append(r)
+            if h is not None: hs.append(h)
     R = pd.concat(rs, ignore_index=True) if rs else pd.DataFrame()
     H = pd.concat(hs, ignore_index=True) if hs else pd.DataFrame()
     return R, H
@@ -95,6 +97,21 @@ def read_all(root, years=None):
 
 def num(s):
     return pd.to_numeric(s, errors='coerce')
+
+
+def fix_race_no(r, h):
+    """開催の最後の日の10Rなどで、レースの番号を読み違えて「レース目」という名前になったレース（2016〜2026年に37）を、前のレースの次の番号に直す。
+    馬の行は成績表の順に並んでいるので、同じ番号の馬のかたまりを、レースの行と同じ順に当てる（並びが合わないときは直さない）"""
+    R = r['R'].tolist(); new = list(R)
+    for i, nm in enumerate(r['レース名'].tolist()):
+        if 'レース目' in nm and i > 0 and str(new[i - 1]).isdigit() and int(R[i]) <= int(new[i - 1]): new[i] = str(int(new[i - 1]) + 1)
+    if new == R or len(set(new)) != len(new): return r, h
+    if h is not None:
+        blk = (h['R'] != h['R'].shift()).cumsum(); seq = h.groupby(blk, sort=False)['R'].first().tolist()
+        if seq != R: return r, h      # 馬のいないレースがあるなど、並びが合わない
+        h = h.copy(); h['R'] = blk.map(dict(zip(range(1, len(new) + 1), new)))
+    r = r.copy(); r['R'] = new; r.loc[r['レース名'].str.contains('レース目'), 'レース名'] = ''
+    return r, h
 
 
 def corner_lists(js):
