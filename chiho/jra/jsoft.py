@@ -62,8 +62,8 @@ def _sorted(X):
     return o.index, g
 
 
-def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None):
-    """X：学ぶ行（勝・着・年月日・場・R・馬番と材料）。勝ち馬のいないレースと1頭のレースは除く"""
+def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None, params=None):
+    """X：学ぶ行（勝・着・年月日・場・R・馬番と材料）。勝ち馬のいないレースと1頭のレースは除く。params で木の大きさなどを替えられる（検証計画 M5）"""
     import lightgbm as lgb
     idx, g = _sorted(X)
     Y = X.loc[idx]; w = pd.Series(Y['勝'].values).groupby(g).transform('sum').values; n = pd.Series(g).groupby(g).transform('size').values
@@ -78,7 +78,7 @@ def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None):
         def ds(m):
             d = lgb.Dataset(Y.loc[m, FE], label=y[m], categorical_feature=[c for c in cat if c in FE], free_raw_data=False)
             d.gs = groups(g[m]); d.order = order[m]; return d
-        b = lgb.train(dict(P, objective=make_obj(tuple(wt)), seed=sd, num_threads=os.cpu_count() or 4), ds(~va), num_boost_round=3000, valid_sets=[ds(va)],
+        b = lgb.train(dict(P, **(params or {}), objective=make_obj(tuple(wt)), seed=sd, num_threads=os.cpu_count() or 4), ds(~va), num_boost_round=3000, valid_sets=[ds(va)],
                       feval=_feval, callbacks=[lgb.early_stopping(30, verbose=False)])
         models.append(b)
         if log: log('モデル 1〜3着の順（レースの中で比べる）', '乱数', sd, '学習', int((~va).sum()), '回数', b.best_iteration)
