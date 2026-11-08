@@ -2,6 +2,8 @@
 1) ses：過去のレース結果。月のページ（pw01skl10年月/チェック。チェックは検索のページの objParam）→ 開催のページ（pw01srl…）
    → 全てのレースのページ（pw01ses…）。1頭1行で、馬ID・馬のページ・推定上り・通過順位・馬体重・人気なども残す。
    → STORE/jra/ses/年/年-回場日.csv.gz（成績表の表と同じ名前）。新しい月から。2016年1月まで。
+   月のページにまだ出ていない最近の開催は、今週のレース結果のページ（pw01sli00）からも読む。今日より前の開催だけ（途中の日を残さない）。
+   毎朝 jra-dl から新しい開催だけ足す（1頭ごとの推定上りを一覧のモデルが使う。検証計画 U1）。
 2) horse：馬のページ（pw01dud…）。父・母・母の父・母の母（とそのID）・生年月日・生産牧場・毛色・性別。
    → STORE/jra/horse/生まれ年.csv.gz（馬IDの頭4けた）。最近走った馬から。
 読み込みは4秒に1回まで。環境変数 LIMIT_MIN（分）を過ぎたら止め、残りの数を GITHUB_OUTPUT の left に出す。30分ごとに保存する。
@@ -110,7 +112,28 @@ def parse_horse(page, hid):
 def time_up(): return time.time() - t0 > limit
 
 
+def ses_path(pl, yy, kai, nichi):
+    name = f'{yy}-{int(kai)}{CODE[pl][0]}{int(nichi)}'
+    return name, f'{store}/jra/ses/{yy}/{name}.csv.gz'
+
+
+def get_kaisai(cn, pl, yy, kai, nichi, ymd):
+    """開催のページ → 全てのレースのページ → 1頭1行の表。読めたら True"""
+    name, path = ses_path(pl, yy, kai, nichi)
+    sp = fetch('POST', '/JRADB/accessS.html', cn)
+    ses = (re.search(r"doAction\('/JRADB/accessS.html',\s*'(pw01ses10\d+/[0-9A-F]{2})'\)", sp or '')
+           or re.search(r"doAction\('/JRADB/accessS.html',\s*'(pw01ses\d+/[0-9A-F]{2})'\)", sp or ''))      # 今週の分は pw01ses01…
+    if not ses: print('全てのレースのリンクが無い', name, flush=True); return False
+    pg = fetch('POST', '/JRADB/accessS.html', ses.group(1))
+    rows = parse_ses(pg or '', ymd, CODE[pl][1], int(kai), int(nichi))
+    if not rows: print('馬が読めない', name, flush=True); return False
+    write(path, SES_COLS, rows)
+    print(name, 'レース', len(set(r[4] for r in rows)), '頭', len(rows), flush=True)
+    return True
+
+
 def run_ses():
+    today = dt.datetime.now(JST).strftime('%Y%m%d')
     top = fetch('POST', '/JRADB/accessS.html', 'pw01skl00999999/B3')
     obj = dict(re.findall(r'objParam\["(\d{4})"\]="([0-9A-F]{2})"', top or ''))
     now = dt.datetime.now(JST); y, m = now.year, now.month; months = []
@@ -131,21 +154,23 @@ def run_ses():
         ok = True
         srl = sorted(set(re.findall(r"doAction\('/JRADB/accessS.html',\s*'(pw01srl10(\d{2})(\d{4})(\d{2})(\d{2})(\d{8})/[0-9A-F]{2})'\)", page)))
         for cn, pl, yy, kai, nichi, ymd in srl:
-            if pl not in CODE: continue
-            name = f'{yy}-{int(kai)}{CODE[pl][0]}{int(nichi)}'; path = f'{store}/jra/ses/{yy}/{name}.csv.gz'
-            if os.path.exists(path): continue
+            if pl not in CODE or ymd >= today: continue
+            if os.path.exists(ses_path(pl, yy, kai, nichi)[1]): continue
             if time_up(): left += 1; ok = False; continue
-            sp = fetch('POST', '/JRADB/accessS.html', cn)
-            ses = re.search(r"doAction\('/JRADB/accessS.html',\s*'(pw01ses10\d+/[0-9A-F]{2})'\)", sp or '')
-            if not ses: print('全てのレースのリンクが無い', name, flush=True); ok = False; continue
-            pg = fetch('POST', '/JRADB/accessS.html', ses.group(1))
-            rows = parse_ses(pg or '', ymd, CODE[pl][1], int(kai), int(nichi))
-            if not rows: print('馬が読めない', name, flush=True); ok = False; continue
-            write(path, SES_COLS, rows); n_done += 1
-            print(name, 'レース', len(set(r[4] for r in rows)), '頭', len(rows), flush=True)
+            if not get_kaisai(cn, pl, yy, kai, nichi, ymd): ok = False; continue
+            n_done += 1
             if time.time() - last_save > 1800: save(f'中央競馬の過去のレース結果（途中） {y}年{m}月'); last_save = time.time()
         if ok and (y, m) < old:
             mdone.add(f'{y}{m:02d}'); os.makedirs(os.path.dirname(mpath), exist_ok=True); json.dump(sorted(mdone), open(mpath, 'w'))
+    # 今週のレース結果（月のページにまだ出ていない最近の開催）。リンクの数字は 種類2・場2・年4・回2・日目2・年月日8
+    week = fetch('POST', '/JRADB/accessS.html', 'pw01sli00/AF') if not time_up() else None
+    wk = sorted(set(re.findall(r"doAction\('/JRADB/accessS.html',\s*'(pw01srl(\d{20})/[0-9A-F]{2})'\)", week or '')))
+    print('今週の開催', len(wk), [d for _, d in wk][:8], flush=True)
+    for cn, d in wk:
+        pl, yy, kai, nichi, ymd = d[2:4], d[4:8], d[8:10], d[10:12], d[12:]
+        if pl not in CODE or ymd[:4] != yy or ymd >= today: continue
+        if os.path.exists(ses_path(pl, yy, kai, nichi)[1]) or time_up(): continue
+        if get_kaisai(cn, pl, yy, kai, nichi, ymd): n_done += 1
     save('中央競馬の過去のレース結果'); print('開催', n_done, '残り（月）', left, flush=True)
     return left
 

@@ -2,6 +2,7 @@
 #   PDFそのものは残さない。読み込みは10秒に1回まで。1回は最大5時間20分で、残りがあれば自分で次の回を動かす。
 #   毎朝6:40（日本時間）に、今年の分の新しい日を足す（一覧のページを1回読むだけの日が多い）。
 #   新しい成績が入った日は、不利明けの馬の前向きの記録（data/fwd/jra_furiake.txt、検証計画 F3）も作り直す。
+#   JRAのレース結果のページ（推定上りなど）の新しい開催も足す（jra/ses/、ped.py。一覧のモデルが使う。検証計画 U1）。
 name: jra-dl
 on:
   schedule:
@@ -53,6 +54,12 @@ jobs:
         run: |
           Y="${YEARS:-$(TZ=Asia/Tokyo date +%Y)}"
           python chiho/jra/dl.py store $Y
+      - name: 推定上りなど（JRAのレース結果のページの新しい開催だけ。検証計画 U1）
+        if: inputs.redo == ''
+        continue-on-error: true
+        env:
+          LIMIT_MIN: '20'
+        run: python chiho/jra/ped.py store ses
       - name: 発売票数（掲載は約60日なので、毎朝新しい分を読んでためる。検証計画 J4）
         if: inputs.redo == ''
         continue-on-error: true

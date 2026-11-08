@@ -3,13 +3,14 @@ STORE/jra/data（成績表を読んだ表）と STORE/jra/card/日付.csv.gz（�
 STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
 - モデルは毎回作る（Y年はY−1年まで、2017年から）。3着内と1着は乱数0・1・2の3つを作って平均する（検証計画 K8）。脚質は乱数0の1つ。材料はレース前に分かるものだけ。人気・オッズは、そのレースの分も前のレースの分も使わない
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
+  前走までのラップ（L3）と1頭ごとの推定上り（U1。STORE/jra/ses、ped.py が毎朝足す）も使う。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
 使い方：python chiho/jra/jpipe.py STORE [日付YYYYMMDD]"""
 import os, sys, gc, json, time, datetime as dt, numpy as np, pandas as pd
 from itertools import combinations
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jfeat
-from jfeat import FEATS, CATF, KEY, EXTRA, PACE, MKT, TROUBLE, LAPF
+from jfeat import FEATS, CATF, KEY, EXTRA, PACE, MKT, TROUBLE, LAPF, UPF
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 JST = dt.timezone(dt.timedelta(hours=9))
@@ -37,7 +38,7 @@ for c in ('着順', 'タイム', '単勝オッズ', '人気', '馬体重', '増�
 log('今日', today, 'レース', C.groupby(['場', 'R']).ngroups, '頭', len(C))
 
 H = jfeat.build(f'{store}/jra/data', card=C, verbose=False); log('材料')
-FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップの材料を足す（L3）
+FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF + UPF if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップ（L3）と1頭ごとの推定上り（U1）を足す
 FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
                    '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
 NEED = set(FE + FES + KEY + ['年', '予測', '合わない', '3着内', '勝', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病'])

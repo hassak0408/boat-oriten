@@ -3,6 +3,7 @@
 - 前走などは同じ馬（馬名）の前のレース。騎手・調教師の成績は前の日までの365日、馬主・生産者は前の日までの全部。
 - 今のレースの人気・オッズは材料に入れない（「人気」「単勝オッズ」の列は答え合わせ用に残す）。
 - card（今日の出馬表、結果なし）を渡すと、その行は「予測」が True になる。
+- 1頭ごとの推定上り（前走・過去3走・過去5走）は、JRAのレース結果のページを読んだ表（STORE/jra/ses/、ped.py）から（検証計画 U1）。無ければ空。
 使い方：python jfeat.py STORE/jra/data 出力.pkl"""
 import os, re, sys, glob, json, time, warnings, numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -120,8 +121,28 @@ def prep_races(R):
     return R
 
 
-def build(root, card=None, verbose=True, years=None):
-    """root：jra/data。card：今日の出馬表（レースの列と馬の列を1つにした表。結果なし）"""
+def ukey(X):
+    """日・場・R・馬番を1つの文字にする（推定上りの表と1頭1行の表をつなぐため）"""
+    return (X['年月日'].astype(str) + '|' + X['場'].astype(str) + '|' + num(X['R']).astype('Int64').astype(str) + '|'
+            + num(X['馬番']).astype('Int64').astype(str))
+
+
+def up_from_ses(ses):
+    """jra/ses（JRAのレース結果のページ。ped.py）から1頭ごとの推定上り：レースの中の速さの順位÷頭数（推上順率）、そのレースで一番速い推定上りとの差（推上差、秒）、
+    一番速かったか（推上1位）。成績表の「上り差」（レースの上り3Fから。PACE の前上り差）とは別の材料（検証計画 U1、jk_up.py と同じ作り方）"""
+    fs = sorted(glob.glob(f'{ses}/*/*.csv.gz')) if ses and os.path.isdir(ses) else []
+    if not fs: return None
+    U = pd.concat([pd.read_csv(f, dtype=str, keep_default_na=False, usecols=['年月日', '場', 'R', '馬番', '推定上り']) for f in fs], ignore_index=True)
+    U['上り'] = num(U['推定上り']); U['R'] = num(U['R']); U['馬番'] = num(U['馬番'])
+    U = U[U['上り'].notna() & U['馬番'].notna() & U['R'].notna()].drop_duplicates(KEY + ['馬番'])
+    g = U.groupby(KEY)['上り']; rk = g.rank(method='min')
+    U['推上順率'] = rk / g.transform('size'); U['推上差'] = U['上り'] - g.transform('min'); U['推上1位'] = (rk == 1).astype(float)
+    U.index = ukey(U)
+    return U[UPC]
+
+
+def build(root, card=None, verbose=True, years=None, ses=None):
+    """root：jra/data。card：今日の出馬表（レースの列と馬の列を1つにした表。結果なし）。ses：推定上りの表の置き場（無ければ root の隣の ses）"""
     t0 = time.time()
     R, H = read_all(root, years)
     R0 = R      # ラップ（L3）は読み取ったままのレースの表から作る
@@ -337,11 +358,19 @@ def build(root, card=None, verbose=True, years=None):
         lap = {c: lt[c].reindex(idx).values for c in jlap.LAPC}
     else:
         lap = {c: np.full(len(H), np.nan) for c in jlap.LAPC}
-    S = pd.DataFrame({'馬': H['馬'].values, '日': H['日'].values, 'R': H['R'].values} | lap, index=H.index).sort_values(['馬', '日', 'R'])
+    # 1頭ごとの推定上り（検証計画 U1）：前走と過去3走の平均の、推上順率・推上差。過去5走で推定上りがレースで1番速かった回数
+    U = up_from_ses(ses if ses is not None else os.path.join(os.path.dirname(os.path.normpath(root)), 'ses'))
+    if U is not None:
+        k = ukey(H); up = {c: U[c].reindex(k).values for c in UPC}
+        if verbose: print('推定上り', len(U), '頭分。入った行', round(float(np.mean(~np.isnan(up['推上順率']))), 3), round(time.time() - t0), '秒', flush=True)
+    else:
+        up = {c: np.full(len(H), np.nan) for c in UPC}
+    S = pd.DataFrame({'馬': H['馬'].values, '日': H['日'].values, 'R': H['R'].values} | lap | up, index=H.index).sort_values(['馬', '日', 'R'])
     g = S.groupby('馬', sort=False)
-    for c, nm in (('前後半差', '前後半差'), ('中盤ゆるみ', '中盤'), ('失速', '失速')):
+    for c, nm in (('前後半差', '前後半差'), ('中盤ゆるみ', '中盤'), ('失速', '失速'), ('推上順率', '推上順率'), ('推上差', '推上差')):
         H['前' + nm] = g[c].shift(1).reindex(H.index)
         H['過去3' + nm] = g[c].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean()).reindex(H.index)
+    H['過去5推上1位'] = g['推上1位'].transform(lambda s: s.shift(1).rolling(5, min_periods=1).sum()).reindex(H.index)
     H = H.copy()
     if verbose: print('できあがり', len(H), '行', round(time.time() - t0), '秒', flush=True)
     return H
@@ -392,6 +421,8 @@ CATF = ['場c', '芝ダc', '馬場c', '天候c', '性c']
 PACE = ['前ペース比', '前上り差', '初角率1']
 PASTM = ['前オッズ', '過去3オッズ', '過去3人気率']
 LAPF = ['前前後半差', '過去3前後半差', '前中盤', '過去3中盤', '前失速', '過去3失速']      # 前走・過去3走のラップ（検証計画 L3。jlap.py）
+UPC = ['推上順率', '推上差', '推上1位']      # そのレースの1頭ごとの推定上り（jra/ses から。答えの側なので材料には入れない）
+UPF = ['前推上順率', '過去3推上順率', '前推上差', '過去3推上差', '過去5推上1位']      # 前走・過去3走・過去5走の推定上り（検証計画 U1）
 MKT = ['前人気', '前人気率', '前人気着差', '騎単回', '調単回']      # 市場から来る材料（一覧の純粋な評価では使わない。検証計画 K3）
 TROUBLE = ['前不利被害', '前不利発走', '前不利疾病', '前不利加害', '前不利あり', '過去3不利']      # 前走・過去3走の不利の印（K1。注記から）
 EXTRA = ['騎初数', '騎初勝率', '騎初3率', '調初数', '調初勝率', '調初3率', '主初数', '主初勝率', '主初3率', '牧初数', '牧初勝率', '牧初3率',
