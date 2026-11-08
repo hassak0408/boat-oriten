@@ -55,7 +55,7 @@ FIX1 = FIX.get('1着の付け直し', {})
 SOFT = FIX1.get('1着の見込み') == 'ソフトマックス'
 if SOFT:
     try:
-        import jsoft
+        import lightgbm, jsoft      # noqa: F401（LightGBM が入っているかをここで確かめる）
     except ImportError as e:      # LightGBM が入っていないとき：前のやり方（HGBの1着＋M2a の値）に戻す
         log('LightGBM が無いので、1着は前のやり方（HGB）', e); SOFT = False; FIX1 = FIX.get('1着の付け直し（HGBのとき）', {})
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
