@@ -158,8 +158,59 @@ def up_from_ses(ses):
     return U[UPC]
 
 
-def build(root, card=None, verbose=True, years=None, ses=None):
-    """root：jra/data。card：今日の出馬表（レースの列と馬の列を1つにした表。結果なし）。ses：推定上りの表の置き場（無ければ root の隣の ses）"""
+def horse_table(hdir):
+    """jra/horse（JRAの馬のページ。ped.py）：馬ID → 父・母・母父"""
+    fs = sorted(glob.glob(f'{hdir}/*.csv.gz')) if hdir and os.path.isdir(hdir) else []
+    if not fs: return None
+    T = pd.concat([pd.read_csv(f, dtype=str, keep_default_na=False, usecols=['馬ID', '父', '母', '母父']) for f in fs], ignore_index=True)
+    return T.drop_duplicates('馬ID', keep='last').set_index('馬ID')
+
+
+def add_ped(H, ses, hdir):
+    """血統の材料（検証計画 P1）：父・母父の産駒の勝率・3着内率（全部・同じ芝ダ・同じ距離の帯・初出走）、母の産駒（兄弟）の勝率・3着内率。
+    どれも前の日までで、その馬自身の走りは除く。ならしは k=20。馬IDは前のレースは jra/ses、今日の馬は出馬表から。父などは jra/horse、無ければ出馬表の値"""
+    T = horse_table(hdir)
+    fs = sorted(glob.glob(f'{ses}/*/*.csv.gz')) if ses and os.path.isdir(ses) else []
+    if T is None or not fs:
+        for c in PEDF: H[c] = np.nan
+        return H
+    I = pd.concat([pd.read_csv(f, dtype=str, keep_default_na=False, usecols=['年月日', '場', 'R', '馬番', '馬ID']) for f in fs], ignore_index=True)
+    I = I[I['馬ID'] != '']; I.index = ukey(I); I = I[~I.index.duplicated()]
+    hid = pd.Series(I['馬ID'].reindex(ukey(H)).values, index=H.index)
+    if '馬ID' in H: c = H['馬ID'].astype(str); hid = hid.where(~c.str.fullmatch(r'\d{10}'), c)      # 今日の馬（出馬表の馬ID）
+    P = {}
+    for c in ('父', '母', '母父'):
+        v = pd.Series(T[c].reindex(hid.values).values, index=H.index)
+        if c in H: v = v.where(v.notna() & (v != ''), H[c])      # まだ馬のページを読んでいない馬は出馬表の値
+        P[c] = v.replace('', np.nan)
+    X = H[['日', '勝', '3着内', '単払', '予測', '走数', '芝ダ', '距帯', '馬']].copy()
+    X['父'], X['母'], X['母父'] = P['父'], P['母'], P['母父']
+    for c in ('父', '母父'):
+        X[c + '芝ダ'] = X[c] + '|' + X['芝ダ'].astype(str); X[c + '距'] = X[c] + '|' + X['距帯'].astype(str)
+    first = X['走数'] == 0
+    k = 20; ok = ~X['予測']
+    m1, m3 = X.loc[ok, '勝'].mean(), X.loc[ok, '3着内'].mean(); f1, f3 = X.loc[ok & first, '勝'].mean(), X.loc[ok & first, '3着内'].mean()
+
+    def rates(ent, mask=None, b1=m1, b3=m3, sub_own=True):
+        S = prior(X, ent, mask=mask)
+        n, w, t = S['n'], S['w'], S['t']
+        if sub_own:      # その馬自身の走りは除く（同じ父などの行どうしで数える）
+            X['_own'] = X['馬'] + '#' + X[ent]; O = prior(X, '_own')
+            n, w, t = n - O['n'], w - O['w'], t - O['t']
+        miss = X[ent].isna().values
+        f = lambda v: np.where(miss, np.nan, v)
+        return f(n.values), f(((w + k * b1) / (n + k)).values), f(((t + k * b3) / (n + k)).values)
+    for c in ('父', '母父'):
+        H[c + '数'], H[c + '勝率'], H[c + '3率'] = rates(c)
+        H[c + '芝ダ3率'] = rates(c + '芝ダ')[2]; H[c + '距3率'] = rates(c + '距')[2]
+        H[c + '初数'], H[c + '初勝率'], H[c + '初3率'] = rates(c, mask=first, b1=f1, b3=f3, sub_own=False)      # 初出走は、その馬自身はまだ走っていない
+    H['母数'], H['母勝率'], H['母3率'] = rates('母')
+    return H
+
+
+def build(root, card=None, verbose=True, years=None, ses=None, ped=False):
+    """root：jra/data。card：今日の出馬表（レースの列と馬の列を1つにした表。結果なし）。ses：推定上りの表の置き場（無ければ root の隣の ses）。
+    ped：血統の材料も作る（検証計画 P1。馬の表は root の隣の horse）"""
     t0 = time.time()
     R, H = read_all(root, years)
     R0 = R      # ラップ（L3）は読み取ったままのレースの表から作る
@@ -167,7 +218,7 @@ def build(root, card=None, verbose=True, years=None, ses=None):
     if card is not None and len(card):
         cr = card.drop_duplicates(KEY)[[c for c in R.columns if c in card.columns]]
         R = pd.concat([R, cr.astype(str)], ignore_index=True)
-        ch = card[[c for c in H.columns if c in card.columns]].astype(str).assign(予測=True)
+        ch = card[[c for c in H.columns if c in card.columns] + ([c for c in ('馬ID', '父', '母', '母父') if c in card.columns] if ped else [])].astype(str).assign(予測=True)
         H = pd.concat([H, ch], ignore_index=True)
     if verbose: print('読み込み レース', len(R), '馬', len(H), round(time.time() - t0), '秒', flush=True)
     R = prep_races(R)
@@ -388,6 +439,10 @@ def build(root, card=None, verbose=True, years=None, ses=None):
         H['前' + nm] = g[c].shift(1).reindex(H.index)
         H['過去3' + nm] = g[c].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean()).reindex(H.index)
     H['過去5推上1位'] = g['推上1位'].transform(lambda s: s.shift(1).rolling(5, min_periods=1).sum()).reindex(H.index)
+    if ped:
+        base = os.path.dirname(os.path.normpath(root))
+        H = add_ped(H, ses if ses is not None else os.path.join(base, 'ses'), os.path.join(base, 'horse'))
+        if verbose: print('血統', round(float(H['父数'].notna().mean()), 3), round(time.time() - t0), '秒', flush=True)
     H = H.copy()
     if verbose: print('できあがり', len(H), '行', round(time.time() - t0), '秒', flush=True)
     return H
@@ -440,6 +495,8 @@ PASTM = ['前オッズ', '過去3オッズ', '過去3人気率']
 LAPF = ['前前後半差', '過去3前後半差', '前中盤', '過去3中盤', '前失速', '過去3失速']      # 前走・過去3走のラップ（検証計画 L3。jlap.py）
 UPC = ['推上順率', '推上差', '推上1位']      # そのレースの1頭ごとの推定上り（jra/ses から。答えの側なので材料には入れない）
 UPF = ['前推上順率', '過去3推上順率', '前推上差', '過去3推上差', '過去5推上1位']      # 前走・過去3走・過去5走の推定上り（検証計画 U1）
+PEDF = ['父数', '父勝率', '父3率', '父芝ダ3率', '父距3率', '父初数', '父初勝率', '父初3率',
+        '母父数', '母父勝率', '母父3率', '母父芝ダ3率', '母父距3率', '母父初数', '母父初勝率', '母父初3率', '母数', '母勝率', '母3率']      # 血統（検証計画 P1。build(ped=True)）
 MKT = ['前人気', '前人気率', '前人気着差', '騎単回', '調単回']      # 市場から来る材料（一覧の純粋な評価では使わない。検証計画 K3）
 TROUBLE = ['前不利被害', '前不利発走', '前不利疾病', '前不利加害', '前不利あり', '過去3不利']      # 前走・過去3走の不利の印（K1。注記から）
 EXTRA = ['騎初数', '騎初勝率', '騎初3率', '調初数', '調初勝率', '調初3率', '主初数', '主初勝率', '主初3率', '牧初数', '牧初勝率', '牧初3率',
