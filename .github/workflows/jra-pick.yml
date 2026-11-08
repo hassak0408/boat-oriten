@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests pandas scikit-learn scipy
+      - run: pip install requests pandas scikit-learn scipy lightgbm
       - name: 今日の出馬表
         env:
           DAY: ${{ inputs.day }}

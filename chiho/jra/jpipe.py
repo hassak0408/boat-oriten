@@ -2,6 +2,7 @@
 STORE/jra/data（成績表を読んだ表）と STORE/jra/card/日付.csv.gz（今日の出馬表）から、今日の馬ごとに3着内・1着の見込みと脚質の予想を出し、
 STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
 - モデルは毎回作る（Y年はY−1年まで、2017年から）。3着内と1着は乱数0・1・2の3つを作って平均する（検証計画 K8）。脚質は乱数0の1つ。材料はレース前に分かるものだけ。人気・オッズは、そのレースの分も前のレースの分も使わない
+- 1着は、レースの中で比べる学び方（レースごとのソフトマックス、LightGBM。検証計画 M3。jsoft.py）。LightGBM が無いときは前のやり方（HGBの1着、M2a）に戻す。
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
   前走までのラップ（L3）と1頭ごとの推定上り（U1。STORE/jra/ses、ped.py が毎朝足す）も使う。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
@@ -48,9 +49,18 @@ TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わな�
 TE = H[H['予測']].copy()
 if not len(TE):
     log('今日の馬の行が作れなかった'); sys.exit(1)
+fx = f'{HERE}/jra_fix.json'
+FIX = json.load(open(fx, encoding='utf-8')) if os.path.exists(fx) else {}
+FIX1 = FIX.get('1着の付け直し', {})
+SOFT = FIX1.get('1着の見込み') == 'ソフトマックス'
+if SOFT:
+    try:
+        import jsoft
+    except ImportError as e:      # LightGBM が入っていないとき：前のやり方（HGBの1着＋M2a の値）に戻す
+        log('LightGBM が無いので、1着は前のやり方（HGB）', e); SOFT = False; FIX1 = FIX.get('1着の付け直し（HGBのとき）', {})
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
-for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, BIG, TRN),
+for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN),) + ((('勝', 'p1', FE, BIG, TRN),) if not SOFT else ()) + (
                              ('先頭', 'p先頭', FES, SMALL, TRN[TRN['初角'].notna()]), ('先行', 'p先行', FES, SMALL, TRN[TRN['初角'].notna()])):
     F = [c for c in F if rows[c].notna().any()]      # 全部空の列は使わない（試しのときだけ起きる）
     cat = [F.index(c) for c in CATF if c in F]
@@ -60,14 +70,15 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN), ('勝', 'p1', FE, 
         m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=sd, categorical_features=cat, **P)
         m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
+if SOFT:      # 1着：レースの中で比べる学び方（M3）
+    F = [c for c in FE if TRN[c].notna().any()]
+    TE['p1'] = jsoft.predict(jsoft.fit(TRN, F, CATF, log=log), TE, F)
 
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(1e-4, 0.97)
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
-fx = f'{HERE}/jra_fix.json'
-FIX = json.load(open(fx, encoding='utf-8')) if os.path.exists(fx) else {}
 grp = [TE[k] for k in KEY]
-if '1着の付け直し' in FIX:      # 1着 ∝ exp(a×log 1着 + b×log 3着内)（検証計画 M2a。3着内の見込みにも1着の手がかりがある）
-    a, b = FIX['1着の付け直し']['a'], FIX['1着の付け直し']['b']
+if FIX1:      # 1着 ∝ exp(a×log 1着 + b×log 3着内)（検証計画 M2a・M3。3着内の見込みにも1着の手がかりがある）
+    a, b = FIX1['a'], FIX1['b']
     sc = a * np.log(TE['p1'].clip(1e-6)) + b * np.log(TE['p3'].clip(1e-6)); sc = sc - sc.groupby(grp).transform('max')
     TE['p1'] = np.exp(sc)
 if '中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値' in FIX:      # F1（M2aで要らなくなった。値があるときだけ）
@@ -100,7 +111,8 @@ def top_pairs(g, m=3):
 
 RC = C.drop_duplicates(['場', 'R']).set_index(['場', 'R'])
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
-out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'), '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印を使う。3つのモデルの平均）', 'レース': []}
+out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'),
+       '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印・ラップ・推定上りを使う。3つのモデルの平均。' + ('1着はレースの中で比べる学び方' if SOFT else '1着はHGB') + '）', 'レース': []}
 lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。馬の走りと成績だけの評価で、人気・オッズは前走の分も見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
          '見方：来る馬・勝つ馬は人気（オッズ）のほうがよく当たる。1番手が1番人気と同じなら信頼できる。違うときは1番人気を重く。',
@@ -136,7 +148,8 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
         if CAL and '3組の和' in CAL: any3 = float(np.interp(any3, CAL['3組の和'], CAL['3組の和の直した見込み']))     # 和は高い所で言いすぎるので直す
         lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(any3 * 100)}%）')
     lines.append('')
-os.makedirs(f'{store}/data/picks', exist_ok=True)
-json.dump(out, open(f'{store}/data/picks/{today}_jra.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-open(f'{store}/data/picks/{today}_jra.txt', 'w', encoding='utf-8').write('\n'.join(lines).rstrip() + '\n')
+pdir = f"{store}/{os.environ.get('PICKS_DIR', 'data/picks')}"      # 試しのときだけ置き場を替える（jk_pipetest.py）
+os.makedirs(pdir, exist_ok=True)
+json.dump(out, open(f'{pdir}/{today}_jra.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+open(f'{pdir}/{today}_jra.txt', 'w', encoding='utf-8').write('\n'.join(lines).rstrip() + '\n')
 log('できた', len(out['レース']), 'レース')
