@@ -2,7 +2,9 @@
 STORE/jra/data（成績表を読んだ表）と STORE/jra/card/日付.csv.gz（今日の出馬表）から、今日の馬ごとに3着内・1着の見込みと脚質の予想を出し、
 STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
 - モデルは毎回作る（Y年はY−1年まで、2017年から）。3着内と1着は乱数0・1・2の3つを作って平均する（検証計画 K8）。脚質は乱数0の1つ。材料はレース前に分かるものだけ。人気・オッズは、そのレースの分も前のレースの分も使わない
-- 1着は、レースの中で比べる学び方（レースごとのソフトマックス、LightGBM。検証計画 M3。jsoft.py）。LightGBM が無いときは前のやり方（HGBの1着、M2a）に戻す。
+- 1着と3着内は、レースの中で1〜3着の順を学ぶやり方（プラケット・ルース、重み1・0.5・0.25、LightGBM。検証計画 M4b。jsoft.py）。1着はそれにHGBの3着内を少し混ぜる。
+  3着内は、中央で初めて走る馬（新馬以外）だけ HGB の3着内を使う（M4c）。
+  LightGBM が無いときは前のやり方（HGBの1着と3着内、M2a）に戻す。
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
   前走までのラップ（L3）と1頭ごとの推定上り（U1。STORE/jra/ses、ped.py が毎朝足す）も使う。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
@@ -42,7 +44,7 @@ H = jfeat.build(f'{store}/jra/data', card=C, verbose=False); log('材料')
 FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF + UPF if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップ（L3）と1頭ごとの推定上り（U1）を足す
 FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
                    '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
-NEED = set(FE + FES + KEY + ['年', '予測', '合わない', '3着内', '勝', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病'])
+NEED = set(FE + FES + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病'])
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わない'] == 0)]
@@ -51,13 +53,14 @@ if not len(TE):
     log('今日の馬の行が作れなかった'); sys.exit(1)
 fx = f'{HERE}/jra_fix.json'
 FIX = json.load(open(fx, encoding='utf-8')) if os.path.exists(fx) else {}
-FIX1 = FIX.get('1着の付け直し', {})
-SOFT = FIX1.get('1着の見込み') == 'ソフトマックス'
+FIX1 = FIX.get('1着の付け直し', {}); FIX3 = FIX.get('3着内の付け直し', {})
+SOFT = '重み' in FIX1      # 1〜3着の順を学ぶやり方（M4b）
 if SOFT:
     try:
         import lightgbm, jsoft      # noqa: F401（LightGBM が入っているかをここで確かめる）
-    except ImportError as e:      # LightGBM が入っていないとき：前のやり方（HGBの1着＋M2a の値）に戻す
-        log('LightGBM が無いので、1着は前のやり方（HGB）', e); SOFT = False; FIX1 = FIX.get('1着の付け直し（HGBのとき）', {})
+    except ImportError as e:      # LightGBM が入っていないとき：前のやり方（HGBの1着と3着内＋M2a の値）に戻す
+        log('LightGBM が無いので、前のやり方（HGB）', e); SOFT = False
+        FIX1 = FIX.get('1着の付け直し（HGBのとき）', {}); FIX3 = FIX.get('3着内の付け直し（HGBのとき）', FIX3)
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
 for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN),) + ((('勝', 'p1', FE, BIG, TRN),) if not SOFT else ()) + (
@@ -70,22 +73,27 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN),) + ((('勝', 'p1',
         m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=sd, categorical_features=cat, **P)
         m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
-if SOFT:      # 1着：レースの中で比べる学び方（M3）
+if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（M4b）
     F = [c for c in FE if TRN[c].notna().any()]
-    TE['p1'] = jsoft.predict(jsoft.fit(TRN, F, CATF, log=log), TE, F)
+    TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(TRN, F, CATF, wt=FIX1['重み'], log=log), TE, F)
 
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(1e-4, 0.97)
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
 grp = [TE[k] for k in KEY]
-if FIX1:      # 1着 ∝ exp(a×log 1着 + b×log 3着内)（検証計画 M2a・M3。3着内の見込みにも1着の手がかりがある）
+if FIX1:      # 1着 ∝ exp(a×log 1着 + b×log HGBの3着内)（検証計画 M2a・M3・M4。3着内の見込みにも1着の手がかりがある）
     a, b = FIX1['a'], FIX1['b']
     sc = a * np.log(TE['p1'].clip(1e-6)) + b * np.log(TE['p3'].clip(1e-6)); sc = sc - sc.groupby(grp).transform('max')
     TE['p1'] = np.exp(sc)
 if '中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値' in FIX:      # F1（M2aで要らなくなった。値があるときだけ）
     TE.loc[(TE['走数'] == 0) & (TE['新馬'] == 0), 'p1'] *= FIX['中央で初めて走る馬（新馬以外）の1着の見込みに掛ける値']
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
-if '3着内の付け直し' in FIX:      # 3着内 ∝ 3着内^c（足して3、M2a）
-    e = TE['p3'] ** FIX['3着内の付け直し']['c']
+if FIX3:      # 3着内 ∝ 3着内^c（足して3。M4c なら順を学んだモデルの3着内（中央で初めて走る馬（新馬以外）だけ HGB）、前のやり方なら HGB の3着内）
+    base = TE['p3']
+    if SOFT and FIX3.get('3着内の見込み') == 'M4c':
+        q = (TE['p3順'] * np.minimum(3, TE['n']) / TE['p3順'].groupby(grp).transform('sum')).clip(1e-4, 0.97)
+        base = pd.Series(np.where((TE['走数'] == 0) & (TE['新馬'] == 0), TE['p3'], q), index=TE.index)
+        base = (base * np.minimum(3, TE['n']) / base.groupby(grp).transform('sum')).clip(1e-4, 0.97)
+    e = base ** FIX3['c']
     TE['p3'] = (e * np.minimum(3, TE['n']) / e.groupby(grp).transform('sum')).clip(1e-4, 0.97)
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
@@ -112,7 +120,7 @@ def top_pairs(g, m=3):
 RC = C.drop_duplicates(['場', 'R']).set_index(['場', 'R'])
 wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'),
-       '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印・ラップ・推定上りを使う。3つのモデルの平均。' + ('1着はレースの中で比べる学び方' if SOFT else '1着はHGB') + '）', 'レース': []}
+       '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印・ラップ・推定上りを使う。3つのモデルの平均。' + ('レースの中で1〜3着の順を学ぶやり方' if SOFT else 'HGB') + '）', 'レース': []}
 lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは1着の見込み）。馬の走りと成績だけの評価で、人気・オッズは前走の分も見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
          '見方：来る馬・勝つ馬は人気（オッズ）のほうがよく当たる。1番手が1番人気と同じなら信頼できる。違うときは1番人気を重く。',
