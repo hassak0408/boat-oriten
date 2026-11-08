@@ -44,6 +44,17 @@ for step in sys.argv[2:]:
         for h in links[:3]:
             save('dud_' + h.split('CNAME=')[1], get('GET', h if h.startswith('/') else '/JRADB/' + h.split('/JRADB/')[-1], ''))
         continue
+    if step.startswith('today'):      # その日の全てのレースの結果（今週のレース結果の入口 → 開催 → 全てのレース）
+        ymd = step.split(':')[1] if ':' in step else time.strftime('%Y%m%d', time.gmtime(time.time() + 9 * 3600))
+        top = get('POST', '/JRADB/accessS.html', 'pw01sli00/AF'); save('sli00_' + ymd, top)
+        srl = sorted(set(re.findall(r"doAction\('/JRADB/accessS.html',\s*'(pw01srl\d{12}%s/[0-9A-F]{2})'\)" % ymd, top or '')))
+        print('開催', srl, flush=True)
+        for cn in srl:
+            sp = get('POST', '/JRADB/accessS.html', cn)
+            ses = re.search(r"doAction\('/JRADB/accessS.html',\s*'(pw01ses\d+/[0-9A-F]{2})'\)", sp or '')
+            if ses: save('ses_' + ses.group(1), get('POST', '/JRADB/accessS.html', ses.group(1)))
+            else: print('全てのレースのリンクが無い', cn, flush=True)
+        continue
     kind, arg = step.split(':', 1)
     if kind == 'F':      # 前のページのリンクをたどる（doAction でも href でも）
         m = re.search(r"doAction\('(/JRADB/access\w+\.html)',\s*'(%s[0-9A-Fa-f/]*)'\)" % re.escape(arg), prev)
