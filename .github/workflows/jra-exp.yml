@@ -1,0 +1,61 @@
+# 中央競馬：手元では動かせない試し（LightGBM など）を動かす（手で動かすだけ。検証計画 M3 など）。
+#   材料は非公開のリポジトリ hassak0408/chiho-keiba の jra/data・jra/ses。出てきた見込みは同じリポジトリの jra/exp/ に置く（手元でくらべる）。
+#   ここの記録（ログ）に出すのは、まとめの数字だけ。
+name: jra-exp
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: '動かすもの（chiho/jra/jk_*.py の名前）'
+        required: true
+        default: 'jk_m3.py'
+      args:
+        description: '後ろにつける引数（年など。空でよい）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: jra-exp
+  cancel-in-progress: false
+jobs:
+  exp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas scikit-learn scipy lightgbm
+      - name: 動かす
+        env:
+          SCRIPT: ${{ inputs.script }}
+          ARGS: ${{ inputs.args }}
+        run: |
+          if ! [[ "$SCRIPT" =~ ^jk_[a-z0-9_]+\.py$ ]]; then echo "名前が違う"; exit 1; fi
+          if ! [[ "$ARGS" =~ ^[0-9\ ]*$ ]]; then echo "引数は数字と空白だけ"; exit 1; fi
+          python "chiho/jra/$SCRIPT" store $ARGS
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jra/exp 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬 試しの見込み（${{ inputs.script }}）"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
