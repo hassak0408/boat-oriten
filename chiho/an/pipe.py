@@ -1,7 +1,9 @@
 """地方競馬の来そうな馬（毎朝の一覧。検証計画「来そうな馬の候補」）。
 STORE（非公開のリポジトリ）の data/race（月ごと）と data/daily/日付（毎日の記録）から、今日の出馬表の馬ごとに
 3着内・1着の見込みと脚質の予想を出し、STORE/data/picks/日付.json と 日付.txt に置く。
-- モデルは毎回作る（Y年はY−1年まで、2017年から。乱数0）。材料はレース前に分かるものだけで、人気・オッズは使わない。
+- モデルは毎回作る（Y年はY−1年まで、2017年から）。材料はレース前に分かるものだけで、人気・オッズは使わない。
+- 1着と3着内は、レースの中で1〜3着の順を学ぶやり方（jsoft.py、中央と同じ作り方）とHGBの3着内（乱数0・1・2の平均）を合わせる（検証計画「地方：精度を上げる」。値は nar_fix.json）。
+  LightGBM が無いときは前のやり方（HGB 乱数0の1着・3着内）に戻す。脚質（先頭・先行）は前のまま。
 - 朝の出馬表には馬体重が無いレースがあるので、馬体重は使わない。材料は cand3.py の「朝3」と同じ（B2＋全部の場の前の成績＝B3）。
 - 全部の場の前の成績は STORE/data_all（環境変数 CHIHO_ALL）から作る。
 - 月ごとのデータより後の日は、毎日の記録の最後の分（結果入り）で埋める。
@@ -101,21 +103,68 @@ H['他の最大先頭率'] = np.where(H['先頭率5'] >= top, mx, top)
 SF = ['先頭率5', '先行率5', '終角率1', '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '他の最大先頭率']
 log('材料4（脚質）')
 
+NFIX = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nar_fix.json'), encoding='utf-8')) \
+    if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nar_fix.json')) else {}
+SOFT = 'a' in NFIX
+if SOFT:
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'jra'))
+        import lightgbm, jsoft      # noqa: F401（LightGBM が入っているかをここで確かめる）
+    except ImportError as e:
+        log('LightGBM が無いので、前のやり方（HGB 乱数0）', e); SOFT = False
+# 騎手の格の差（今の騎手の勝率・3着内率 − 前走の騎手の勝率・3着内率。N2）
+H = H.sort_values(['馬', '日', 'レース番号']).reset_index(drop=True); _g = H.groupby('馬', sort=False)
+H['騎勝率差'] = H['騎勝率'] - _g['騎勝率'].shift(1); H['騎3率差'] = H['騎3率'] - _g['騎3率'].shift(1)
+JF = ['騎勝率差', '騎3率差'] if (SOFT and NFIX.get('騎手の格の差')) else []
+if SOFT and NFIX.get('騎手の性能'):      # 騎手の性能（N3）：近ごろの調子（60日）、その競馬場での成績（365日）、厩舎との組み合わせ（365日）
+    def _roll(H, ent, cols, days):
+        D = H.groupby([ent, '日'])[cols].sum().reset_index().sort_values([ent, '日'])
+        out = []
+        for e, g in D.groupby(ent, sort=False):
+            d = g['日'].values.astype('datetime64[D]').astype(np.int64)
+            c = np.vstack([np.zeros(len(cols))] + [g[cols].values]).cumsum(axis=0)
+            lo = np.searchsorted(d, d - days, side='left'); hi = np.arange(len(d))
+            out.append(pd.DataFrame(c[hi] - c[lo], columns=cols).assign(**{ent: e, '日': g['日'].values}))
+        return pd.concat(out, ignore_index=True)
+    H['騎場'] = H['騎'] + '#' + H['競馬場'].astype(str); H['騎調'] = H['騎'] + '#' + H['調']
+    for ent, days, pre in (('騎', 60, '騎近'), ('騎場', 365, '騎場'), ('騎調', 365, '騎調')):
+        _S = _roll(H, ent, ['乗', '勝', '3着内'], days)
+        _S[pre + '数'] = _S['乗']; _S[pre + '勝率'] = _S['勝'] / _S['乗'].where(_S['乗'] > 0); _S[pre + '3率'] = _S['3着内'] / _S['乗'].where(_S['乗'] > 0)
+        H = H.merge(_S[[ent, '日', pre + '数', pre + '勝率', pre + '3率']], on=[ent, '日'], how='left'); JF += [pre + '数', pre + '勝率', pre + '3率']
+    log('騎手の性能の材料', len(JF))
+
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測']]
 TE = H[H['予測']].copy()
-FE3 = [c for c in FEATS + NEW + (EXTRA3 if USE3 else []) if c not in BW]
+FE3 = [c for c in FEATS + NEW + (EXTRA3 if USE3 else []) if c not in BW] + JF
 FES = [c for c in FEATS + SF if c not in BW]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
-for tgt, col, FE, P, rows in (('3着内', 'p3', FE3, BIG, TRN), ('勝', 'p1', FE3, BIG, TRN),
-                              ('先頭', 'p先頭', FES, SMALL, TRN[TRN['初角'].notna()]), ('先行', 'p先行', FES, SMALL, TRN[TRN['初角'].notna()])):
-    cat = [FE.index(c) for c in ['場c', '馬場c', '天候c', '性c']]
-    m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=0, categorical_features=cat, **P)
-    m.fit(rows[FE], rows[tgt]); TE[col] = m.predict_proba(TE[FE])[:, 1]; log('モデル', tgt, '回数', m.n_iter_)
+for tgt, col, FE, P, rows, seeds in ((('3着内', 'p3', FE3, BIG, TRN, (0, 1, 2) if SOFT else (0,)),) + ((('勝', 'p1', FE3, BIG, TRN, (0,)),) if not SOFT else ()) +
+                                     (('先頭', 'p先頭', FES, SMALL, TRN[TRN['初角'].notna()], (0,)), ('先行', 'p先行', FES, SMALL, TRN[TRN['初角'].notna()], (0,)))):
+    FE = [c for c in FE if rows[c].nunique(dropna=True) >= 2]
+    cat = [FE.index(c) for c in ['場c', '馬場c', '天候c', '性c'] if c in FE]
+    ps = []
+    for sd in seeds:
+        m = HistGradientBoostingClassifier(early_stopping=True, validation_fraction=0.1, random_state=sd, categorical_features=cat, **P)
+        m.fit(rows[FE], rows[tgt]); ps.append(m.predict_proba(TE[FE])[:, 1]); log('モデル', tgt, '乱数', sd, '回数', m.n_iter_)
+    TE[col] = np.mean(ps, axis=0)
+if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（jsoft.py）
+    F = [c for c in FE3 if TRN[c].nunique(dropna=True) >= 2]
+    A = TRN.assign(年月日=TRN['競走年月日'], 場=TRN['競馬場'], R=TRN['レース番号'], 着=pd.to_numeric(TRN['着'], errors='coerce'))
+    B = TE.assign(年月日=TE['競走年月日'], 場=TE['競馬場'], R=TE['レース番号'])
+    TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(A, F, ['場c', '馬場c', '天候c', '性c'], wt=tuple(NFIX['重み']), params=NFIX['木'], log=log), B, F)
+    del A, B
 
 # レースの中で足し合わせをそろえる（3着内は合計3、1着は合計1）
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+if SOFT:      # 1着 ∝ 順を学ぶモデルの1着^a × HGBの3着内^b、3着内 ∝ 順を学ぶモデルの3着内（5場で初めて走る馬だけHGB）^c
+    _gk = [TE[k] for k in KEY]
+    _s = NFIX['a'] * np.log(TE['p1'].clip(1e-6)) + NFIX['b'] * np.log(TE['p3'].clip(1e-6)); _s = _s - _s.groupby(_gk).transform('max')
+    TE['p1'] = np.exp(_s); TE['p1'] = TE['p1'] / TE['p1'].groupby(_gk).transform('sum')
+    _q = (TE['p3順'] * np.minimum(3, TE['n']) / TE['p3順'].groupby(_gk).transform('sum')).clip(1e-4, 0.97)
+    _b = pd.Series(np.where(TE['五場走数'] == 0, TE['p3'], _q), index=TE.index); _b = (_b * np.minimum(3, TE['n']) / _b.groupby(_gk).transform('sum')).clip(1e-4, 0.97)
+    _e = _b ** NFIX['c']; TE['p3'] = (_e * np.minimum(3, TE['n']) / _e.groupby(_gk).transform('sum')).clip(upper=0.97)
 # 前の所属による直し（origin_fix.py で2021〜2025年から決めた値。全部の場の前の成績があるときだけ）
 H = H.sort_values(['馬', '日', 'レース番号'])
 first = np.select([(H['五場走数'] == 0) & (H['全走'] == 0), (H['五場走数'] == 0) & (H['初データ'] == 1) & (H['芝走'] > 0),
@@ -182,7 +231,8 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
         if '3組の和' in CAL: any3 = float(np.interp(any3, CAL['3組の和'], CAL['3組の和の直した見込み']))     # 和は高い所で言いすぎるので直す
         lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(any3 * 100)}%）')
     lines.append('')
-os.makedirs(f'{store}/data/picks', exist_ok=True)
-json.dump(out, open(f'{store}/data/picks/{today}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-open(f'{store}/data/picks/{today}.txt', 'w', encoding='utf-8').write('\n'.join(lines).rstrip() + '\n')
+pdir = f"{store}/{os.environ.get('PICKS_DIR', 'data/picks')}"      # 試しのときだけ置き場を替える（nk_pipetest.py）
+os.makedirs(pdir, exist_ok=True)
+json.dump(out, open(f'{pdir}/{today}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+open(f'{pdir}/{today}.txt', 'w', encoding='utf-8').write('\n'.join(lines).rstrip() + '\n')
 log('できた', len(out['レース']), 'レース')
