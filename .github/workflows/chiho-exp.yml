@@ -16,7 +16,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: chiho-exp
+  group: chiho-exp-${{ inputs.script }}
   cancel-in-progress: false
 jobs:
   exp:
