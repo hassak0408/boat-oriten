@@ -1,12 +1,13 @@
 """地方：N1・N2 のくらべ（検証計画「地方：精度を上げる」）。nk_m4.py の見込みで、5頭以上のレースを、
 今（HGB 乱数0、そのまま）・N1（順を学ぶモデル＋HGB 3つの平均）・N2（N1＋騎手の格の差）・N3（N2＋騎手の性能。nk_m4b.py の見込みがあれば）で、
 2021〜2023年で決めて2024〜2026年に当てる、と逆向き。
-使い方：python nk_m4cmp.py nk_m4_pred.csv.gz [nk_m4b_pred.csv.gz]"""
+使い方：python nk_m4cmp.py "nk_m4_pred*.csv.gz" [nk_m4b_pred.csv.gz]"""
 import sys, numpy as np, pandas as pd
 from scipy.optimize import minimize
 
 KEY = ['競馬場', '競走年月日', 'レース番号']
-D = pd.read_csv(sys.argv[1], dtype={'競馬場': str, '競走年月日': str, 'レース番号': str})
+import glob
+D = pd.concat([pd.read_csv(f, dtype={'競馬場': str, '競走年月日': str, 'レース番号': str}) for f in sorted(glob.glob(sys.argv[1]))], ignore_index=True)      # 年ごとに分けて作ったときは、まとめて読む（* で指定）
 V = ['', '_j']
 if len(sys.argv) > 2:
     E = pd.read_csv(sys.argv[2], dtype={'競馬場': str, '競走年月日': str, 'レース番号': str})
