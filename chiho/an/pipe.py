@@ -90,6 +90,7 @@ for c in ['先頭', '先行']:
     H[c + '率5'] = g[c].transform(lambda s: s.shift(1).rolling(5, min_periods=1).mean())
 H['終角率1'] = g['終角率'].shift(1); H['上げ1'] = g['上げ'].shift(1)
 H['上げ3'] = g['上げ'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())
+H['終角率3'] = g['終角率'].transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())      # 一覧の脚質（差し・追込）の表示だけに使う（モデルの材料ではない）
 H['逃げ型'] = (H['先頭率5'] >= 0.4).astype(int)
 H['他の逃げ型'] = H.groupby(KEY)['逃げ型'].transform('sum') - H['逃げ型']
 H['先頭率5順'] = H.groupby(KEY)['先頭率5'].rank(ascending=False, method='min')
@@ -131,7 +132,8 @@ TAG = {'中央': '中央から初戦', 'ほかの地方': 'ほかの地方から
 TE['印'] = [TAG.get(k, '') if (isinstance(k, str) and s == 1) else '' for k, s in zip(TE['来かた'], TE['戦目'])]
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
-TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
+TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行',
+              np.where(TE['終角率3'].isna(), '', np.where(TE['終角率3'] <= 0.6, '差し', '追込'))))      # 差し・追込は前の3走の4角の位置（頭数で割る）が前から6割以内か
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
 # 勝ちきり度＝1着の見込み÷3着内の見込み（3着内に来たとき1着になる割合の見込み。kachikiri.py で合い方を確かめた）
 TE['勝ちきり度'] = TE['p1'] / TE['p3']
@@ -156,7 +158,8 @@ lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}�
          '数字は3着内に来る見込み（かっこは1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
          '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。',
          '馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で合うことを確かめた）。',
-         '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。', '']
+         '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。',
+         '脚質＝逃げ（先頭に立つ見込みがレースで一番で3割以上）・先行（最初の角で3番手以内の見込みが5割以上）・差し／追込（前の3走の4角の位置が前から6割以内／それより後ろ）。', '']
 order = {'盛岡': 0, '水沢': 1, '園田': 2, '姫路': 3, '笠松': 4}
 for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv[0][0], 9), int(kv[0][2]))):
     info = RT.loc[(place, ymd, rno)] if (place, ymd, rno) in RT.index else {}
@@ -164,7 +167,8 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     post = f'{hhmm[:2]}:{hhmm[2:]}' if hhmm.strip('0') else ''
     head = f"{place} {int(rno)}R {post} {info.get('距離', '')}m {len(g)}頭"
     g = g.sort_values('順位')
-    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き']) for _, r in g.iterrows()]
+    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
+               逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100)) for _, r in g.iterrows()]
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
                             馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp]))
