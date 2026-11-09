@@ -158,7 +158,9 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     head = f"{place}{rno}R {post} {nm}{('（' + grade + '）') if grade else ''} {info.get('芝ダ', '')}{info.get('距離', '')}m {len(g)}頭"
     if len(info) and info.get('条件', '') == '新馬': head += '［新馬：人気を重く］'
     g = g.sort_values('順位')
-    hs = [dict(順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
+    # 指数＝AIの評価を1つの数に：50＝このレースの平均の馬（1着の見込みが1÷頭数）、10上がるごとに1着の見込みが2倍
+    _ix = lambda p: int(round(min(100.0, max(0.0, 50 + 10 / np.log(2) * np.log(max(float(p), 1e-4) * len(g))))))
+    hs = [dict(順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
                不利明け=r['不利明け'], 向き=r['向き']) for _, r in g.iterrows()]
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, レース名=nm, 格=grade, 芝ダ=info.get('芝ダ', ''), 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
