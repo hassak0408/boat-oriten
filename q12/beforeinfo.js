@@ -44,6 +44,32 @@ var BeforeInfo = (function () {
     return pv;
   }
   function count(pv) { var n = 0; for (var k in pv.racers) if (pv.racers[k].exhibition_time > 0) n++; return n; }   // 展示タイムがそろった艇の数
-  return { parse: parse, count: count };
+  // 市場の値段にまだ入っていないかもしれない材料（2026-11-09から記録。parse は変えない＝通知と同じ形のまま）
+  //   艇ごと：t 登録番号、pr プロペラの欄（替えたときは「新」）、pt 部品交換の札（「ピストン×２」など）
+  //   レース：lab 見出しの札（進入固定・安定板使用などが出るところ）、name レース名、m 距離、antei ページのどこかに「安定板」があれば1
+  function txt(s) { return String(s === null || s === undefined ? '' : s).replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').replace(/\s+/g, ' ').trim(); }
+  function extras(html) {
+    var ex = { b: {} };
+    var bodies = html.split('<tbody class="is-fs12');
+    for (var i = 1; i < bodies.length; i++) {
+      var b = bodies[i].split('</tbody>')[0];
+      var mb = /is-boatColor(\d)/.exec(b); if (!mb) continue;
+      var tds = [], re = /<td[^>]*>([\s\S]*?)<\/td>/g, m, kp = -1;
+      while ((m = re.exec(b)) !== null) { if (kp < 0 && m[1].indexOf('labelGroup1') >= 0) kp = tds.length; tds.push(m[1]); }
+      var pt = [], g = /<ul class="labelGroup1">([\s\S]*?)<\/ul>/.exec(b);
+      if (g) { var rl = /<span[^>]*>([^<]*)<\/span>/g, q; while ((q = rl.exec(g[1])) !== null) { var u = txt(q[1]); if (u) pt.push(u); } }
+      var tb = /toban=(\d+)/.exec(b);
+      ex.b[mb[1]] = { t: tb ? tb[1] : null, pr: kp > 0 ? txt(tds[kp - 1]) : null, pt: pt };   // プロペラの欄は部品交換の欄のすぐ前
+    }
+    var lab = [], lb = html.split('title16_titleLabels__add2020">')[1];
+    if (lb) { lb = lb.split('</div>')[0]; var rs = />([^<]+)</g, z; while ((z = rs.exec(lb)) !== null) { var w = txt(z[1]); if (w) lab.push(w); } }
+    ex.lab = lab;
+    var td = /title16_titleDetail__add2020">([\s\S]*?)<\/h3>/.exec(html), dt = td ? txt(td[1]) : '', dm = /(\d{3,4})m/.exec(dt);
+    ex.name = td ? dt.replace(/\s*\d{3,4}m\s*$/, '') : null;
+    ex.m = dm ? Number(dm[1]) : null;
+    ex.antei = html.indexOf('安定板') >= 0 ? 1 : 0;
+    return ex;
+  }
+  return { parse: parse, count: count, extras: extras };
 })();
 if (typeof module !== 'undefined') module.exports = BeforeInfo;

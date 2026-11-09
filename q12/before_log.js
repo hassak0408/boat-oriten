@@ -3,6 +3,7 @@
 //   v1 は5分ごとに読み直し、展示がそろったのを見つけた時刻を書く。読み始めは全体で2秒に1回まで。決めた分だけ動いて止まる（全部締め切られたら早く止まる）
 //   出力：q12/before/log_YYYYMMDD.csv（日付,場,R,締切,公式で見つけた時刻,締切の何分前,v1で見つけた時刻,締切の何分前,その回の最初の読みか）
 //         q12/before/pv_YYYYMMDD.jsonl（公式のページから作った preview。あとで v1 の最後の形とくらべる）
+//           2026-11-09から ex も足す（B.extras：プロペラ新・部品交換・見出しの札・安定板。通知は使わない、あとで値段に入っているかを調べる材料）
 const fs = require('fs'); const path = require('path'); const { execSync } = require('child_process');
 const B = require('./beforeinfo.js');
 const DIR = path.join(__dirname, 'before'); const UA = 'boat-oriten (+https://github.com/hassak0408/boat-oriten)';
@@ -71,7 +72,8 @@ const lastPoll = {};
       let pv; try { pv = B.parse(html); } catch (e) { continue; }
       if (B.count(pv) >= 5) {
         const now = Date.now(); rec[k].official = jst(now).hms; rec[k].offMins = ((r.close - now) / 60e3).toFixed(2);
-        fs.appendFileSync(PV, JSON.stringify({ v: r.v, rno: r.rno, at: jst(now).hms, mins: rec[k].offMins, preview: pv }) + '\n');
+        let ex = null; try { ex = B.extras(html); } catch (e) { ex = null; }
+        fs.appendFileSync(PV, JSON.stringify({ v: r.v, rno: r.rno, at: jst(now).hms, mins: rec[k].offMins, preview: pv, ex: ex }) + '\n');
       }
     }
     flush();

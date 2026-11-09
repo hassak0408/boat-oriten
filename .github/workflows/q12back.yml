@@ -1,0 +1,69 @@
+# 公式の直前情報の過去のページから、市場の値段にまだ入っていないかもしれない材料（プロペラ新・部品交換・安定板など）を集める（2026-11-09〜）
+#   q12/before_back.js を動かす。新しい日から古い日へ。済んだ日は q12/before/back/done.txt にあり、次の回はとばす
+#   1回は最大5時間30分。残りの日があれば次の回を動かす。公式のページは1本ずつ、1.5秒以上あけて読む。公式が20回続けて読めなければ止める
+#   per を入れると確かめ（その日の1R・12Rを per 本だけ。q12/before/back/probe.jsonl に書く）
+#   通知（版15）は変えない。集めたものは、1月の作り直し（2027-01-05）で「値段に入っているか」を調べる材料にする
+name: q12-back
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: '古い方の日（YYYYMMDD）。「,」でつなぐとその日だけ'
+        required: true
+        default: '20250101'
+      to:
+        description: '新しい方の日（YYYYMMDD）'
+        required: false
+        default: '20261109'
+      minutes:
+        description: '1回で動く時間（分、最大330）'
+        required: false
+        default: '330'
+      gap:
+        description: '公式を読む間隔（ミリ秒、1000以上）'
+        required: false
+        default: '1500'
+      per:
+        description: '1日に読む本数（確かめ用。0は全部）'
+        required: false
+        default: '0'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: q12-back
+  cancel-in-progress: false
+jobs:
+  back:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 読む
+        id: read
+        run: node q12/before_back.js "${{ inputs.from }}" "${{ inputs.to }}" "${{ inputs.minutes }}" "${{ inputs.gap }}" "${{ inputs.per }}"
+      - name: 保存
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add q12/before/back
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "q12：過去の直前情報の材料 ${{ steps.read.outputs.span }}"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
+      - name: 次の回を動かす
+        if: steps.read.outputs.left != '' && steps.read.outputs.left != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run q12back.yml --repo ${{ github.repository }} --ref main -f from="${{ inputs.from }}" -f to="${{ inputs.to }}" -f minutes="${{ inputs.minutes }}" -f gap="${{ inputs.gap }}" -f per="${{ inputs.per }}"
