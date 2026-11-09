@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(HERE, '..', 'jra'))
 import jsoft
 store, day = sys.argv[1], sys.argv[2]
 YEARS = [int(v) for v in sys.argv[3:]] or list(range(2021, 2027))
+ARGV = list(sys.argv)
 src = open(f'{HERE}/pipe.py', encoding='utf-8').read()
 head = src[:src.index("Y = int(today[:4])")]      # pipe.py の材料づくりの部分（モデルを作る前まで）
 g = {'__name__': 'pipe_head', '__file__': f'{HERE}/pipe.py'}
@@ -48,5 +49,6 @@ for y in YEARS:
         log(y, '年', vn or '（騎手の差なし）', '材料', len(F), '順を学ぶモデルの1着の当て分け（そのまま）', round(float(-np.log(np.clip(o['pl_1' + vn].values[w], 1e-9, 1)).mean()), 4))
     out.append(o)
 os.makedirs(f'{store}/data/exp', exist_ok=True)
-pd.concat(out, ignore_index=True).to_csv(f'{store}/data/exp/nk_m4_pred.csv.gz', index=False)
+suffix = ('_' + '_'.join(map(str, YEARS))) if len(ARGV) > 3 else ''      # 年を指定したとき（並べて動かすとき）は名前に年を入れる
+pd.concat(out, ignore_index=True).to_csv(f'{store}/data/exp/nk_m4_pred{suffix}.csv.gz', index=False)
 log('できた')
