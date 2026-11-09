@@ -238,7 +238,9 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     g = g.sort_values('順位')
     # 指数＝AIの評価を1つの数に：50＝このレースの平均の馬（1着の見込みが1÷頭数）、10上がるごとに1着の見込みが2倍
     _ix = lambda p: int(round(min(100.0, max(0.0, 50 + 10 / np.log(2) * np.log(max(float(p), 1e-4) * len(g))))))
-    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
+    # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
+    _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
+    hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
                逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100)) for _, r in g.iterrows()]
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
