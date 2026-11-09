@@ -4,6 +4,7 @@ STORE（非公開のリポジトリ）の data/race（月ごと）と data/daily
 - モデルは毎回作る（Y年はY−1年まで、2017年から）。材料はレース前に分かるものだけで、人気・オッズは使わない。
 - 1着と3着内は、レースの中で1〜3着の順を学ぶやり方（jsoft.py、中央と同じ作り方）とHGBの3着内（乱数0・1・2の平均）を合わせる（検証計画「地方：精度を上げる」。値は nar_fix.json）。
   LightGBM が無いときは前のやり方（HGB 乱数0の1着・3着内）に戻す。脚質（先頭・先行）は前のまま。
+- 1着の見込みは、場×枠の群ごとの値を掛けて直す（検証計画 W1。値は nar_fix.json の「枠の付け直し」）。
 - 朝の出馬表には馬体重が無いレースがあるので、馬体重は使わない。材料は cand3.py の「朝3」と同じ（B2＋全部の場の前の成績＝B3）。
 - 全部の場の前の成績は STORE/data_all（環境変数 CHIHO_ALL）から作る。
 - 月ごとのデータより後の日は、毎日の記録の最後の分（結果入り）で埋める。
@@ -167,6 +168,15 @@ if SOFT:      # 1着 ∝ 順を学ぶモデルの1着^a × HGBの3着内^b、3�
     _q = (TE['p3順'] * np.minimum(3, TE['n']) / TE['p3順'].groupby(_gk).transform('sum')).clip(1e-4, 0.97)
     _b = pd.Series(np.where(TE['五場走数'] == 0, TE['p3'], _q), index=TE.index); _b = (_b * np.minimum(3, TE['n']) / _b.groupby(_gk).transform('sum')).clip(1e-4, 0.97)
     _e = _b ** NFIX['c']; TE['p3'] = (_e * np.minimum(3, TE['n']) / _e.groupby(_gk).transform('sum')).clip(upper=0.97)
+    # 枠の付け直し（検証計画 W1）：場×枠の群（内1〜2枠・中3〜6枠・外7〜8枠）ごとの値を1着の見込みに掛けて、足して1に直す。3着内は直さない。5場のほかの場は1のまま
+    _wf = NFIX.get('枠の付け直し', {}).get('1着')
+    if _wf:
+        _wk = pd.to_numeric(TE['枠番'], errors='coerce')
+        _wg = np.where(_wk <= 2, '内（1〜2枠）', np.where(_wk <= 6, '中（3〜6枠）', '外（7〜8枠）'))
+        _m = pd.Series(TE['競馬場'].astype(str).values + '・' + _wg, index=TE.index).map(_wf).fillna(1.0)
+        _m[_wk.isna()] = 1.0
+        TE['p1'] = TE['p1'] * _m; TE['p1'] = TE['p1'] / TE['p1'].groupby(_gk).transform('sum')
+        log('枠の付け直し（1着）', '値を掛けた馬', int((_m != 1.0).sum()), '／', len(TE))
 # 前の所属による直し（origin_fix.py で2021〜2025年から決めた値。全部の場の前の成績があるときだけ）
 H = H.sort_values(['馬', '日', 'レース番号'])
 first = np.select([(H['五場走数'] == 0) & (H['全走'] == 0), (H['五場走数'] == 0) & (H['初データ'] == 1) & (H['芝走'] > 0),

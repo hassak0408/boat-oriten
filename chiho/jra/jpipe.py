@@ -6,6 +6,7 @@ STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
   1着はそれにHGBの3着内を少し混ぜる。
   3着内は、中央で初めて走る馬（新馬以外）だけ HGB の3着内を使う（M4c）。
   LightGBM が無いときは前のやり方（HGBの1着と3着内、M2a）に戻す。
+  1着と3着内は、芝ダ×枠の群（芝は開催1〜2日目か・外回り・直線も）ごとの値を掛けて直す（検証計画 W1。値は jra_fix.json の「枠の付け直し」）。
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
   前走までのラップ（L3）と1頭ごとの推定上り（U1。STORE/jra/ses、ped.py が毎朝足す）も使う。
 - 障害のレースは出さない。朝は馬場・天候が分からないので「良」「晴」とする。
@@ -96,6 +97,22 @@ if FIX3:      # 3着内 ∝ 3着内^c（足して3。M4c なら順を学んだ�
         base = (base * np.minimum(3, TE['n']) / base.groupby(grp).transform('sum')).clip(1e-4, 0.97)
     e = base ** FIX3['c']
     TE['p3'] = (e * np.minimum(3, TE['n']) / e.groupby(grp).transform('sum')).clip(1e-4, 0.97)
+WFIX = FIX.get('枠の付け直し', {}) if SOFT else {}
+if WFIX:      # 枠の付け直し（検証計画 W1）：芝ダ×枠の群（芝は開催1〜2日目か・外回り・直線も）ごとの値を1着と3着内の見込みに掛けて直す
+    _c = C.drop_duplicates(['場', 'R'])[['場', 'R', '芝ダ', 'コース', '日目']].copy(); _c['_R'] = pd.to_numeric(_c['R'], errors='coerce')
+    _t = pd.DataFrame({'場': TE['場'].astype(str).values, '_R': pd.to_numeric(TE['R'], errors='coerce').values}).merge(_c.drop(columns=['R']), on=['場', '_R'], how='left')
+    _wk = pd.to_numeric(TE['枠'], errors='coerce').values
+    _wg = np.where(_wk <= 2, '内（1〜2枠）', np.where(_wk <= 6, '中（3〜6枠）', '外（7〜8枠）'))
+    _cs = _t['コース'].fillna('').astype(str)
+    _kai = np.where(_cs.str.contains('外').values, '外回り', np.where(_cs.str.contains('直線').values, '直線', '内回り・ふつう'))
+    _day = np.where(pd.to_numeric(_t['日目'], errors='coerce').values <= 2, '1〜2日目', '3日目以降')
+    _cell = pd.Series(np.where(_t['芝ダ'].values == 'ダート', 'ダ・' + _wg, '芝・' + _day + '・' + _kai + '・' + _wg), index=TE.index)
+    for _k, _col in (('1着', 'p1'), ('3着内', 'p3')):
+        if _k not in WFIX: continue
+        _m = _cell.map(WFIX[_k]).fillna(1.0); _m[np.isnan(_wk)] = 1.0
+        _v = TE[_col] * _m
+        TE[_col] = _v / _v.groupby(grp).transform('sum') if _k == '1着' else (_v * np.minimum(3, TE['n']) / _v.groupby(grp).transform('sum')).clip(1e-4, 0.97)
+        log('枠の付け直し（' + _k + '）', '値を掛けた馬', int((_m != 1.0).sum()), '／', len(TE))
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
