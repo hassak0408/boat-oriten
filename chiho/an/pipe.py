@@ -137,6 +137,8 @@ Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測']]
 TE = H[H['予測']].copy()
 FE3 = [c for c in FEATS + NEW + (EXTRA3 if USE3 else []) if c not in BW] + JF
+if SOFT and NFIX.get('展開の材料'):      # 展開の材料（脚質の予想の材料 SF）を3着内・1着のモデルにも入れる（N4）
+    FE3 += [c for c in SF if c not in FE3]
 FES = [c for c in FEATS + SF if c not in BW]
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)

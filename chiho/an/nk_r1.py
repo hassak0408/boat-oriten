@@ -1,9 +1,9 @@
 """地方：R1 連対（2着内）の見込みの出し方（検証計画 R1）。N3の見込み（nk_m4b.py）で、R1a（馬連の組の見込みを足す）と R1b（ハービル）をくらべる。
-使い方：python nk_r1.py nk_m4b_pred.csv.gz STORE"""
+使い方：python nk_r1.py "見込み*.csv.gz" STORE [種類 a b c]"""
 import sys, glob, numpy as np, pandas as pd
 KEY = ['競馬場', '競走年月日', 'レース番号']
-a, b, c = 0.978, 0.222, 0.884      # nar_fix.json（N3）の値
-D = pd.read_csv(sys.argv[1], dtype={'競馬場': str, '競走年月日': str, 'レース番号': str}); D = D[D['n'] >= 5].copy()
+V = sys.argv[3] if len(sys.argv) > 3 else '_k'; a, b, c = (float(x) for x in sys.argv[4:7]) if len(sys.argv) > 6 else (0.978, 0.222, 0.884)      # nar_fix.json の値
+D = pd.concat([pd.read_csv(f, dtype={'競馬場': str, '競走年月日': str, 'レース番号': str}) for f in sorted(glob.glob(sys.argv[1]))], ignore_index=True); D = D[D['n'] >= 5].copy()
 R = pd.concat([pd.read_csv(f, dtype=str, keep_default_na=False, usecols=KEY + ['馬番', '着順']) for f in glob.glob(f'{sys.argv[2]}/data/race/*/*horselist*.csv.gz')],
               ignore_index=True).drop_duplicates(KEY + ['馬番'], keep='last')
 R['馬番'] = pd.to_numeric(R['馬番'], errors='coerce'); R['着'] = pd.to_numeric(R['着順'], errors='coerce')
@@ -13,9 +13,9 @@ ok = pd.Series((D['着'] <= 2).astype(int)).groupby(G).transform('sum').values =
 D, G = D[ok].reset_index(drop=True), G[ok]; G = pd.factorize(G)[0]
 s1 = lambda x: x / pd.Series(x).groupby(G).transform('sum').values
 s3 = lambda x: np.clip(x * np.minimum(3, D['n'].values) / pd.Series(x).groupby(G).transform('sum').values, 1e-4, 0.97)
-h3 = s3(D['h_3_k'].values); pl1 = s1(D['pl_1_k'].values)
+h3 = s3(D['h_3' + V].values); pl1 = s1(D['pl_1' + V].values)
 z = a * np.log(np.clip(pl1, 1e-6, 1)) + b * np.log(h3); z = z - pd.Series(z).groupby(G).transform('max').values
-p1 = s1(np.exp(z)); m3 = s3(np.where((D['五場走数'] == 0).values, h3, s3(D['pl_3_k'].values))); p3 = s3(m3 ** c)
+p1 = s1(np.exp(z)); m3 = s3(np.where((D['五場走数'] == 0).values, h3, s3(D['pl_3' + V].values))); p3 = s3(m3 ** c)
 y2 = (D['着'] <= 2).astype(int).values
 r2a = np.zeros(len(D)); r2b = np.zeros(len(D))
 st = np.r_[0, np.flatnonzero(np.diff(G)) + 1]; en = np.r_[st[1:], len(G)]
