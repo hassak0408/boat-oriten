@@ -1,6 +1,7 @@
 # 公式の直前情報の過去のページから、市場の値段にまだ入っていないかもしれない材料（プロペラ新・部品交換・安定板など）を集める（2026-11-09〜）
 #   q12/before_back.js を動かす。新しい日から古い日へ。済んだ日は q12/before/back/done.txt にあり、次の回はとばす
-#   1回は最大5時間30分。残りの日があれば次の回を動かす。公式のページは1本ずつ、1.5秒以上あけて読む。公式が20回続けて読めなければ止める
+#   1回は最大5時間30分。残りの日があれば次の回を動かす。公式のページは読み始めを1.5秒以上あけて読む（同時に6本まで）。公式が20回続けて読めなければ止める
+#   （2026-11-10：Actions からは1ページ9秒ほどかかるので、同時に読む本数 conc を足した。頼みの数は1秒に0.67本までのまま）
 #   per を入れると確かめ（その日の1R・12Rを per 本だけ。q12/before/back/probe.jsonl に書く）
 #   通知（版15）は変えない。集めたものは、1月の作り直し（2027-01-05）で「値段に入っているか」を調べる材料にする
 name: q12-back
@@ -27,6 +28,10 @@ on:
         description: '1日に読む本数（確かめ用。0は全部）'
         required: false
         default: '0'
+      conc:
+        description: '同時に読む本数（1〜8。読み始めの間は gap のまま）'
+        required: false
+        default: '6'
 permissions:
   contents: write
   actions: write
@@ -47,7 +52,7 @@ jobs:
           node-version: '22'
       - name: 読む
         id: read
-        run: node q12/before_back.js "${{ inputs.from }}" "${{ inputs.to }}" "${{ inputs.minutes }}" "${{ inputs.gap }}" "${{ inputs.per }}"
+        run: node q12/before_back.js "${{ inputs.from }}" "${{ inputs.to }}" "${{ inputs.minutes }}" "${{ inputs.gap }}" "${{ inputs.per }}" "${{ inputs.conc || '6' }}"
       - name: 保存
         if: always()
         run: |
@@ -66,4 +71,4 @@ jobs:
         if: steps.read.outputs.left != '' && steps.read.outputs.left != '0'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run q12back.yml --repo ${{ github.repository }} --ref main -f from="${{ inputs.from }}" -f to="${{ inputs.to }}" -f minutes="${{ inputs.minutes }}" -f gap="${{ inputs.gap }}" -f per="${{ inputs.per }}"
+        run: gh workflow run q12back.yml --repo ${{ github.repository }} --ref main -f from="${{ inputs.from }}" -f to="${{ inputs.to }}" -f minutes="${{ inputs.minutes }}" -f gap="${{ inputs.gap }}" -f per="${{ inputs.per }}" -f conc="${{ inputs.conc || '6' }}"

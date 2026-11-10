@@ -1,8 +1,10 @@
 // 公式の直前情報（beforeinfo）の過去のページから、市場の値段にまだ入っていないかもしれない材料を集める（2026-11-09〜）
 //   集めるもの（B.extras）：艇ごとのプロペラ（新）・部品交換、レースの見出しの札（進入固定・安定板使用など）・距離・「安定板」の有無、展示がそろった艇の数（n）
-//   node q12/before_back.js FROM TO [分] [間隔ms] [1日の上限]
+//   node q12/before_back.js FROM TO [分] [間隔ms] [1日の上限] [同時に読む本数]
 //     FROM・TO：YYYYMMDD。新しい日から古い日へ読む。FROM に「,」でつないだ日を並べると、その日だけ読む
-//     出走表は BoatraceOpenAPI（api v1、なければ programs v3）から。公式のページは1本ずつ、間隔をあけて読む（既定1.5秒）
+//     出走表は BoatraceOpenAPI（api v1、なければ programs v3）から。公式のページは、読み始めの間を必ずあける（既定1.5秒）
+//       2026-11-10：Actions からは公式の1ページが9秒ほどかかり（1本ずつでは1日に約9,300ページ、全部で1か月）、
+//       同時に読む本数（既定6）を足した。読み始めの間（1.5秒）は変えないので、公式への頼みの数は1秒に0.67本までのまま
 //     出力：q12/before/back/ex_YYYYMM.jsonl（1行1レース。札のある艇だけを書く：p プロペラ、x 部品交換、lab 見出しの札、m 1800m以外の距離、a 安定板）
 //           済んだ日は q12/before/back/done.txt（次の回はとばす）
 //       1日の上限を入れたとき（ページがあるかの確かめ）は q12/before/back/probe.jsonl に B.extras をそのまま書き、done には書かない
@@ -14,14 +16,15 @@ const UA = 'boat-oriten (+https://github.com/hassak0408/boat-oriten)';
 const BR = 'https://www.boatrace.jp/owpc/pc/race/beforeinfo';
 const FROM = process.argv[2] || '', TO = process.argv[3] || '';
 const LIMIT = Number(process.argv[4] || 330) * 60e3, GAP = Math.max(1000, Number(process.argv[5] || 1500)), PER = Number(process.argv[6] || 0), t0 = Date.now();
+const CONC = Math.max(1, Math.min(8, Number(process.argv[7] || 6)));
 const DIR = process.env.Q12_BACK_DIR || path.join(__dirname, 'before', 'back'); fs.mkdirSync(DIR, { recursive: true });   // Q12_BACK_DIR は確かめ用
 const DONE = path.join(DIR, 'done.txt');
 const sleep = ms => new Promise(s => setTimeout(s, ms)); const pad = n => String(n).padStart(2, '0');
 function out(k, v) { if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`); }
-let lastGet = 0;
+let nextSlot = 0;   // 公式を次に読み始めてよい時刻（同時に読んでも、読み始めは GAP ずつあく）
 async function get(url, json, official) {   // 読めたら中身、404 なら null、3回とも読めなければ undefined
   for (let i = 0; i < 3; i++) {
-    if (official) { const w = lastGet + GAP - Date.now(); if (w > 0) await sleep(w); lastGet = Date.now(); }
+    if (official) { const s = Math.max(Date.now(), nextSlot); nextSlot = s + GAP; const w = s - Date.now(); if (w > 0) await sleep(w); }
     try {
       const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(30e3) });
       if (r.ok) return json ? await r.json() : await r.text();
@@ -65,23 +68,29 @@ function row(d, v, r, n, ex) {   // ふつうの日の1行：札のある艇だ�
   const done = new Set(fs.existsSync(DONE) ? fs.readFileSync(DONE, 'utf8').split('\n').filter(x => x) : []);
   const todo = days().filter(d => PER > 0 || !done.has(d));
   let left = todo.length, stop = '', first = '', last = '', nPage = 0, fails = 0;   // fails は日をまたいで数える（続けて読めない回数）
-  console.log('読む日', todo.length, '（済み', done.size, '）間隔', GAP, 'ms');
+  console.log('読む日', todo.length, '（済み', done.size, '）間隔', GAP, 'ms・同時に', CONC, '本');
   for (const ymd of todo) {
     if (Date.now() - t0 > LIMIT) { stop = '時間'; break; }
     const R = await races(ymd);
     if (R === null) { console.log(ymd, '出走表が読めない（次の回に残す）'); continue; }
-    const rows = []; let cut = false;
-    for (const [v, rno] of (PER > 0 ? R.filter(x => x[1] === 1 || x[1] === 12).slice(0, PER) : R)) {
-      if (Date.now() - t0 > LIMIT) { cut = true; break; }
-      const html = await get(`${BR}?rno=${rno}&jcd=${pad(v)}&hd=${ymd}`, false, true); nPage++;
-      if (html === undefined) { rows.push({ d: ymd, v, r: rno, e: 1 }); if (++fails >= 20) { stop = '公式が続けて読めない'; break; } continue; }
-      fails = 0;
-      if (html === null) { rows.push({ d: ymd, v, r: rno, e: 404 }); continue; }
-      try {
-        const pv = B.parse(html), ex = B.extras(html), n = B.count(pv);
-        rows.push(PER > 0 ? { d: ymd, v, r: rno, n, len: html.length, ex } : row(ymd, v, rno, n, ex));
-      } catch (e) { rows.push({ d: ymd, v, r: rno, e: 'parse' }); }
-    }
+    const list = PER > 0 ? R.filter(x => x[1] === 1 || x[1] === 12).slice(0, PER) : R;
+    const rows = new Array(list.length); let cut = false, k = 0, tsum = 0; const td = Date.now();
+    const worker = async () => {   // CONC 本が並んで、list を前から1本ずつ取って読む（行は list の順に入れる）
+      while (!cut && !stop) {
+        const i = k++; if (i >= list.length) return;
+        if (Date.now() - t0 > LIMIT) { cut = true; return; }
+        const [v, rno] = list[i], t1 = Date.now();
+        const html = await get(`${BR}?rno=${rno}&jcd=${pad(v)}&hd=${ymd}`, false, true); nPage++; tsum += Date.now() - t1;
+        if (html === undefined) { rows[i] = { d: ymd, v, r: rno, e: 1 }; if (++fails >= 20) stop = '公式が続けて読めない'; continue; }
+        fails = 0;
+        if (html === null) { rows[i] = { d: ymd, v, r: rno, e: 404 }; continue; }
+        try {
+          const pv = B.parse(html), ex = B.extras(html), n = B.count(pv);
+          rows[i] = PER > 0 ? { d: ymd, v, r: rno, n, len: html.length, ex } : row(ymd, v, rno, n, ex);
+        } catch (e) { rows[i] = { d: ymd, v, r: rno, e: 'parse' }; }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.max(1, Math.min(CONC, list.length)) }, worker));
     if (cut || stop) { if (!stop) stop = '時間'; console.log(ymd, '途中で止めたので、この日の分は捨てる'); break; }
     const e1 = rows.filter(x => x.e === 1).length;
     if (e1 && e1 >= rows.length / 2) { console.log(ymd, '読めないページが多いので、この日は次の回に読み直す', e1, '/', rows.length); continue; }
@@ -90,7 +99,7 @@ function row(d, v, r, n, ex) {   // ふつうの日の1行：札のある艇だ�
     else { if (rows.length) fs.appendFileSync(path.join(DIR, `ex_${ymd.slice(0, 6)}.jsonl`), txt); fs.appendFileSync(DONE, ymd + '\n'); }
     left--; if (!first) first = ymd; last = ymd;
     const ok = rows.filter(x => x.n >= 5).length, bad = rows.filter(x => x.e).length, part = rows.filter(x => x.x || (x.ex && Object.values(x.ex.b).some(z => z.pt.length))).length;
-    console.log(ymd, 'レース', R.length, '読んだ', rows.length, '展示あり', ok, '読めない', bad, '部品交換あり', part);
+    console.log(ymd, 'レース', R.length, '読んだ', rows.length, '展示あり', ok, '読めない', bad, '部品交換あり', part, '1本', (tsum / Math.max(1, list.length) / 1000).toFixed(1) + '秒', 'この日', ((Date.now() - td) / 60e3).toFixed(1) + '分');
   }
   if (PER > 0) left = 0;
   if (!first && stop !== '時間') left = 0;   // 1日も進まなかった（出走表が読めない日ばかり）ときは、くり返さない
