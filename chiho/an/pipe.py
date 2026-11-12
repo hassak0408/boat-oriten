@@ -5,6 +5,7 @@ STORE（非公開のリポジトリ）の data/race（月ごと）と data/daily
 - 1着と3着内は、レースの中で1〜3着の順を学ぶやり方（jsoft.py、中央と同じ作り方）とHGBの3着内（乱数0・1・2の平均）を合わせる（検証計画「地方：精度を上げる」。値は nar_fix.json）。
   LightGBM が無いときは前のやり方（HGB 乱数0の1着・3着内）に戻す。脚質（先頭・先行）は前のまま。
 - 1着の見込みは、場×枠の群ごとの値を掛けて直す（検証計画 W1。値は nar_fix.json の「枠の付け直し」）。
+- 着差を学ぶモデル（HGB、3つの平均）の見込みを、1着と3着内に掛ける（検証計画 N5 の mg。値は nar_fix.json の「着差のモデル」）。
 - 朝の出馬表には馬体重が無いレースがあるので、馬体重は使わない。材料は cand3.py の「朝3」と同じ（B2＋全部の場の前の成績＝B3）。
 - 全部の場の前の成績は STORE/data_all（環境変数 CHIHO_ALL）から作る。
 - 月ごとのデータより後の日は、毎日の記録の最後の分（結果入り）で埋める。
@@ -158,16 +159,21 @@ if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（jso
     B = TE.assign(年月日=TE['競走年月日'], 場=TE['競馬場'], R=TE['レース番号'])
     TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(A, F, ['場c', '馬場c', '天候c', '性c'], wt=tuple(NFIX['重み']), params=NFIX['木'], log=log), B, F)
     del A, B
+    if NFIX.get('着差のモデル'):      # 着差を学ぶモデル（検証計画 N5 の mg）：勝ち馬との着差（秒、1000mあたり）の見込み。小さいほど良い
+        import jk_rel
+        TE['mg'] = jk_rel.margin_fit_predict(TRN, TE, F, [F.index(c) for c in ['場c', '馬場c', '天候c', '性c'] if c in F], BIG); log('モデル 着差', '見込みの着差の平均', round(float(TE['mg'].mean()), 3))
 
 # レースの中で足し合わせをそろえる（3着内は合計3、1着は合計1）
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
 if SOFT:      # 1着 ∝ 順を学ぶモデルの1着^a × HGBの3着内^b、3着内 ∝ 順を学ぶモデルの3着内（5場で初めて走る馬だけHGB）^c
     _gk = [TE[k] for k in KEY]
-    _s = NFIX['a'] * np.log(TE['p1'].clip(1e-6)) + NFIX['b'] * np.log(TE['p3'].clip(1e-6)); _s = _s - _s.groupby(_gk).transform('max')
+    _MG = (NFIX.get('着差のモデル') or {}) if 'mg' in TE else {}
+    _mm = (TE['mg'] - TE['mg'].groupby(_gk).transform('mean')) if _MG else 0.0      # 見込みの着差−レースの平均
+    _s = NFIX['a'] * np.log(TE['p1'].clip(1e-6)) + NFIX['b'] * np.log(TE['p3'].clip(1e-6)) - _MG.get('e', 0.0) * _mm; _s = _s - _s.groupby(_gk).transform('max')
     TE['p1'] = np.exp(_s); TE['p1'] = TE['p1'] / TE['p1'].groupby(_gk).transform('sum')
     _q = (TE['p3順'] * np.minimum(3, TE['n']) / TE['p3順'].groupby(_gk).transform('sum')).clip(1e-4, 0.97)
     _b = pd.Series(np.where(TE['五場走数'] == 0, TE['p3'], _q), index=TE.index); _b = (_b * np.minimum(3, TE['n']) / _b.groupby(_gk).transform('sum')).clip(1e-4, 0.97)
-    _e = _b ** NFIX['c']; TE['p3'] = (_e * np.minimum(3, TE['n']) / _e.groupby(_gk).transform('sum')).clip(upper=0.97)
+    _e = _b ** NFIX['c'] * np.exp(-_MG.get('f', 0.0) * _mm); TE['p3'] = (_e * np.minimum(3, TE['n']) / _e.groupby(_gk).transform('sum')).clip(1e-4, 0.97)
     # 枠の付け直し（検証計画 W1）：場×枠の群（内1〜2枠・中3〜6枠・外7〜8枠）ごとの値を1着の見込みに掛けて、足して1に直す。3着内は直さない。5場のほかの場は1のまま
     _wf = NFIX.get('枠の付け直し', {}).get('1着')
     if _wf:
