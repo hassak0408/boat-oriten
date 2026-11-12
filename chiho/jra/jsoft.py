@@ -28,6 +28,8 @@ def make_obj(wt):
             ok = np.repeat(has & (np.add.reduceat(tgt, st) > 0), sz)      # その着の馬がいるレースだけ
             grad += np.where(ok, wk * (p - tgt), 0); hess += np.where(ok, wk * p * (1 - p), 0)
             m = m * (o != k)
+        rw = getattr(data, 'rw', None)      # レースの重み（検証計画 N5・M6 の td。無ければ全部1）
+        if rw is not None: grad *= rw; hess *= rw
         return grad, np.maximum(hess, 1e-6)
     return obj
 
@@ -62,13 +64,14 @@ def _sorted(X):
     return o.index, g
 
 
-def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None, params=None):
+def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None, params=None, rw=None):
     """X：学ぶ行（勝・着・年月日・場・R・馬番と材料）。勝ち馬のいないレースと1頭のレースは除く。params で木の大きさなどを替えられる（検証計画 M5）"""
     import lightgbm as lgb
     idx, g = _sorted(X)
     Y = X.loc[idx]; w = pd.Series(Y['勝'].values).groupby(g).transform('sum').values; n = pd.Series(g).groupby(g).transform('size').values
     keep = (w > 0) & (n >= 2)
     Y = Y[keep]; g = g[keep]; y = Y['勝'].values / w[keep]
+    rwv = None if rw is None else pd.Series(np.asarray(rw, dtype=float), index=X.index).loc[Y.index].values      # rw：X の行の順の重み（同じレースは同じ値）
     od = pd.DataFrame({'g': g, 'f': pd.to_numeric(Y['着'], errors='coerce').fillna(99).values, 'b': pd.to_numeric(Y['馬番'], errors='coerce').values})
     order = (od.sort_values(['g', 'f', 'b']).groupby('g').cumcount() + 1).reindex(od.index).values      # 着の順（同着は馬番の順）
     races = np.unique(g); models = []
@@ -77,7 +80,9 @@ def fit(X, FE, cat, wt=(1.0, 0.5, 0.25), seeds=(0, 1, 2), log=None, params=None)
 
         def ds(m):
             d = lgb.Dataset(Y.loc[m, FE], label=y[m], categorical_feature=[c for c in cat if c in FE], free_raw_data=False)
-            d.gs = groups(g[m]); d.order = order[m]; return d
+            d.gs = groups(g[m]); d.order = order[m]
+            if rwv is not None: d.rw = rwv[m]
+            return d
         b = lgb.train(dict(P, **(params or {}), objective=make_obj(tuple(wt)), seed=sd, num_threads=os.cpu_count() or 4), ds(~va), num_boost_round=3000, valid_sets=[ds(va)],
                       feval=_feval, callbacks=[lgb.early_stopping(30, verbose=False)])
         models.append(b)

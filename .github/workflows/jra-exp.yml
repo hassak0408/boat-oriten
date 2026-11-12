@@ -15,8 +15,8 @@ on:
         default: ''
 permissions:
   contents: read
-concurrency:
-  group: jra-exp
+concurrency:      # 同じもの・同じ引数は1つずつ。年ごとに分けたものは並べて動かせる
+  group: jra-exp-${{ inputs.script }}-${{ inputs.args }}
   cancel-in-progress: false
 jobs:
   exp:
