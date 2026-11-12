@@ -1,12 +1,13 @@
 # 地方競馬の来そうな馬（毎朝の一覧）：今日の出馬表（chiho-rec が非公開のリポジトリに置く朝の分）から、
 #   馬ごとの3着内・1着の見込みと脚質の予想を出して、非公開のリポジトリ hassak0408/chiho-keiba の data/picks/日付.txt・.json に置く。
-#   毎朝9:25（日本時間。20〜40分ほど遅れることが多い）に動き出し、朝の出馬表が置かれるまで待つ（最大90分）。5場の開催が無い日は何もしない。
+#   毎朝8:03（日本時間。控えに9:25）に動き出し、朝の出馬表が置かれるまで待つ（最大150分）。5場の開催が無い日は何もしない。
 #   月の途中のレース情報（今の月、10日より前は前の月も。全部の場）は、ここで1日1回だけ読む（説明書の目安）。
 #   材料は B3（B2＋全部の場の前の成績）。馬体重は使わない。
 name: chiho-pick
 on:
   schedule:
-    - cron: '25 0 * * *'
+    - cron: '3 23 * * *'       # 8:03（日本時間）。0時台（世界時）は GitHub が混んで遅れたので、ずらした
+    - cron: '25 0 * * *'       # 控え（9:25）。もう今日の一覧があれば何もしない
   workflow_dispatch:
     inputs:
       day:
@@ -21,7 +22,7 @@ concurrency:
 jobs:
   pick:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 210
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,7 +43,8 @@ jobs:
           DAY: ${{ inputs.day }}
         run: |
           D="${DAY:-$(TZ=Asia/Tokyo date +%Y%m%d)}"; echo "DAY=$D" >> "$GITHUB_ENV"
-          for i in $(seq 1 45); do
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -f "store/data/picks/$D.json" ]; then echo "今日の一覧はもうある"; echo "NONE=1" >> "$GITHUB_ENV"; exit 0; fi
+          for i in $(seq 1 75); do
             git -C store fetch -q --depth 1 origin main && git -C store reset -q --hard origin/main
             f="store/data/daily/$D"
             if [ -f "$f/race_horselist_am.csv.gz" ]; then echo "出馬表あり"; exit 0; fi

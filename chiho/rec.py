@@ -84,7 +84,15 @@ def fetch_race(day_dir, day):
     zf, ts = get(BASE + 'RaceDataDownload?type=daily')
     if zf is None: return None
     sched, info = {}, {}
-    for name, rows in read_csvs(zf):
+    files = read_csvs(zf)
+    # 朝早いと、まだ前の日の分が置かれていることがある。どの場にも今日の日付のレースが無ければ「まだ」として何も置かず、あとでもう一度読む
+    fresh = None
+    for name, rows in files:
+        if rows and '発走時刻' in rows[0] and '競走年月日' in rows[0]:
+            i = rows[0].index('競走年月日'); fresh = any(len(x) > i and x[i] == day for x in rows[1:])
+    if fresh is False:
+        print(now().strftime('%H:%M'), 'レース情報がまだ今日の分でない（あとでもう一度）', flush=True); return None
+    for name, rows in files:
         head, body = keep_tracks(rows)
         kind = kind_of(name, head)
         info[kind] = {'元の名前': name, '行': len(body), '全体の行': len(rows) - 1}
