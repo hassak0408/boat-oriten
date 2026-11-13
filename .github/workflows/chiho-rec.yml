@@ -4,8 +4,13 @@
 name: chiho-rec
 on:
   schedule:
-    - cron: '47 22 * * *'      # 7:47（日本時間）。0時台（世界時）は GitHub が混んで6〜7時間遅れた（2026-11-09〜12）ので、ずらした
-    - cron: '7 0 * * *'        # 控え（9:07）。もう今日の朝の出馬表があれば何もしない
+    # この置き場の定時は4〜7時間遅れて動き出す（2026-11-10〜13 の実績。どの仕組みも同じ）。そこで早い時刻をいくつも置き、
+    # 先に動いた回が記録を始め、あとの回は「もう始まっている」で何もしない。早く動きすぎた回は、今日の分が置かれるまで10分おきに読み直す。
+    - cron: '7 17 * * *'
+    - cron: '7 19 * * *'
+    - cron: '7 21 * * *'
+    - cron: '47 22 * * *'
+    - cron: '7 0 * * *'
   workflow_dispatch:
     inputs:
       minutes:
@@ -53,6 +58,8 @@ jobs:
         env:
           MINUTES: ${{ inputs.minutes || '340' }}
           ONCE: ${{ inputs.once }}
+          GH_TOKEN: ${{ github.token }}      # 朝の出馬表を置いたら一覧作り（chiho-pick）を動かすため
+          GH_REPO: ${{ github.repository }}
         run: |
           if [ "$ONCE" = "1" ]; then python chiho/rec.py store "$MINUTES" --once; else python chiho/rec.py store "$MINUTES"; fi
       - name: 次の回を動かす

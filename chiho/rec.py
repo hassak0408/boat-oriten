@@ -184,6 +184,17 @@ def output(**kv):
             for k, v in kv.items(): f.write(f'{k}={v}\n')
 
 
+def start_pick(day):
+    """朝の出馬表を置いたら、来そうな馬の一覧（chiho-pick）をすぐ動かす（定時は何時間も遅れることがあるので、待たない）。GitHub の中で動いているときだけ。"""
+    if not (os.environ.get('GH_TOKEN') and os.environ.get('GH_REPO')): return
+    try:
+        import subprocess
+        r = subprocess.run(['gh', 'workflow', 'run', 'chiho-pick.yml', '-R', os.environ['GH_REPO'], '-f', f'day={day}'], capture_output=True, text=True, timeout=60)
+        print('一覧作りを動かした' if r.returncode == 0 else '一覧作りを動かせなかった ' + r.stderr[:200], flush=True)
+    except Exception as e:      # 記録は止めない
+        print('一覧作りを動かせなかった', e, flush=True)
+
+
 def main():
     store, minutes = sys.argv[1], float(sys.argv[2]); once = '--once' in sys.argv
     t0 = time.time(); day = now().strftime('%Y%m%d')
@@ -196,6 +207,7 @@ def main():
         output(left=0, ymd=day); return
     eh, em = map(int, END.split(':')); end = now().replace(hour=eh, minute=em, second=0, microsecond=0)
     sched, last_race, last_odds, last_save, finished = None, -1e9, -1e9, time.time(), False
+    had_am = os.path.exists(f'{day_dir}/race_horselist_am.csv.gz')
     while time.time() - t0 < minutes * 60 and now() < end:
         if sched is None or time.time() - last_race >= RACE_EVERY:
             first = sched is None
@@ -206,6 +218,7 @@ def main():
                 print('今日は対象の場のレースが無い', flush=True); finished = True; break
             if first and sched:          # 朝の出馬表はすぐ保存する（来そうな馬の一覧が使う）
                 save(store, rel, f'毎日の記録 {day}（朝の出馬表）'); last_save = time.time()
+                if not had_am: start_pick(day)      # この回で初めて朝の出馬表を置いたときだけ
         if sched:
             if now() > max(sched.values()) + dt.timedelta(minutes=AFTER_LAST):
                 fetch_race(day_dir, day); finished = True; break     # 結果入りを読んで終わる
