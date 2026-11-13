@@ -53,7 +53,9 @@ RELF = []
 if REL:      # レースの中での差の材料（順を学ぶモデルだけが使う）
     import jk_rel
     H, RELF = jk_rel.add_rel(H, KEY)
-NEED = set(FE + FES + RELF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離'])
+ZF = _FX0.get('市場のずれ') or (_FX0.get('市場のずれ（試し）') if os.environ.get('PICKS_DIR') else None) or {}      # 検証計画「Z1の印」：しきいがあるときだけ型を出す（「試し」の値は jk_pipetest.py のときだけ）
+NEED = set(FE + FES + RELF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
+           + (['単勝オッズ'] if ZF else []))
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わない'] == 0)]
@@ -124,6 +126,18 @@ if WFIX:      # 枠の付け直し（検証計画 W1）：芝ダ×枠の群（�
         _v = TE[_col] * _m
         TE[_col] = _v / _v.groupby(grp).transform('sum') if _k == '1着' else (_v * np.minimum(3, TE['n']) / _v.groupby(grp).transform('sum')).clip(1e-4, 0.97)
         log('枠の付け直し（' + _k + '）', '値を掛けた馬', int((_m != 1.0).sum()), '／', len(TE))
+TE['型'] = ''
+if SOFT and ZF:      # Z1の印：f（市場の見込みに掛ける exp(f) の f）を、Z1 と同じ材料・同じ木で、全部の馬に単勝オッズがある5頭以上のレースで学ぶ。評価（1着・3着内）は変えない
+    import jz1
+    _o = pd.to_numeric(TRN['単勝オッズ'], errors='coerce')
+    ZT = TRN[_o.groupby([TRN[k] for k in KEY]).transform(lambda s: s.notna().all()) & (TRN['n'] >= 5)].copy()
+    _q = 1 / pd.to_numeric(ZT['単勝オッズ'], errors='coerce'); ZT['pm'] = _q / _q.groupby([ZT[k] for k in KEY]).transform('sum')
+    FZ = [c for c in FE if c not in set(jfeat.PEDF) and ZT[c].notna().any()]
+    _nz = ZT.groupby(KEY).ngroups
+    TE['f'] = jz1.predict(jz1.fit_resid(ZT, FZ, CATF, log=log), TE, FZ); del ZT; gc.collect()
+    TE['型'] = np.where(TE['f'] >= ZF['上のしきい'], '市場より来やすい型', np.where(TE['f'] <= ZF['下のしきい'], '市場より来にくい型', ''))
+    log('市場のずれ', '学んだレース', _nz, 'f の標準偏差', round(float(TE['f'].std()), 4),
+        '来やすい型', round(float((TE['型'] == '市場より来やすい型').mean()) * 100, 1), '%・来にくい型', round(float((TE['型'] == '市場より来にくい型').mean()) * 100, 1), '%')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行', ''))
 TE['順位'] = TE.groupby(KEY)['p3'].rank(ascending=False, method='first').astype(int)
@@ -167,7 +181,10 @@ lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}�
          '「前走で出遅れなど」「前走で疾病」＝前走で発走の不利や競走中の疾病があった馬。これまで市場もこの評価も低く見がちだった（実際の1着は市場の見込みの1.3〜1.5倍）。'
          '人気薄でも気にかける目印（買えば勝てるという決まりではない）。上位5頭の外でも「ほか」に出す。',
          '馬連＝1・2着に来る見込みの高い組。' + ('（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた）' if CAL else '（見込みの直しはまだ。目安）'),
-         '新馬は血統の情報が無く、モデルが弱い（人気を重く）。「初出走」「中央で初」は中央の前の成績が無い馬。「中央で初」（新馬戦以外）の3着内の％は高めに出やすい（これまで実際は見込みの7〜8割）。', '']
+         '新馬は血統の情報が無く、モデルが弱い（人気を重く）。「初出走」「中央で初」は中央の前の成績が無い馬。「中央で初」（新馬戦以外）の3着内の％は高めに出やすい（これまで実際は見込みの7〜8割）。']
+if ZF: lines.append('市場より来やすい型・来にくい型＝朝の材料だけで見た「市場（オッズ）とのずれ」の型（上位1割・下位1割）。これまで来やすい型は市場の見込みの1.1倍ほど1着に来て、'
+                    '来にくい型は0.8倍ほどだった。単勝の回収は9割前後・4割前後で、買えば得という印ではない（来にくい型を買う前にもう一度考える目印）。')
+lines.append('')
 order = {p: i for i, p in enumerate(['札幌', '函館', '福島', '新潟', '東京', '中山', '中京', '京都', '阪神', '小倉'])}
 TE['Ri'] = TE['R'].astype(int)
 for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.get(kv[0][0], 9), kv[0][1])):
@@ -184,14 +201,14 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
     hs = [dict(順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
-               不利明け=r['不利明け'], 向き=r['向き'], **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
+               不利明け=r['不利明け'], 向き=r['向き'], 型=r['型'], **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
     _pc = lambda h: f"（連対{h['連対']}%・1着{h['一着']}%）" if '連対' in h else f"（{h['一着']}%）"
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, レース名=nm, 格=grade, 芝ダ=info.get('芝ダ', ''), 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
                             馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp]))
     lines.append(head)
     for h in hs[:5]:
-        tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印'], h['不利明け']) if x)
+        tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印'], h['不利明け'], h['型']) if x)
         lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%{_pc(h)}{tail}".rstrip())
     for h in hs[5:]:
         if h['不利明け']: lines.append(f" ほか {h['馬番']}番 {h['馬名']} {h['三着内']}%{_pc(h)}{h['不利明け']}（評価{h['順位']}番目）")
