@@ -135,6 +135,16 @@ TE['不利明け'] = ['・'.join(x for x in (('前走で出遅れなど' if a ==
                 for a, b in zip(TE['前不利発走'].fillna(0), TE['前不利疾病'].fillna(0))]
 cp = f'{HERE}/jra_pair_calib.json'
 CAL = json.load(open(cp, encoding='utf-8')) if os.path.exists(cp) else None
+# 連対（2着内）の見込み（検証計画 R1中央・R1中央b）：馬連の組の見込み（B式、直す前）を、その馬の入る組について足し（足すと2）、
+# jra_rentai_calib.json（なめらかな直し）で直す。表が無いときは出さない（ページは「—」）
+rp = f'{HERE}/jra_rentai_calib.json'
+RCAL = json.load(open(rp, encoding='utf-8')) if os.path.exists(rp) else None
+if RCAL:
+    _gs = lambda v: v.groupby(grp).transform('sum')
+    _p1 = TE['p1'] / _gs(TE['p1']); _q = (TE['p3'] * np.minimum(3, TE['n']) / _gs(TE['p3'])).clip(upper=0.97); _q = _q / _gs(_q)      # jk_r1b.py の r1a と同じ
+    _t = _p1 / (1 - _q); _u = _p1 + _q * (_gs(_t) - _t)
+    TE['p2'] = np.interp((2 * _u / _gs(_u)).clip(1e-4, 0.999), RCAL['見込み'], RCAL['直した見込み'])
+    log('連対の見込み', '1レースの和の平均', round(float(TE['p2'].groupby(grp).sum().mean()), 3))
 
 
 def top_pairs(g, m=3):
@@ -151,7 +161,7 @@ wd = '月火水木金土日'[dt.datetime.strptime(today, '%Y%m%d').weekday()]
 out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-%d %H:%M'),
        '評価': '純粋な評価（人気・オッズ・騎手と厩舎の単勝の回収を使わない。前走の不利の印・ラップ・推定上りを使う。3つのモデルの平均。' + ('レースの中で1〜3着の順を学ぶやり方' if SOFT else 'HGB') + '）', 'レース': []}
 lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
-         '数字は3着内に来る見込み（かっこは1着の見込み）。馬の走りと成績だけの評価で、人気・オッズは前走の分も見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
+         '数字は3着内に来る見込み（かっこは' + ('2着内＝連対と1着' if RCAL else '1着') + 'の見込み）。馬の走りと成績だけの評価で、人気・オッズは前走の分も見ていない。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。',
          '見方：来る馬・勝つ馬は人気（オッズ）のほうがよく当たる。1番手が1番人気と同じなら信頼できる。違うときは1番人気を重く。',
          '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み（同じオッズの馬どうしでも少し見分けられる）。逃げ・先行＝前に行く見込み。',
          '「前走で出遅れなど」「前走で疾病」＝前走で発走の不利や競走中の疾病があった馬。これまで市場もこの評価も低く見がちだった（実際の1着は市場の見込みの1.3〜1.5倍）。'
@@ -174,16 +184,17 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
     hs = [dict(順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
-               不利明け=r['不利明け'], 向き=r['向き']) for _, r in g.iterrows()]
+               不利明け=r['不利明け'], 向き=r['向き'], **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
+    _pc = lambda h: f"（連対{h['連対']}%・1着{h['一着']}%）" if '連対' in h else f"（{h['一着']}%）"
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, レース名=nm, 格=grade, 芝ダ=info.get('芝ダ', ''), 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
                             馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp]))
     lines.append(head)
     for h in hs[:5]:
         tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印'], h['不利明け']) if x)
-        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{tail}".rstrip())
+        lines.append(f" {h['馬番']:>2}番 {h['馬名']} {h['三着内']}%{_pc(h)}{tail}".rstrip())
     for h in hs[5:]:
-        if h['不利明け']: lines.append(f" ほか {h['馬番']}番 {h['馬名']} {h['三着内']}%（{h['一着']}%）{h['不利明け']}（評価{h['順位']}番目）")
+        if h['不利明け']: lines.append(f" ほか {h['馬番']}番 {h['馬名']} {h['三着内']}%{_pc(h)}{h['不利明け']}（評価{h['順位']}番目）")
     if tp:
         any3 = sum(b for _, b in tp)
         if CAL and '3組の和' in CAL: any3 = float(np.interp(any3, CAL['3組の和'], CAL['3組の和の直した見込み']))     # 和は高い所で言いすぎるので直す
