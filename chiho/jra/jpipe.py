@@ -153,11 +153,12 @@ CAL = json.load(open(cp, encoding='utf-8')) if os.path.exists(cp) else None
 # jra_rentai_calib.json（なめらかな直し）で直す。表が無いときは出さない（ページは「—」）
 rp = f'{HERE}/jra_rentai_calib.json'
 RCAL = json.load(open(rp, encoding='utf-8')) if os.path.exists(rp) else None
+_gs = lambda v: v.groupby(grp).transform('sum')
+_p1 = TE['p1'] / _gs(TE['p1']); _q = (TE['p3'] * np.minimum(3, TE['n']) / _gs(TE['p3'])).clip(upper=0.97); _q = _q / _gs(_q)      # jk_r1b.py の r1a と同じ
+_t = _p1 / (1 - _q); _u = _p1 + _q * (_gs(_t) - _t)
+TE['p2素'] = (2 * _u / _gs(_u)).clip(1e-4, 0.999)      # 直す前の連対の見込み（R1a）。ページには出さず、前向きの確かめ（検証計画 R1中央c）のためにファイルにだけ書く
 if RCAL:
-    _gs = lambda v: v.groupby(grp).transform('sum')
-    _p1 = TE['p1'] / _gs(TE['p1']); _q = (TE['p3'] * np.minimum(3, TE['n']) / _gs(TE['p3'])).clip(upper=0.97); _q = _q / _gs(_q)      # jk_r1b.py の r1a と同じ
-    _t = _p1 / (1 - _q); _u = _p1 + _q * (_gs(_t) - _t)
-    TE['p2'] = np.interp((2 * _u / _gs(_u)).clip(1e-4, 0.999), RCAL['見込み'], RCAL['直した見込み'])
+    TE['p2'] = np.interp(TE['p2素'], RCAL['見込み'], RCAL['直した見込み'])
     log('連対の見込み', '1レースの和の平均', round(float(TE['p2'].groupby(grp).sum().mean()), 3))
 
 
@@ -201,7 +202,7 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
     hs = [dict(順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
-               不利明け=r['不利明け'], 向き=r['向き'], 型=r['型'], **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
+               不利明け=r['不利明け'], 向き=r['向き'], 型=r['型'], 連対の素=round(float(r['p2素']) * 100, 1), **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
     _pc = lambda h: f"（連対{h['連対']}%・1着{h['一着']}%）" if '連対' in h else f"（{h['一着']}%）"
     tp = top_pairs(g)
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, レース名=nm, 格=grade, 芝ダ=info.get('芝ダ', ''), 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
