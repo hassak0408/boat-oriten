@@ -6,6 +6,7 @@ STORE/data/picks/日付_jra.json と 日付_jra.txt に置く。
   1着はそれにHGBの3着内を少し混ぜる。
   3着内は、中央で初めて走る馬（新馬以外）だけ HGB の3着内を使う（M4c）。
   LightGBM が無いときは前のやり方（HGBの1着と3着内、M2a）に戻す。
+  材料に血統（父・母父・母の産駒の成績、P1）を足し、順を学ぶモデルにはレースの中での差の材料（M6・M7）も足す。3着内には着差を学ぶモデルの見込みを掛ける（mg3）。どれも jra_fix.json の印で入り切り。
   1着と3着内は、芝ダ×枠の群（芝は開催1〜2日目か・外回り・直線も）ごとの値を掛けて直す（検証計画 W1。値は jra_fix.json の「枠の付け直し」）。
   （騎手・厩舎の単勝の回収も使わない＝馬の走りと成績だけの「純粋な評価」。前走の不利（注記の出遅れ・疾病など）は使う。検証計画「一覧の評価を『正しい評価』に替える」）。馬体重も使わない。
   前走までのラップ（L3）と1頭ごとの推定上り（U1。STORE/jra/ses、ped.py が毎朝足す）も使う。
@@ -42,11 +43,17 @@ for c in ('着順', 'タイム', '単勝オッズ', '人気', '馬体重', '増�
     if c not in C: C[c] = ''
 log('今日', today, 'レース', C.groupby(['場', 'R']).ngroups, '頭', len(C))
 
-H = jfeat.build(f'{store}/jra/data', card=C, verbose=False); log('材料')
-FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF + UPF if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップ（L3）と1頭ごとの推定上り（U1）を足す
+_fx0 = f'{HERE}/jra_fix.json'; _FX0 = json.load(open(_fx0, encoding='utf-8')) if os.path.exists(_fx0) else {}
+PED, REL, MG = bool(_FX0.get('血統')), bool(_FX0.get('レースの中での差')), (_FX0.get('着差のモデル') or {})      # 検証計画 P1・M6・mg3（2026-11-13）
+H = jfeat.build(f'{store}/jra/data', card=C, verbose=False, ped=PED); log('材料', '血統のある行' if PED else '', round(float(H['父数'].notna().mean()), 3) if PED and '父数' in H else '')
+FE = [c for c in FEATS + EXTRA + PACE + TROUBLE + LAPF + UPF + (jfeat.PEDF if PED else []) if c not in MKT and c in H]       # EXTRA・PACE は2021〜2023年で選んだ（検証計画「中央：直してみること」その1・その2）。市場の材料は外す（K3）。ラップ（L3）と1頭ごとの推定上り（U1）を足す
 FES = [c for c in ['場c', '芝ダc', '距離', 'n', '馬番', '馬番率', '枠', '齢', '斤量', '走数', '間隔', '距離差', '芝ダ変更', '先頭率5', '先行率5', '終角率1',
                    '上げ1', '上げ3', '他の逃げ型', '先頭率5順', '過去3角順', '過去3角', '騎勝率', 'クラス'] if c in H]
-NEED = set(FE + FES + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病'])
+RELF = []
+if REL:      # レースの中での差の材料（順を学ぶモデルだけが使う）
+    import jk_rel
+    H, RELF = jk_rel.add_rel(H, KEY)
+NEED = set(FE + FES + RELF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離'])
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測'] & (H['合わない'] == 0)]
@@ -76,8 +83,11 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN),) + ((('勝', 'p1',
         m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
 if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（M4b）
-    F = [c for c in FE if TRN[c].notna().any()]
-    TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(TRN, F, CATF, wt=FIX1['重み'], params=FIX1.get('木'), log=log), TE, F)      # 木の大きさ（M5）
+    F = [c for c in FE if TRN[c].notna().any()]; F2 = F + [c for c in RELF if TRN[c].notna().any()]
+    TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(TRN, F2, CATF, wt=FIX1['重み'], params=FIX1.get('木'), log=log), TE, F2)      # 木の大きさ（M5）
+    if MG:      # 着差を学ぶモデル（mg3）：勝ち馬との着差（秒、1000mあたり）の見込み。3着内だけに使う
+        import jk_rel
+        TE['mg'] = jk_rel.margin_fit_predict(TRN, TE, F, [F.index(c) for c in CATF if c in F], BIG); log('モデル 着差', '見込みの着差の平均', round(float(TE['mg'].mean()), 3))
 
 TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(1e-4, 0.97)
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
@@ -96,6 +106,7 @@ if FIX3:      # 3着内 ∝ 3着内^c（足して3。M4c なら順を学んだ�
         base = pd.Series(np.where((TE['走数'] == 0) & (TE['新馬'] == 0), TE['p3'], q), index=TE.index)
         base = (base * np.minimum(3, TE['n']) / base.groupby(grp).transform('sum')).clip(1e-4, 0.97)
     e = base ** FIX3['c']
+    if SOFT and MG and 'mg' in TE: e = e * np.exp(-MG.get('f', 0.0) * (TE['mg'] - TE['mg'].groupby(grp).transform('mean')))
     TE['p3'] = (e * np.minimum(3, TE['n']) / e.groupby(grp).transform('sum')).clip(1e-4, 0.97)
 WFIX = FIX.get('枠の付け直し', {}) if SOFT else {}
 if WFIX:      # 枠の付け直し（検証計画 W1）：芝ダ×枠の群（芝は開催1〜2日目か・外回り・直線も）ごとの値を1着と3着内の見込みに掛けて直す
