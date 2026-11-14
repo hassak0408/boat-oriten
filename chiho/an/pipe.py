@@ -60,10 +60,9 @@ ER, EP, EH = [], [], []
 for d in sorted(glob.glob(f'{DATA}/daily/2*')):
     day = os.path.basename(d)
     if not (last_month_day < day < today): continue
-    r, p, h = rd(f'{d}/race_racelist.csv.gz'), rd(f'{d}/race_payback.csv.gz'), rd(f'{d}/race_horselist.csv.gz')
-    if r is not None: ER.append(r[r['競走年月日'] == day])
-    if p is not None: EP.append(p[p['競走年月日'] == day])
-    if h is not None: EH.append(h[h['競走年月日'] == day])
+    # 5場のレースが無い日の記録は0行のファイル。0行の表をつなぐと、新しい pandas では差・指数の列が数でなくなる（2026-11-15 の朝の失敗）ので足さない
+    for xs, x in ((ER, rd(f'{d}/race_racelist.csv.gz')), (EP, rd(f'{d}/race_payback.csv.gz')), (EH, rd(f'{d}/race_horselist.csv.gz'))):
+        if x is not None and len(x[x['競走年月日'] == day]): xs.append(x[x['競走年月日'] == day])
 cat_or_none = lambda xs: pd.concat(xs, ignore_index=True) if xs else None
 extra = {'R': pd.concat(ER + [TR], ignore_index=True), 'P': cat_or_none(EP), 'H': cat_or_none(EH), 'T': TH}
 log('今日', today, 'レース', len(TR), '頭', len(TH), '／月ごとのデータの最後', last_month_day, '／足した日', len(EH))
