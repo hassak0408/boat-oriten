@@ -61,31 +61,44 @@ def add_elo(H, KEY):
     return H, ['E馬', 'E馬芝ダ', 'E騎', 'E調', 'E馬平均差', 'E馬最高差', 'E馬順率', 'E芝ダ平均差', 'E騎平均差']
 
 
-def add_after(H, KEY):
+def add_after(H, KEY, detail=False):
     H = H.copy()
     H['_rid'] = H.groupby(KEY, sort=False).ngroup()
     H['_row'] = np.arange(len(H))
     fin = pd.to_numeric(H['着'], errors='coerce')
-    A = H.loc[fin.notna() & ~H['予測'].astype(bool), ['_rid', '馬', '日', '着率', '3着内', '指数']].sort_values(['馬', '日'])
+    H['_fin'] = fin
+    A = H.loc[fin.notna() & ~H['予測'].astype(bool), ['_rid', '馬', '日', '着率', '3着内', '指数', '_fin', '勝']].sort_values(['馬', '日'])
     gh = A.groupby('馬', sort=False)
-    A['次日'] = gh['日'].shift(-1); A['次着率'] = gh['着率'].shift(-1); A['次3'] = gh['3着内'].shift(-1); A['次指数差'] = gh['指数'].shift(-1) - A['指数']
-    A = A[A['次日'].notna()][['_rid', '馬', '次日', '次着率', '次3', '次指数差']].rename(columns={'馬': '相手'})
+    A['次日'] = gh['日'].shift(-1); A['次着率'] = gh['着率'].shift(-1); A['次3'] = gh['3着内'].shift(-1); A['次指数差'] = gh['指数'].shift(-1) - A['指数']; A['次勝'] = gh['勝'].shift(-1)
+    A = A[A['次日'].notna()][['_rid', '馬', '次日', '次着率', '次3', '次指数差', '次勝', '_fin']].rename(columns={'馬': '相手', '_fin': '相手着'})
     # 自分の前1〜3走のレース（走ったレースだけ。今日の行も含めて、馬ごとに日の順）
     T = H[['_row', '馬', '日', '_rid']].sort_values(['馬', '日'], kind='stable')
     ran = (fin.notna() & ~H['予測'].astype(bool)).reindex(T.index).values
     G = np.cumsum(ran) - ran                                   # 並べた表で、この行より前にある「走った行」の数
     G0 = pd.Series(G, index=T.index).groupby(T['馬'], sort=False).transform('first').values      # その馬の始まり
-    ran_rid = T['_rid'].values[ran]
+    ran_rid = T['_rid'].values[ran]; ran_fin = fin.reindex(T.index).values[ran]
     parts = []
     for k in (1, 2, 3):                                        # 前に走った k 番目のレース（中止などの行は飛ばす）
         ok = (G - k) >= G0
-        X = pd.DataFrame({'_row': T['_row'].values[ok], '馬': T['馬'].values[ok], '日': T['日'].values[ok], '_rid': ran_rid[(G - k)[ok]]})
+        X = pd.DataFrame({'_row': T['_row'].values[ok], '馬': T['馬'].values[ok], '日': T['日'].values[ok], '_rid': ran_rid[(G - k)[ok]], '自着': ran_fin[(G - k)[ok]]})
         M = X.merge(A, on='_rid', how='inner')
         M = M[(M['相手'] != M['馬']) & (M['次日'] < M['日'])]
-        M['k'] = k; parts.append(M[['_row', 'k', '次着率', '次3', '次指数差']])
+        M['k'] = k; parts.append(M[['_row', 'k', '次着率', '次3', '次指数差', '次勝', '相手着', '自着']])
     M = pd.concat(parts, ignore_index=True)
     one = M[M['k'] == 1].groupby('_row').agg(後数1=('次3', 'size'), 後着率1=('次着率', 'mean'), 後3率1=('次3', 'mean'), 後指数差1=('次指数差', 'mean'))
     all3 = M.groupby('_row').agg(後数3=('次3', 'size'), 後着率3=('次着率', 'mean'), 後3率3=('次3', 'mean'), 後指数差3=('次指数差', 'mean'))
     H = H.join(one, on='_row').join(all3, on='_row')
     H['後数1'] = H['後数1'].fillna(0); H['後数3'] = H['後数3'].fillna(0)
-    return H.drop(columns=['_rid', '_row']), ['後数1', '後着率1', '後3率1', '後指数差1', '後数3', '後着率3', '後3率3', '後指数差3']
+    VF = ['後数1', '後着率1', '後3率1', '後指数差1', '後数3', '後着率3', '後3率3', '後指数差3']
+    V2 = []
+    if detail:      # V2：自分が先着した相手（下）・先着された相手（上）に分ける。そのあと勝った相手の数
+        for nm, m in (('上', M['相手着'] < M['自着']), ('下', M['相手着'] > M['自着'])):
+            a3 = M[m].groupby('_row').agg(**{f'後{nm}数3': ('次3', 'size'), f'後{nm}3率3': ('次3', 'mean'), f'後{nm}着率3': ('次着率', 'mean')})
+            a1 = M[m & (M['k'] == 1)].groupby('_row').agg(**{f'後{nm}3率1': ('次3', 'mean')})
+            H = H.join(a3, on='_row').join(a1, on='_row'); H[f'後{nm}数3'] = H[f'後{nm}数3'].fillna(0)
+            V2 += [f'後{nm}数3', f'後{nm}3率3', f'後{nm}着率3', f'後{nm}3率1']
+        w = M.groupby('_row').agg(後勝数3=('次勝', 'sum')); w1 = M[M['k'] == 1].groupby('_row').agg(後勝数1=('次勝', 'sum'))
+        H = H.join(w, on='_row').join(w1, on='_row'); H['後勝数3'] = H['後勝数3'].fillna(0); H['後勝数1'] = H['後勝数1'].fillna(0)
+        V2 += ['後勝数3', '後勝数1']
+    H = H.drop(columns=['_rid', '_row', '_fin'])
+    return (H, VF, V2) if detail else (H, VF)
