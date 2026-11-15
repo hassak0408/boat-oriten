@@ -84,6 +84,19 @@ def build_hist(all_dir, extra=None, verbose=True):
     H['指数'] = (H['基準'] - H['sec']) / H['距離'] * 1000 + H['当日の速さ']
     H.loc[H['中止'] == True, '指数'] = np.nan
     log('タイムの指数')
+    EVC = []
+    if os.environ.get('CHIHO_EV') == '1':      # 検証計画 N6：強さの点数（E）と前走の相手のその後（V）。全部の場のレースで作る（jra/jk_elo.py）
+        import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'jra'))
+        import jk_elo
+        S = H[KEY + ['馬番', '日', '着', '着率', '指数', '予測']].copy()
+        for c in KEY: S[c] = S[c].astype(str)
+        S['馬'] = H['馬'].astype(str); S['騎'] = H['騎'].astype(str)
+        S['勝'] = (S['着'] == 1).astype(float); S['3着内'] = (S['着'] <= 3).astype(float)
+        S, EF = jk_elo.add_elo(S, KEY, jk='騎', tr=None, sd=None, rel=False)
+        S, VF = jk_elo.add_after(S, KEY)
+        EVC = EF + VF
+        for c in EVC: H[c] = S[c].values
+        log('強さの点数・相手のその後', EVC)
     # 馬ごとに前のレースを並べる（全部の場）
     H = H.sort_values(['馬', '日', 'レース番号']).reset_index(drop=True)
     g = H.groupby('馬', sort=False, observed=True)
@@ -115,7 +128,7 @@ def build_hist(all_dir, extra=None, verbose=True):
     H['前走外'] = (~fs.isin(FIVE)).astype(float).where(H['前場'].notna())     # 前走が5場の外
     H['外走5'] = sum((g['競馬場'].shift(k).notna() & ~g['競馬場'].shift(k).astype(str).isin(FIVE)).astype(float) for k in range(1, 6))
     log('前の成績')
-    O = H[H['競馬場'].astype(str).isin(FIVE)][KEY + ['馬番', '予測'] + COLS].copy()
+    O = H[H['競馬場'].astype(str).isin(FIVE)][KEY + ['馬番', '予測'] + COLS + EVC].copy()
     for c in KEY: O[c] = O[c].astype(str)
     O['前場'] = O['前場'].astype(str).where(O['前場'].notna()); O['前騎'] = O['前騎'].astype(str).where(O['前騎'].notna())
     O['馬番'] = O['馬番'].astype(float)
