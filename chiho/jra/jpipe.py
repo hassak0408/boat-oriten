@@ -53,8 +53,15 @@ RELF = []
 if REL:      # レースの中での差の材料（順を学ぶモデルだけが使う）
     import jk_rel
     H, RELF = jk_rel.add_rel(H, KEY)
+AIT = _FX0.get('相手の材料') or {}      # 検証計画 M8：強さの点数（E）と前走の相手のその後（V）。順を学ぶモデルだけが使う
+ADDF = []
+if AIT:
+    import jk_elo
+    if AIT.get('E'): H, _ef = jk_elo.add_elo(H, KEY); ADDF += _ef
+    if AIT.get('V'): H, _vf = jk_elo.add_after(H, KEY); ADDF += _vf
+    log('相手の材料', len(ADDF), '今日の馬で点数のある割合', round(float(H.loc[H['予測'], 'E馬'].notna().mean()), 3) if 'E馬' in H else '')
 ZF = _FX0.get('市場のずれ') or (_FX0.get('市場のずれ（試し）') if os.environ.get('PICKS_DIR') else None) or {}      # 検証計画「Z1の印」：しきいがあるときだけ型を出す（「試し」の値は jk_pipetest.py のときだけ）
-NEED = set(FE + FES + RELF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
+NEED = set(FE + FES + RELF + ADDF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
            + (['単勝オッズ'] if ZF else []))
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
@@ -85,7 +92,7 @@ for tgt, col, F, P, rows in (('3着内', 'p3', FE, BIG, TRN),) + ((('勝', 'p1',
         m.fit(rows[F], rows[tgt]); ps.append(m.predict_proba(TE[F])[:, 1]); log('モデル', tgt, '乱数', sd, '学習', len(rows), '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
 if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（M4b）
-    F = [c for c in FE if TRN[c].notna().any()]; F2 = F + [c for c in RELF if TRN[c].notna().any()]
+    F = [c for c in FE if TRN[c].notna().any()]; F2 = F + [c for c in RELF if TRN[c].notna().any()] + [c for c in ADDF if TRN[c].notna().any()]
     TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(TRN, F2, CATF, wt=FIX1['重み'], params=FIX1.get('木'), log=log), TE, F2)      # 木の大きさ（M5）
     if MG:      # 着差を学ぶモデル（mg3）：勝ち馬との着差（秒、1000mあたり）の見込み。3着内だけに使う
         import jk_rel
