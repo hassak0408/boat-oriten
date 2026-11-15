@@ -8,13 +8,15 @@ import numpy as np, pandas as pd
 K_NEW, K_OLD, K_HUMAN, START = 100.0, 50.0, 4.0, 1500.0
 
 
-def add_elo(H, KEY):
-    H = H.copy()
+def add_elo(H, KEY, jk='騎手', tr='調教師', sd='芝ダ', rel=True):
+    """jk・tr・sd は騎手・調教師・芝ダの列の名前（tr・sd は None なら作らない。地方は調教師・芝ダ別を作らない）。rel=False ならレースの中での差は作らない"""
+    H = H.copy(); _jk, _tr, _sd = jk, tr, sd
     n = len(H)
     eh, es, ej, et = (np.full(n, np.nan) for _ in range(4))
     RH, RS, RJ, RT, CNT = {}, {}, {}, {}, {}
     pos = np.arange(n)
-    day = H['日'].values; horse = H['馬'].values; jk = H['騎手'].values; tr = H['調教師'].values; sd = H['芝ダ'].values
+    day = H['日'].values; horse = H['馬'].astype(str).values; jk = H[_jk].astype(str).values
+    tr = H[_tr].astype(str).values if _tr else np.full(n, ''); sd = H[_sd].astype(str).values if _sd else np.full(n, '')
     fin = pd.to_numeric(H['着'], errors='coerce').values; pred = H['予測'].values.astype(bool)
     rid = H.groupby(KEY, sort=False).ngroup().values
     order = np.lexsort((rid, day))                       # 日 → レース の順
@@ -37,7 +39,7 @@ def add_elo(H, KEY):
             m = len(ii)
             if m < 2: continue
             f = fin[ii]
-            for which in (0, 1):
+            for which in ((0, 1) if _sd else (0,)):
                 R = np.array([(RH.get(horse[i], START) if which == 0 else RS.get((horse[i], sd[i]), RH.get(horse[i], START))) for i in ii])
                 E = (1.0 / (1.0 + 10 ** ((R[None, :] - R[:, None]) / 400.0))).sum(axis=1) - 0.5      # 自分との組（0.5）を引く
                 E = E / (m - 1)
@@ -51,14 +53,22 @@ def add_elo(H, KEY):
                 RJ[jk[i]] = RJ.get(jk[i], 0.0) + K_HUMAN * res; RT[tr[i]] = RT.get(tr[i], 0.0) + K_HUMAN * res
             else:
                 RS[(horse[i], sd[i])] = newr
-    H['E馬'], H['E馬芝ダ'], H['E騎'], H['E調'] = eh, es, ej, et
+    H['E馬'], H['E騎'] = eh, ej; EF = ['E馬', 'E騎']
+    if _sd: H['E馬芝ダ'] = es; EF.append('E馬芝ダ')
+    if _tr: H['E調'] = et; EF.append('E調')
+    if not rel: return H, EF
+    return add_elo_rel(H, KEY, EF)
+
+
+def add_elo_rel(H, KEY, EF):
+    """レースの中での差（H は見込みを出すレースの行だけでもよい）"""
     g = H.groupby(KEY, sort=False)
     H['E馬平均差'] = H['E馬'] - g['E馬'].transform('mean')
     H['E馬最高差'] = g['E馬'].transform('max') - H['E馬']
     H['E馬順率'] = g['E馬'].rank(ascending=False, method='average') / g['E馬'].transform('count')
-    H['E芝ダ平均差'] = H['E馬芝ダ'] - g['E馬芝ダ'].transform('mean')
+    if 'E馬芝ダ' in H: H['E芝ダ平均差'] = H['E馬芝ダ'] - g['E馬芝ダ'].transform('mean')
     H['E騎平均差'] = H['E騎'] - g['E騎'].transform('mean')
-    return H, ['E馬', 'E馬芝ダ', 'E騎', 'E調', 'E馬平均差', 'E馬最高差', 'E馬順率', 'E芝ダ平均差', 'E騎平均差']
+    return H, [c for c in ['E馬', 'E馬芝ダ', 'E騎', 'E調', 'E馬平均差', 'E馬最高差', 'E馬順率', 'E芝ダ平均差', 'E騎平均差'] if c in H]
 
 
 def add_after(H, KEY, detail=False):
