@@ -73,6 +73,8 @@ USE3 = False
 H['五場走数'] = H['走数']          # 5場だけで数えた前の走数（前の所属の直しに使う）
 try:
     if not glob.glob(f'{ALL}/race/2*'): raise FileNotFoundError(ALL)
+    if json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nar_fix.json'), encoding='utf-8')).get('相手の材料'):
+        os.environ['CHIHO_EV'] = '1'      # 検証計画 N6：強さの点数・前走の相手のその後を、全部の場のレースで作る（hist_all.py）
     H = feat3.apply3(H, hist_all.build_hist(ALL, extra, verbose=False)); USE3 = True; log('材料3（全部の場の前の成績）')
 except Exception as e:      # 全部の場のデータが使えないときは、B2の材料のまま作る
     log('全部の場の前の成績は使わない：', type(e).__name__, str(e)[:200])
@@ -135,12 +137,21 @@ if SOFT and NFIX.get('騎手の性能'):      # 騎手の性能（N3）：近ご
     log('騎手の性能の材料', len(JF))
 
 Y = int(today[:4])
+ADDF = []      # 検証計画 N6：相手の材料（強さの点数 E・前走の相手のその後 V）。順を学ぶモデルが使う（「HGBにも」が付いていれば、HGBの3着内と着差のモデルにも）
+_AIT = NFIX.get('相手の材料') or {}
+if _AIT and 'E馬' in H:
+    import jk_elo
+    H, ADDF = jk_elo.add_elo_rel(H, KEY, ['E馬', 'E騎'])
+    ADDF += ['後数1', '後着率1', '後3率1', '後指数差1', '後数3', '後着率3', '後3率3', '後指数差3']
+    log('相手の材料', len(ADDF), '今日の馬で点数のある割合', round(float(H.loc[H['予測'], 'E馬'].notna().mean()), 3))
 TRN = H[(H['年'] >= 2017) & (H['年'] <= Y - 1) & ~H['予測']]
 TE = H[H['予測']].copy()
 FE3 = [c for c in FEATS + NEW + (EXTRA3 if USE3 else []) if c not in BW] + JF
 if SOFT and NFIX.get('展開の材料'):      # 展開の材料（脚質の予想の材料 SF）を3着内・1着のモデルにも入れる（N4）
     FE3 += [c for c in SF if c not in FE3]
 FES = [c for c in FEATS + SF if c not in BW]
+FE3P = FE3 + ADDF      # 順を学ぶモデルの材料
+if _AIT.get('HGBにも'): FE3 = FE3P
 BIG = dict(max_leaf_nodes=63, min_samples_leaf=200, learning_rate=0.05, max_iter=2000, l2_regularization=1.0, n_iter_no_change=30)
 SMALL = dict(max_leaf_nodes=15, min_samples_leaf=1500, learning_rate=0.05, max_iter=500)
 for tgt, col, FE, P, rows, seeds in ((('3着内', 'p3', FE3, BIG, TRN, (0, 1, 2) if SOFT else (0,)),) + ((('勝', 'p1', FE3, BIG, TRN, (0,)),) if not SOFT else ()) +
@@ -153,13 +164,14 @@ for tgt, col, FE, P, rows, seeds in ((('3着内', 'p3', FE3, BIG, TRN, (0, 1, 2)
         m.fit(rows[FE], rows[tgt]); ps.append(m.predict_proba(TE[FE])[:, 1]); log('モデル', tgt, '乱数', sd, '回数', m.n_iter_)
     TE[col] = np.mean(ps, axis=0)
 if SOFT:      # 1着と3着内：レースの中で1〜3着の順を学ぶ（jsoft.py）
-    F = [c for c in FE3 if TRN[c].nunique(dropna=True) >= 2]
+    F = [c for c in FE3P if TRN[c].nunique(dropna=True) >= 2]
     A = TRN.assign(年月日=TRN['競走年月日'], 場=TRN['競馬場'], R=TRN['レース番号'], 着=pd.to_numeric(TRN['着'], errors='coerce'))
     B = TE.assign(年月日=TE['競走年月日'], 場=TE['競馬場'], R=TE['レース番号'])
     TE['p1'], TE['p3順'] = jsoft.predict(jsoft.fit(A, F, ['場c', '馬場c', '天候c', '性c'], wt=tuple(NFIX['重み']), params=NFIX['木'], log=log), B, F)
     del A, B
     if NFIX.get('着差のモデル'):      # 着差を学ぶモデル（検証計画 N5 の mg）：勝ち馬との着差（秒、1000mあたり）の見込み。小さいほど良い
         import jk_rel
+        F = [c for c in FE3 if TRN[c].nunique(dropna=True) >= 2]      # 着差のモデルの材料（HGBと同じ）
         TE['mg'] = jk_rel.margin_fit_predict(TRN, TE, F, [F.index(c) for c in ['場c', '馬場c', '天候c', '性c'] if c in F], BIG); log('モデル 着差', '見込みの着差の平均', round(float(TE['mg'].mean()), 3))
 
 # レースの中で足し合わせをそろえる（3着内は合計3、1着は合計1）
@@ -230,7 +242,7 @@ out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは2着内＝連対と1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
          '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。',
-         '馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で合うことを確かめた）。',
+         '馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた。30%を超える組は高めに出る：実際は見込みより2〜5ポイント低い）。',
          '馬連の相手を2位と3位で迷ったら、連対の数字が高い方（当たりが少し増える。回収率はほぼ同じで、買えば得という意味ではない。検証計画 B2）。',
          '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。',
          '脚質＝逃げ（先頭に立つ見込みがレースで一番で3割以上）・先行（最初の角で3番手以内の見込みが5割以上）・差し（その見込みが2.5割以上か、前の3走の4角の位置が前から6割以内）・追込（それより後ろ）。', '']
