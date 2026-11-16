@@ -230,6 +230,10 @@ if os.path.exists(_rc):
 TE['向き'] = np.where(TE['勝ちきり度'] >= 0.5, '頭向き', np.where(TE['勝ちきり度'] <= 0.2, 'ヒモ向き', ''))
 # 馬連の組の見込み（pair2.py の B：1着は1着の見込み、2着は3着内の見込みで割り振る。pair_calib.json で直す）
 CAL = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pair_calib.json'), encoding='utf-8'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'jra'))
+import jk_wide
+_wp = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'wide_calib.json')
+WCAL = json.load(open(_wp, encoding='utf-8')) if os.path.exists(_wp) else None
 GX, GY = np.array(CAL['見込み']), np.array(CAL['直した見込み'])
 
 
@@ -247,6 +251,7 @@ out = {'日付': today, '作った時刻': dt.datetime.now(JST).strftime('%Y-%m-
 lines = [f'地方競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}日・{wd}）',
          '数字は3着内に来る見込み（かっこは2着内＝連対と1着の見込み）。人気・オッズは見ていない。朝の出馬表で計算（馬体重は入れていない）。',
          '頭向き＝3着内に来れば半分以上は1着の見込み、ヒモ向き＝来ても2・3着が多い見込み。',
+         'ワイド＝2頭とも3着内に来る見込みの高い組（2021〜2023年で合わせ、2024〜2026年で確かめた）。1位から流すときの的中の目安：相手1点で約41%、2点で約58%、3点で約66%、4点で約70%（1位の3着内が70%以上なら 49%・67%・75%・79%）。',
          '馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた。30%を超える組は高めに出る：実際は見込みより2〜7ポイント低い）。',
          '馬連の相手を2位と3位で迷ったら、連対の数字が高い方（当たりが少し増える。回収率はほぼ同じで、買えば得という意味ではない。検証計画 B2）。',
          '「中央から初戦」などの印は、5場で初めて走る馬（前の成績が少なく、見込みがぶれやすい）。',
@@ -265,8 +270,9 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     hs = [dict(馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
                逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100)) for _, r in g.iterrows()]
     tp = top_pairs(g)
+    wp = jk_wide.top_wide(g['馬番'].astype(int).values, g['p1'].values, WCAL) if WCAL else []      # ワイドの組の見込み（検証計画 WD3）
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
-                            馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp]))
+                            馬連=[dict(組=a, 見込み=round(b * 100)) for a, b in tp], ワイド=[dict(組=a, 見込み=round(b * 100)) for a, b in wp]))
     lines.append(head)
     for h in hs[:5]:
         tail = ' '.join(x for x in (h['向き'], h['脚質'], h['印']) if x)
@@ -275,6 +281,7 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
         any3 = sum(b for _, b in tp)
         if '3組の和' in CAL: any3 = float(np.interp(any3, CAL['3組の和'], CAL['3組の和の直した見込み']))     # 和は高い所で言いすぎるので直す
         lines.append(' 馬連 ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in tp) + f'（3組のどれか {round(any3 * 100)}%）')
+    if wp: lines.append(' ワイド ' + '・'.join(f'{a} {round(b * 100)}%' for a, b in wp))
     lines.append('')
 pdir = f"{store}/{os.environ.get('PICKS_DIR', 'data/picks')}"      # 試しのときだけ置き場を替える（nk_pipetest.py）
 os.makedirs(pdir, exist_ok=True)
