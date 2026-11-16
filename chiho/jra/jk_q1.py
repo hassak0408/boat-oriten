@@ -8,30 +8,63 @@ import os, sys, json, numpy as np, pandas as pd
 NEEDS = ['齢', '間隔', '芝ダ変更', '距離差', '着率1', 'クラス差', '走数', '新馬']
 
 
-def keys(X):
-    """行ごとの区分の名前（7つの列）。空は「無」"""
+def keys(X, kind='jra'):
+    """行ごとの区分の名前。空は「無」。kind：jra（中央）・nar（地方）"""
     def cut(s, bins, labs): return pd.cut(pd.to_numeric(s, errors='coerce'), bins, labels=labs).astype(object).where(s.notna(), '無')
+    num = lambda c: pd.to_numeric(X[c], errors='coerce')
     K = pd.DataFrame(index=X.index)
-    a = pd.to_numeric(X['齢'], errors='coerce'); K['齢'] = a.clip(upper=7).map(lambda v: '無' if v != v else f'{int(v)}歳')
-    K['間隔'] = cut(X['間隔'], [-1, 14, 35, 63, 119, 179, 99999], ['〜2週', '3〜5週', '6〜9週', '10〜17週', '18〜25週', '半年〜'])
-    K['芝ダ変更'] = pd.to_numeric(X['芝ダ変更'], errors='coerce').map(lambda v: '無' if v != v else ('替わる' if v == 1 else '同じ'))
-    K['距離'] = cut(X['距離差'], [-99999, -400, -1, 0, 399, 99999], ['400m〜短く', '短く', '同じ', '長く', '400m〜長く'])
+    K['齢'] = num('齢').clip(upper=7 if kind == 'jra' else 8).map(lambda v: '無' if v != v else f'{int(v)}歳')
     K['前走'] = cut(X['着率1'], [-.01, .1, .25, .5, .75, 1.01], ['1着近く', '上位', '中', '下位', '大敗'])
-    K['クラス'] = np.sign(pd.to_numeric(X['クラス差'], errors='coerce')).map(lambda v: '無' if v != v else {-1: '降級', 0: '同じ', 1: '昇級'}[int(v)])
-    r = pd.to_numeric(X['走数'], errors='coerce'); K['走数'] = np.where(r == 0, '中央で初', np.where(r <= 2, '1〜2走', '3走〜'))
+    K['クラス'] = np.sign(num('クラス差')).map(lambda v: '無' if v != v else {-1: '降級', 0: '同じ', 1: '昇級'}[int(v)])
+    if kind == 'jra':
+        K['間隔'] = cut(X['間隔'], [-1, 14, 35, 63, 119, 179, 99999], ['〜2週', '3〜5週', '6〜9週', '10〜17週', '18〜25週', '半年〜'])
+        K['芝ダ変更'] = num('芝ダ変更').map(lambda v: '無' if v != v else ('替わる' if v == 1 else '同じ'))
+        K['距離'] = cut(X['距離差'], [-99999, -400, -1, 0, 399, 99999], ['400m〜短く', '短く', '同じ', '長く', '400m〜長く'])
+        r = num('走数'); K['走数'] = np.where(r == 0, '中央で初', np.where(r <= 2, '1〜2走', '3走〜'))
+    else:
+        K['間隔'] = cut(X['間隔'], [-1, 9, 20, 35, 63, 119, 99999], ['〜9日', '10〜20日', '3〜5週', '6〜9週', '10〜17週', '18週〜'])
+        K['距離'] = cut(X['距離差'], [-99999, -300, -1, 0, 299, 99999], ['300m〜短く', '短く', '同じ', '長く', '300m〜長く'])
+        r = num('五場走数'); K['走数'] = np.where(r == 0, '5場で初', np.where(r <= 2, '1〜2走', '3走〜'))
+        K['前走外'] = num('前走外').map(lambda v: '無' if v != v else ('外' if v == 1 else '5場'))
     return K
 
 
-def score(X, TH):
-    """Σ θ（新馬は0）"""
-    K = keys(X); s = np.zeros(len(X))
+NEEDS_NAR = ['齢', '間隔', '距離差', '着率1', 'クラス差', '五場走数', '前走外']
+
+
+def score(X, TH, kind='jra'):
+    """Σ θ（中央の新馬は0）"""
+    K = keys(X, kind); s = np.zeros(len(X))
     for c in K.columns: s += K[c].map(lambda v, c=c: TH.get(f'{c}・{v}', 0.0)).values.astype(float)
-    return np.where(pd.to_numeric(X['新馬'], errors='coerce').fillna(0).values == 1, 0.0, s)
+    if kind == 'jra': s = np.where(pd.to_numeric(X['新馬'], errors='coerce').fillna(0).values == 1, 0.0, s)
+    return s
 
 
-def apply(p1, X, TH, grp):
-    """p1（Series）に掛けて、レース（grp）の中で足して1に直す"""
-    v = p1 * np.exp(score(X, TH)); return v / v.groupby(grp).transform('sum')
+def apply(p1, X, TH, grp, kind='jra'):
+    """1着：p1（Series）に掛けて、レース（grp）の中で足して1に直す"""
+    v = p1 * np.exp(score(X, TH, kind)); return v / v.groupby(grp).transform('sum')
+
+
+def apply3(p3, X, TH, grp, n, kind='jra'):
+    """3着内：log(p/(1−p)) に Σθ を足し、レースの中で足して min(3, 頭数) に直す"""
+    q = p3.clip(1e-4, 0.97); v = 1 / (1 + (1 - q) / q * np.exp(-score(X, TH, kind)))
+    return (v * np.minimum(3, n) / v.groupby(grp).transform('sum')).clip(1e-4, 0.97)
+
+
+def fit1(D, kind, gcol='g', lam=1e-4):
+    """1着の値 θ を決める（条件つきロジット）。D は p1・勝・gcol（レースの番号）と区分の元の列を持つ。返すのは {区分・名前: θ}"""
+    from scipy.optimize import minimize
+    D = D.sort_values(gcol).reset_index(drop=True); g = pd.factorize(D[gcol])[0]; n = g.max() + 1
+    K = keys(D, kind); X = pd.get_dummies(pd.DataFrame({c: c + '・' + K[c].astype(str) for c in K.columns}), prefix='', prefix_sep='').astype(float)
+    Xv = X.values.copy()
+    if kind == 'jra': Xv[(pd.to_numeric(D['新馬'], errors='coerce') == 1).values] = 0
+    y = D['勝'].values.astype(float); lp = np.log((D['p1'] / D.groupby(gcol)['p1'].transform('sum')).values); st = np.r_[0, np.flatnonzero(np.diff(g)) + 1]
+
+    def f(t):
+        s = lp + Xv @ t; s = s - np.maximum.reduceat(s, st)[g]; e = np.exp(s); p = e / np.bincount(g, e, n)[g]
+        return -np.log(p[y == 1]).sum() / n + lam * (t ** 2).sum(), (Xv.T @ (p - y)) / n + 2 * lam * t
+    t = minimize(f, np.zeros(Xv.shape[1]), jac=True, method='L-BFGS-B').x
+    return {c: round(float(v), 4) for c, v in zip(X.columns, t)}
 
 
 if __name__ == '__main__':

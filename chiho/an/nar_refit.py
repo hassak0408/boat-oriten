@@ -41,6 +41,18 @@ ok = D['枠番'].notna()
 W = ((D[ok].groupby('区分')['勝'].sum() + 50) / (D[ok].groupby('区分')['p1'].sum() + 50)).round(4).to_dict()
 print('枠の掛ける値', W)
 v = D['p1'].values * D['区分'].map(W).fillna(1.0).where(ok, 1.0).values; D['p1'] = v / gs(v)
+# 偏りの直し（検証計画 NQ1）：齢・間隔・前走の着順・クラスの上がり下がり・距離の変更・5場での走数・前走が5場の外か、の区分ごとの値を1着の見込みに掛ける。値は全部の期間で決める
+QTH = None
+if os.environ.get('H_PKL'):      # 区分の元の列（pipe.py の材料の表を手元で作ったもの）
+    sys.path.insert(0, os.path.join(AN, '..', 'jra')); import jk_q1
+    HQ = pd.read_pickle(os.environ['H_PKL'])[KEY + ['馬番'] + [c for c in jk_q1.NEEDS_NAR if c not in D]].copy()
+    for k in KEY: HQ[k] = HQ[k].astype(str)
+    HQ['馬番'] = pd.to_numeric(HQ['馬番'])
+    n0 = len(D); D = D.merge(HQ, on=KEY + ['馬番'], how='left'); assert len(D) == n0
+    D['_g'] = D.groupby(KEY, sort=False).ngroup()
+    QTH = jk_q1.fit1(D, 'nar', '_g')
+    _old = D['p1'].copy(); D['p1'] = jk_q1.apply(D['p1'], D, QTH, D['_g'], 'nar').values
+    w = D['勝'] == 1; print('偏りの直し：1着の当て分け（全部の期間で決めて全部に当てた）', round(float(-np.log(_old[w]).mean()), 5), '→', round(float(-np.log(D.loc[w, 'p1']).mean()), 5))
 # 連対の直し（ハービル→単調な直し、2021〜2023年で作って2024〜2026年で確かめる）
 r = D['p1'] / (1 - D['p1']).clip(lower=1e-9); p2 = (D['p1'] + D['p1'] * (r.groupby(G).transform('sum') - r)).clip(0, 1).values
 y2 = (D['着'] <= 2).astype(float).values; okk = D['着'].notna().values | True
@@ -79,6 +91,7 @@ J = json.load(open(f'{AN}/nar_fix.json', encoding='utf-8'))
 J.update({'a': a, 'b': b, 'c': c})
 J['相手の材料'] = {'E': True, 'V': True, 'HGBにも': HS == 'm6b', '作り方': '検証計画 N6。強さの点数（E）と前走の相手のその後（V）を全部の場のレースで作り（hist_all.py・jra/jk_elo.py）、順を学ぶモデルの材料に足す'}
 J['着差のモデル'] = {'e': e, 'f': f, '作り方': '検証計画 N5 の mg。HGB（3つの平均）で勝ち馬との着差（秒、1000mあたり、0〜5で切る）を学び、見込みの着差−レースの平均を m として、1着に exp(−e×m)、3着内に exp(−f×m) を掛ける。値は2021〜2026年の全部で決めた（nar_refit.py）'}
+if QTH: J['偏りの直し'] = {'値': QTH, '作り方': '検証計画 NQ1。1着の見込み（枠の付け直しのあと）に exp(Σ値) を掛けて足して1に直す。値は2021〜2026年の全部で決めた（nar_refit.py・jra/jk_q1.py）'}
 J['枠の付け直し']['1着'] = W
 J['枠の付け直し']['作り方'] = '検証計画 W1。N6 の1着の見込みに、場×枠の群ごとの値を掛けて足して1に直す。値＝（実際の1着＋50）÷（見込みの和＋50）、2021〜2026年の全部で決めた（nar_refit.py）。3着内は直さない。5場のほかの場は1のまま。'
 json.dump(J, open(f'{AN}/nar_fix.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
