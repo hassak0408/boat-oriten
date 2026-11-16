@@ -22,6 +22,7 @@ on:
         default: ''
 permissions:
   contents: read
+  actions: write
 concurrency:
   group: jra-pick
   cancel-in-progress: false
@@ -69,3 +70,8 @@ jobs:
             sleep 5
           done
           echo "保存できなかった"; exit 1
+      - name: 締切前のオッズの記録を動かす
+        if: env.NONE != '1' && inputs.card_only != '1' && inputs.day == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run jra-odds.yml -R "${{ github.repository }}" -f day="$DAY" || echo "動かせなかった"
