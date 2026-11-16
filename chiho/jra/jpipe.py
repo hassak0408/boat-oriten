@@ -61,7 +61,7 @@ if AIT:
     if AIT.get('V'): H, _vf = jk_elo.add_after(H, KEY); ADDF += _vf
     log('相手の材料', len(ADDF), '今日の馬で点数のある割合', round(float(H.loc[H['予測'], 'E馬'].notna().mean()), 3) if 'E馬' in H else '')
 ZF = _FX0.get('市場のずれ') or (_FX0.get('市場のずれ（試し）') if os.environ.get('PICKS_DIR') else None) or {}      # 検証計画「Z1の印」：しきいがあるときだけ型を出す（「試し」の値は jk_pipetest.py のときだけ）
-NEED = set(FE + FES + RELF + ADDF + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
+NEED = set(FE + FES + RELF + ADDF + ['齢', '間隔', '芝ダ変更', '距離差', '着率1', 'クラス差', '走数', '新馬'] + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
            + (['単勝オッズ'] if ZF else []))
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
@@ -133,6 +133,11 @@ if WFIX:      # 枠の付け直し（検証計画 W1）：芝ダ×枠の群（�
         _v = TE[_col] * _m
         TE[_col] = _v / _v.groupby(grp).transform('sum') if _k == '1着' else (_v * np.minimum(3, TE['n']) / _v.groupby(grp).transform('sum')).clip(1e-4, 0.97)
         log('枠の付け直し（' + _k + '）', '値を掛けた馬', int((_m != 1.0).sum()), '／', len(TE))
+QFIX = (FIX.get('偏りの直し') or {}) if SOFT else {}
+if QFIX:      # 見込みの偏りの直し（検証計画「的中率の研究その2」Q1）：齢・間隔・芝ダ変更・距離の変更・前走の着順・クラスの上がり下がり・走数の区分ごとの値を1着の見込みに掛ける。新馬は直さない
+    import jk_q1
+    _old = TE['p1'].copy(); TE['p1'] = jk_q1.apply(TE['p1'], TE, QFIX['値'], grp)
+    log('偏りの直し', '1着の見込みの動き 平均', round(float((TE['p1'] - _old).abs().mean()) * 100, 2), 'ポイント・最大', round(float((TE['p1'] - _old).abs().max()) * 100, 1))
 TE['型'] = ''
 if SOFT and ZF:      # Z1の印：f（市場の見込みに掛ける exp(f) の f）を、Z1 と同じ材料・同じ木で、全部の馬に単勝オッズがある5頭以上のレースで学ぶ。評価（1着・3着内）は変えない
     import jz1
