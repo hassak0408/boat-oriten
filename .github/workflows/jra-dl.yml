@@ -75,6 +75,13 @@ jobs:
           if git -C store diff --quiet "$BEFORE" HEAD -- jra/data && [ -f store/data/fwd/jra_furiake.txt ]; then echo "新しい成績なし"; exit 0; fi
           pip install pandas
           python chiho/jra/jfwd.py store
+      - name: これからのレースで数える記録のまとめ（chiho/fwd.py。地方・中央。毎日作り直す）
+        if: inputs.redo == '' && (steps.dl.outputs.left == '' || steps.dl.outputs.left == '0')
+        continue-on-error: true
+        run: |
+          pip install pandas numpy
+          git -C store pull -q --rebase origin main || true
+          python chiho/fwd.py store
       - name: 次の回を動かす
         if: steps.dl.outputs.left != '' && steps.dl.outputs.left != '0'
         env:
