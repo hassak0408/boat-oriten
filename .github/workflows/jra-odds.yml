@@ -1,0 +1,69 @@
+# 中央競馬の締切前のオッズの記録：発走の約10分前と約3分前に、JRA公式サイトの単勝・複勝・ワイドのオッズを読んで、
+#   非公開のリポジトリ hassak0408/chiho-keiba の jra/odds/日付.csv.gz に足す（chiho/jra/jodds.py）。評価（予測）には使わない。
+#   jra-pick が一覧を置いたあとに動かす（予約は遅れるので頼らない）。1回は5時間半まで。読み残しがあれば自分で続きを動かす。
+name: jra-odds
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付 YYYYMMDD（空なら今日）'
+        required: false
+        default: ''
+      mode:
+        description: 'test なら、はじめの2レースを今すぐ1回読むだけ（作りの確かめ）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: jra-odds
+  cancel-in-progress: false
+jobs:
+  odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pandas
+      - name: オッズを読む
+        env:
+          DAY: ${{ inputs.day }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          D="${DAY:-$(TZ=Asia/Tokyo date +%Y%m%d)}"; echo "DAY=$D" >> "$GITHUB_ENV"
+          if [ "$MODE" = "test" ]; then python chiho/jra/jodds.py store "$D" test; else python chiho/jra/jodds.py store "$D" 320; fi
+      - name: 保存
+        if: always()
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          MORE=0; if [ -f "jra/odds/$DAY.more" ]; then MORE=1; rm -f "jra/odds/$DAY.more"; fi
+          echo "MORE=$MORE" >> "$GITHUB_ENV"
+          git add jra/odds 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "中央競馬の締切前のオッズ $DAY"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
+      - name: 続きを動かす
+        if: always() && env.MORE == '1' && inputs.mode != 'test'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run jra-odds.yml -R "${{ github.repository }}" -f day="$DAY"
