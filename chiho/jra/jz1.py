@@ -30,3 +30,11 @@ def fit_resid(X, FE, cat, seeds=(0, 1, 2), log=print):
 
 def predict(models, X, FE):
     return np.mean([b.predict(X[FE], num_iteration=b.best_iteration, raw_score=True) for b in models], axis=0)
+
+
+def nar_prior(tr, te_list, KEY):
+    """地方：市場の見込みの代わり（検証計画 ZN1）。人気の順×頭数ごとの、tr の中の1着率（少し縮める）を、レースの中で足して1に直す。tr と te_list の各表に pm の列を足す"""
+    def cells(X): return pd.Series(list(zip(pd.cut(X['n'], [0, 8, 10, 12, 99], labels=False), pd.to_numeric(X['人気'], errors='coerce').clip(upper=11))), index=X.index)
+    c = cells(tr); T = tr['勝'].groupby(c).agg(['sum', 'size']); rate = ((T['sum'] + 1) / (T['size'] + 20)).to_dict()
+    for X in [tr] + list(te_list):
+        r = cells(X).map(rate).fillna(0.01); X['pm'] = r / r.groupby([X[k] for k in KEY]).transform('sum')
