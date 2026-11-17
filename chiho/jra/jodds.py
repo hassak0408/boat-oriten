@@ -1,5 +1,5 @@
 """中央競馬の締切前のオッズ（JRA公式サイトのオッズのページ）を、発走の約10分前と約3分前に読んで、STORE/jra/odds/日付.csv.gz に足していく。
-読むのは単勝・複勝（pw151ou…）とワイド（pw155ou…）。評価（予測）には使わない。ワイドなどの「値段の甘い所」を前向きに確かめるための記録（検証計画 WD7・WD8・PL2）。
+読むのは単勝・複勝（pw151ou…）・ワイド（pw155ou…）・3連複（pw157ou…、2026-11-17 に足した。検証計画 E4）。評価（予測）には使わない。ワイドなどの「値段の甘い所」を前向きに確かめるための記録（検証計画 WD7・WD8・PL2）。
 読み込みは10秒に1回まで。開催のページ（pw15orl…）から各レースのページの名前を拾う。発走時刻は出馬表（jra/card/日付.csv.gz）のもの。
 使い方：python chiho/jra/jodds.py STORE 日付YYYYMMDD [動かす分（既定 330）] [test（発走に関わらず、はじめの2レースを今すぐ1回読む。作りの確かめ用）]
   終わったとき、まだ読んでいないレースが残っていれば STORE/jra/odds/日付.more を置く（仕組みの方が続きを動かす）。"""
@@ -47,6 +47,16 @@ def parse_wide(page):
     return out
 
 
+def parse_trio(page):
+    """3連複：[(賭式, 馬番1, 馬番2, 馬番3, オッズ)]。表（caption＝i-j）ごとに、行の見出しが3頭目"""
+    out = []
+    for m in re.finditer(r'<table class="[^"]*\bfuku3\b[^"]*">\s*<caption>(\d+)-(\d+)</caption>(.*?)</table>', page, re.S):
+        a, b = int(m.group(1)), int(m.group(2))
+        for r in re.finditer(r'<th scope="row">(\d+)</th>\s*<td[^>]*>(?:\s*<[^>]+>)*\s*([\d.]+)', m.group(3), re.S):
+            out.append(('3連複', a, b, int(r.group(1)), float(r.group(2))))
+    return out
+
+
 def main():
     store, day = sys.argv[1], sys.argv[2]
     budget = float(sys.argv[3]) if len(sys.argv) > 3 and sys.argv[3] != 'test' else 330.0; test = 'test' in sys.argv[3:]
@@ -65,19 +75,21 @@ def main():
     top = fetch('pw15oli00/6D'); names = {}
     for cn in sorted(set(re.findall(r"'(pw15orl\d+%s/[0-9A-F]{2})'" % day, top or ''))):
         rl = fetch(cn) or ''
-        for kind, c in re.findall(r"'(pw15[15]ou)(\d+%sZ/[0-9A-F]{2})'" % day, rl):
+        for kind, c in re.findall(r"'(pw15[157]ou)(\d+%sZ(?:99)?/[0-9A-F]{2})'" % day, rl):
             pl = PLACE.get(c[2:4]); rno = int(c[12:14]); names.setdefault((pl, rno), {})[kind] = kind + c
     print('開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), flush=True)
     rows = []
 
     def snap(k, tg):
         got = 0
-        for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide)):
+        for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide), ('pw157ou', parse_trio)):
             cn = names.get(k, {}).get(kind)
             if not cn: continue
             page = fetch(cn); t = now()
-            for b, n1, n2, o, mx in (parse(page) if page else []):
-                rows.append(dict(取得=t.strftime('%Y-%m-%d %H:%M:%S'), 発走まで分=round((post[k] - t).total_seconds() / 60, 1) if k in post else '', 場=k[0], 年月日=day, R=k[1], 回目=str(tg), 賭式=b, 番号1=n1, 番号2=n2, オッズ=o, 最大=mx)); got += 1
+            for x in (parse(page) if page else []):
+                b, n1, n2 = x[0], x[1], x[2]
+                n3, o, mx = (x[3], x[4], '') if b == '3連複' else ('', x[3], x[4])
+                rows.append(dict(取得=t.strftime('%Y-%m-%d %H:%M:%S'), 発走まで分=round((post[k] - t).total_seconds() / 60, 1) if k in post else '', 場=k[0], 年月日=day, R=k[1], 回目=str(tg), 賭式=b, 番号1=n1, 番号2=n2, 番号3=n3, オッズ=o, 最大=mx)); got += 1
         done.add((k[0], k[1], str(tg))); print(k[0], k[1], 'R', tg, '分前の回', '行', got, flush=True)
 
     def save():

@@ -4,6 +4,8 @@
   2) WD5：1番人気を軸に、7番人気以下の馬へのワイド。相手がAIの5位以内（A）と6位以下（B）
   3) Z1の印：中央の「市場より来やすい型／来にくい型」の1着の数と、市場の見込み（確定オッズ）の和（2026-11-14〜）
   4) R1中央c：中央の連対の見込み（直す前の値に、先に決めた直しをかけたもの）の帯ごとの合い方（2026-11-14〜）
+  7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
+  8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
   5) WD8：地方の締切前（発走の1分以上前でいちばんあとの回）のワイドのオッズと、AIの見込みを合わせた見込みの値打ち別（2026-11-12〜。重みは 11/11 までの167レースで決めて固定）
 使い方：python chiho/fwd.py STORE [nosave]"""
@@ -147,6 +149,54 @@ if T:
     lines.append(f"  {T['日'].nunique()}日・{T.groupby(['日', 'レース']).ngroups}レース・{len(T)}組")
     for b, g in T.groupby('帯', observed=True): lines.append(f"  値打ち {b}：{len(g)}点・合わせた見込み {g['b'].mean() * 100:.1f}%・的中 {(g['払戻'] > 0).mean() * 100:.1f}%・回収 {g['払戻'].mean():.1f}%")
 else: lines.append('  まだ無い')
+# 7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みで見る（検証計画 E4。重みは 10/25〜11/11 の167レースで決めて固定。11/18〜）
+WD9 = dict(c=0.4509, ai=0.4785, ww=0.1531, w3=0.5749); WD9_FROM = '20261118'; T9 = []
+for d in sorted(glob.glob(f'{store}/data/daily/2*')):
+    day = os.path.basename(d); op = f'{d}/odds_snap.csv.gz'
+    if day < WD9_FROM or not os.path.exists(op): continue
+    O = rd(op)
+    for c in ('発走まで分', '番号1', '番号2', '番号3', 'オッズ'): O[c] = num(O[c])
+    O = O[O['発走まで分'] >= 1]
+    if not len(O): continue
+    lastt = O.groupby(['競馬場', 'レース番号'])['発走まで分'].transform('min'); O = O[O['発走まで分'] == lastt]
+    for (pl, rno), g in O.groupby(['競馬場', 'レース番号']):
+        k = (day, pl, int(rno)); r = PK['地方'].get(k); res = RES['地方'].get(k)
+        if r is None or res is None or len(res['W']) != 3: continue
+        w = g[(g['賭式'] == 'ワイド') & (g['オッズ'] > 0)]; t3 = g[(g['賭式'] == '３連複') & (g['オッズ'] > 0)]
+        if not len(w) or not len(t3): continue
+        q3 = (1 / t3['オッズ']).values; q3 = q3 / q3.sum(); w3 = {}
+        for (a1, a2, a3), v in zip(t3[['番号1', '番号2', '番号3']].astype(int).values, q3):
+            for pr in ((a1, a2), (a1, a3), (a2, a3)): w3[frozenset(pr)] = w3.get(frozenset(pr), 0) + v
+        iw = 1 / w['オッズ'].values; iw = 3 * iw / iw.sum()
+        hs = r['馬']; nums = [h['馬番'] for h in hs]; p1 = np.array([h.get('p1', max(h['一着'], 0.5) / 100) for h in hs], float); p1 = p1 / p1.sum()
+        M = jk_wide.pairprob(p1, WCAL['地方']['λ2'], WCAL['地方']['λ3']); pos = {int(x): i for i, x in enumerate(nums)}
+        for (a1, a2), ww, o in zip(w[['番号1', '番号2']].astype(int).values, iw, w['オッズ'].values):
+            pr = frozenset((a1, a2))
+            if a1 not in pos or a2 not in pos or pr not in w3: continue
+            ai = float(np.interp(M[pos[a1], pos[a2]], WCAL['地方']['見込み'], WCAL['地方']['直した見込み']))
+            bb = 1 / (1 + np.exp(-(WD9['c'] + WD9['ai'] * L(ai) + WD9['ww'] * L(ww) + WD9['w3'] * L(w3[pr])))); T9.append((day, f'{pl}{rno}', bb, o, res['W'].get(pr, 0)))
+lines.append('【地方】WD9：AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別のワイド（11/18〜。1,000レースで判断）')
+if T9:
+    T9 = pd.DataFrame(T9, columns=['日', 'レース', 'b', 'o', '払戻']); T9['v'] = T9['b'] * T9['o']; T9['帯'] = pd.cut(T9['v'], [0, .7, .8, .9, 1.0, 1.1, 99], labels=['0.7未満', '0.7〜0.8', '0.8〜0.9', '0.9〜1.0', '1.0〜1.1', '1.1以上'], right=False)
+    lines.append(f"  {T9['日'].nunique()}日・{T9.groupby(['日', 'レース']).ngroups}レース・{len(T9)}組")
+    for b, g in T9.groupby('帯', observed=True): lines.append(f"  値打ち {b}：{len(g)}点・合わせた見込み {g['b'].mean() * 100:.1f}%・的中 {(g['払戻'] > 0).mean() * 100:.1f}%・回収 {g['払戻'].mean():.1f}%")
+else: lines.append('  まだ無い')
+lines.append('')
+# 8) E1：地方の当日の馬体重の増減と単勝の戻り（検証計画 E1。11/18〜）
+WB = {}; E1_FROM = '20261118'
+for d in sorted(glob.glob(f'{store}/data/daily/2*')):
+    day = os.path.basename(d); hp, pp = f'{d}/race_horselist.csv.gz', f'{d}/race_payback.csv.gz'
+    if day < E1_FROM or not (os.path.exists(hp) and os.path.exists(pp)): continue
+    Hh = rd(hp); FIVE = {'盛岡', '水沢', '園田', '姫路', '笠松'}; Hh = Hh[Hh['競馬場'].isin(FIVE)]
+    for _, h in Hh.iterrows():
+        k = (day, h['競馬場'], int(h['レース番号'])); res = RES['地方'].get(k); fin = num(h['着順']); pop = num(h['人気']); w = num(h['馬体重増減'])
+        if res is None or fin != fin or pop != pop or pop > 6: continue
+        band = 'なし' if w != w else ('−10以下' if w <= -10 else '−9〜−4' if w <= -4 else '±3' if w <= 3 else '+4〜+9' if w <= 9 else '+10以上')
+        x = WB.setdefault(('1〜3番人気' if pop <= 3 else '4〜6番人気', band), [0, 0, 0.0]); x[0] += 1; x[1] += fin == 1; x[2] += res['tan'].get(int(h['馬番']), 0) if fin == 1 else 0
+lines.append('【地方】E1：当日の馬体重の増減と単勝（1〜6番人気。11/18〜。−9〜−4kg と +4〜+9kg がそれぞれ1,000頭たまったら判断）')
+for pg in ('1〜3番人気', '4〜6番人気'):
+    lines.append(f'  {pg}：' + '・'.join(f"{b} {WB[(pg, b)][0]}頭 回収{pct(WB[(pg, b)][2] / 100, WB[(pg, b)][0])}" for b in ('−10以下', '−9〜−4', '±3', '+4〜+9', '+10以上') if (pg, b) in WB) if any((pg, b) in WB for b in ('−10以下', '−9〜−4', '±3', '+4〜+9', '+10以上')) else f'  {pg}：まだ無い')
+lines.append('')
 txt = '\n'.join(lines) + '\n'; print(txt)
 if not NOSAVE:
     os.makedirs(f'{store}/data/fwd', exist_ok=True); open(f'{store}/data/fwd/matome.txt', 'w', encoding='utf-8').write(txt)
