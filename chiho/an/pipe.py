@@ -280,7 +280,7 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     _ix = lambda p: int(round(min(100.0, max(0.0, 50 + 10 / np.log(2) * np.log(max(float(p), 1e-4) * len(g))))))
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
-    hs = [dict(p1=round(float(r['p1']), 5), 型=r['型'], 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
+    hs = [dict(p1=round(float(r['p1']), 5), **({'f': round(float(r['f']), 4)} if 'f' in r and r['f'] == r['f'] else {}), 型=r['型'], 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
                逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100)) for _, r in g.iterrows()]
     tp = top_pairs(g)
     wp = jk_wide.top_wide(g['馬番'].astype(int).values, g['p1'].values, WCAL) if WCAL else []      # ワイドの組の見込み（検証計画 WD3）
