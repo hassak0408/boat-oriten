@@ -144,10 +144,11 @@ if SOFT and ZF:      # Z1の印：f（市場の見込みに掛ける exp(f) の 
     _o = pd.to_numeric(TRN['単勝オッズ'], errors='coerce')
     ZT = TRN[_o.groupby([TRN[k] for k in KEY]).transform(lambda s: s.notna().all()) & (TRN['n'] >= 5)].copy()
     _q = 1 / pd.to_numeric(ZT['単勝オッズ'], errors='coerce'); ZT['pm'] = _q / _q.groupby([ZT[k] for k in KEY]).transform('sum')
-    FZ = [c for c in FE if c not in set(jfeat.PEDF) and ZT[c].notna().any()]
+    FZ = ([c for c in FE + RELF + ADDF if ZT[c].notna().any()] if ZF.get('版') == 'Z2'      # Z2：今の全部の材料（血統・レースの中での差・相手の材料も）
+          else [c for c in FE if c not in set(jfeat.PEDF) and ZT[c].notna().any()])
     _nz = ZT.groupby(KEY).ngroups
     TE['f'] = jz1.predict(jz1.fit_resid(ZT, FZ, CATF, log=log), TE, FZ); del ZT; gc.collect()
-    TE['型'] = np.where(TE['f'] >= ZF['上のしきい'], '市場より来やすい型', np.where(TE['f'] <= ZF['下のしきい'], '市場より来にくい型', ''))
+    TE['型'] = np.where(TE['f'] >= ZF.get('かなりのしきい', 9e9), '市場よりかなり来やすい型', np.where(TE['f'] >= ZF['上のしきい'], '市場より来やすい型', np.where(TE['f'] <= ZF['下のしきい'], '市場より来にくい型', '')))
     log('市場のずれ', '学んだレース', _nz, 'f の標準偏差', round(float(TE['f'].std()), 4),
         '来やすい型', round(float((TE['型'] == '市場より来やすい型').mean()) * 100, 1), '%・来にくい型', round(float((TE['型'] == '市場より来にくい型').mean()) * 100, 1), '%')
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
@@ -201,8 +202,8 @@ lines = [f'中央競馬 来そうな馬（{int(today[4:6])}月{int(today[6:])}�
          'ワイド＝2頭とも3着内に来る見込みの高い組（2021〜2023年で合わせ、2024〜2026年で確かめた）。1位から流すときの的中の目安：相手1点で約28%、2点で約43%、3点で約51%、4点で約55%（1位の3着内が70%以上なら 42%・59%・68%・72%）。',
          '馬連＝1・2着に来る見込みの高い組。' + ('（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた）' if CAL else '（見込みの直しはまだ。目安）'),
          '新馬は血統の情報が無く、モデルが弱い（人気を重く）。「初出走」「中央で初」は中央の前の成績が無い馬。「中央で初」（新馬戦以外）の3着内の％は高めに出やすい（これまで実際は見込みの7〜8割）。']
-if ZF: lines.append('市場より来やすい型・来にくい型＝朝の材料だけで見た「市場（オッズ）とのずれ」の型（上位1割・下位1割）。これまで来やすい型は市場の見込みの1.1倍ほど1着に来て、'
-                    '来にくい型は0.8倍ほどだった。単勝の回収は9割前後・4割前後で、買えば得という印ではない（来にくい型を買う前にもう一度考える目印）。')
+if ZF: lines.append('市場より来やすい型・かなり来やすい型・来にくい型＝朝の材料だけで見た「市場（オッズ）とのずれ」の型（上位1割・上位5%・下位1割）。これまで（2021〜2026年）来やすい型は市場の見込みの1.2倍ほど1着に来て、'
+                    '来にくい型は0.76倍ほどだった。単勝の戻りは来やすい型で9割前後・来にくい型で4割弱で、買えば得という印ではない（来にくい型を買う前にもう一度考える目印）。')
 lines.append('')
 order = {p: i for i, p in enumerate(['札幌', '函館', '福島', '新潟', '東京', '中山', '中京', '京都', '阪神', '小倉'])}
 TE['Ri'] = TE['R'].astype(int)
