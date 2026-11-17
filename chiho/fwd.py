@@ -4,6 +4,7 @@
   2) WD5：1番人気を軸に、7番人気以下の馬へのワイド。相手がAIの5位以内（A）と6位以下（B）
   3) Z1の印：中央の「市場より来やすい型／来にくい型」の1着の数と、市場の見込み（確定オッズ）の和（2026-11-14〜）
   4) R1中央c：中央の連対の見込み（直す前の値に、先に決めた直しをかけたもの）の帯ごとの合い方（2026-11-14〜）
+  6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
   5) WD8：地方の締切前（発走の1分以上前でいちばんあとの回）のワイドのオッズと、AIの見込みを合わせた見込みの値打ち別（2026-11-12〜。重みは 11/11 までの167レースで決めて固定）
 使い方：python chiho/fwd.py STORE [nosave]"""
 import os, sys, glob, json, subprocess, datetime as dt, numpy as np, pandas as pd
@@ -11,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, f'{HERE}/j
 import jk_wide
 store = sys.argv[1]; NOSAVE = 'nosave' in sys.argv[2:]
 GIT_ID = ['-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com']
-START = {'地方': '20261117', '中央': '20261121'}; Z1_FROM = '20261114'; R1C_FROM = '20261114'; WD8_FROM = '20261112'
+START = {'地方': '20261117', '中央': '20261121'}; ZN_FROM = '20261118'; Z1_FROM = '20261114'; R1C_FROM = '20261114'; WD8_FROM = '20261112'
 WD8 = dict(c=0.3397, a=0.5826, b=0.5940)                   # 合わせた見込み＝1/(1+exp(−(c＋a×L(AI)＋b×L(0.75÷オッズ))))
 R1C = dict(alpha=0.1429, beta=1.1026)
 num = lambda v: pd.to_numeric(v, errors='coerce'); L = lambda p: np.log(np.clip(p, 1e-4, 1 - 1e-4) / (1 - np.clip(p, 1e-4, 1 - 1e-4)))
@@ -27,10 +28,12 @@ def nar_results():
         if not (os.path.exists(hp) and os.path.exists(pp)): continue
         H, P = rd(hp), rd(pp)
         for k, g in H.groupby(['競走年月日', '競馬場', 'レース番号']):
-            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={})
+            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={}, tan={})
         for _, r in P.iterrows():
             k = (r['競走年月日'], r['競馬場'], int(r['レース番号']))
             if k not in out: continue
+            a, y = num(r.get('単勝組番', '')), num(str(r.get('単勝払戻金（円）', '')).replace(',', ''))
+            if a == a and y == y: out[k]['tan'][int(a)] = y
             for i in (1, 2, 3):
                 a, b, y = num(r.get(f'ワイド組番{i}馬番1', '')), num(r.get(f'ワイド組番{i}馬番2', '')), num(str(r.get(f'ワイド払戻金{i}（円）', '')).replace(',', ''))
                 if a == a and b == b and y == y: out[k]['W'][frozenset((int(a), int(b)))] = y
@@ -89,7 +92,7 @@ for kind in ('地方', '中央'):
               f'  上位3頭の3着内 {t3}/{n3}（{pct(t3, n3)}）／ワイドの上位1組 的中 {wh}/{wn}（{pct(wh, wn)}。見込みの平均 {pct(wq, wn)}）',
               f'  WD5（1番人気×7番人気以下のワイド）：相手がAIの5位以内 {A[0]}点・的中 {pct(A[1], A[0])}・回収 {pct(A[2] / 100, A[0])}／6位以下 {B[0]}点・的中 {pct(B[1], B[0])}・回収 {pct(B[2] / 100, B[0])}', '']
 # 3) Z1の印 ／ 4) R1中央c
-Z = {'市場よりかなり来やすい型': [0, 0, 0.0], '市場より来やすい型': [0, 0, 0.0], '市場より来にくい型': [0, 0, 0.0]}; ZB = [0, 0, 0.0]      # ZB：かなり来やすい型で単勝3〜6倍（確定オッズ）; bands = {}; zr = set()
+Z = {'市場よりかなり来やすい型': [0, 0, 0.0], '市場より来やすい型': [0, 0, 0.0], '市場より来にくい型': [0, 0, 0.0]}; ZB = [0, 0, 0.0]; bands = {}; zr = set()      # ZB：来やすい型（かなり含む）で単勝3〜6倍（確定オッズ）
 for k, r in PK['中央'].items():
     if k not in RES['中央']: continue
     res = RES['中央'][k]; od = res['odds']; fin = res['fin']; hs = r['馬']
@@ -104,6 +107,21 @@ for k, r in PK['中央'].items():
             p = h['連対の素'] / 100; q = 1 / (1 + np.exp(-(R1C['alpha'] + R1C['beta'] * L(p)))); b = min(int(q * 10), 9); x = bands.setdefault(b, [0, 0.0, 0, 0.0]); x[0] += 1; x[1] += q; x[2] += fin[h['馬番']] <= 2; x[3] += p
 lines += [f'【中央】市場のずれの印（11/14〜16 は Z1、11/21〜 は Z2。{len(zr)}レース。1,000レースで判断）', f'  ZS2：来やすい型（かなりも含む）で単勝3〜6倍（11/21〜）：{ZB[0]}頭・1着 {ZB[1]}・回収 {pct(ZB[2] / 100, ZB[0])}'] + [f'  {nm}：{v[0]}頭・1着 {v[1]}・市場の見込みの和 {v[2]:.1f}（実際÷市場 {v[1] / v[2]:.2f}）' if v[2] else f'  {nm}：まだ無い' for nm, v in Z.items()] + ['']
 lines += ['【中央】連対の見込み（R1中央c。11/14〜。40〜70%の帯が500頭ずつたまったら判断）'] + [f'  {b * 10}〜{b * 10 + 10}%：{v[0]}頭・直した見込み {v[1] / v[0] * 100:.1f}%・実際 {v[2] / v[0] * 100:.1f}%（直す前の見込み {v[3] / v[0] * 100:.1f}%）' for b, v in sorted(bands.items())] + ['']
+# 6) ZN1・ZN2
+ZN = {'市場よりかなり来やすい型': [0, 0, 0.0], '市場より来やすい型': [0, 0, 0.0], '市場より来にくい型': [0, 0, 0.0], '印なし': [0, 0, 0.0]}; ZN2 = [0, 0, 0.0]; znr = set()
+for k, r in PK['地方'].items():
+    if k[0] < ZN_FROM or k not in RES['地方']: continue
+    res = RES['地方'][k]; fin = res['fin']; pop = res['pop']
+    if not res['tan'] or not any(h.get('型') for h in r['馬']): continue
+    znr.add(k)
+    for h in r['馬']:
+        b = h['馬番']
+        if fin.get(b) != fin.get(b): continue
+        t = h.get('型') or '印なし'; pay = res['tan'].get(b, 0) if fin.get(b) == 1 else 0
+        ZN[t][0] += 1; ZN[t][1] += fin[b] == 1; ZN[t][2] += pay
+        if '来やすい' in t and 4 <= (pop.get(b) or 0) <= 6: ZN2[0] += 1; ZN2[1] += fin[b] == 1; ZN2[2] += pay
+lines += [f'【地方】市場のずれの印（ZN1。11/18〜、{len(znr)}レース。1,000頭で判断）'] + [f'  {nm}：{v[0]}頭・1着 {v[1]}（{pct(v[1], v[0])}）・単勝の回収 {pct(v[2] / 100, v[0])}' for nm, v in ZN.items()] + \
+         [f'  ZN2：来やすい型（かなり含む）で4〜6番人気：{ZN2[0]}頭・1着 {ZN2[1]}・回収 {pct(ZN2[2] / 100, ZN2[0])}', '']
 # 5) WD8
 T = []
 for d in sorted(glob.glob(f'{store}/data/daily/2*')):
