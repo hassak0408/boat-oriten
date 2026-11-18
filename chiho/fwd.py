@@ -5,6 +5,7 @@
   3) Z1の印：中央の「市場より来やすい型／来にくい型」の1着の数と、市場の見込み（確定オッズ）の和（2026-11-14〜）
   4) R1中央c：中央の連対の見込み（直す前の値に、先に決めた直しをかけたもの）の帯ごとの合い方（2026-11-14〜）
   ※ 3) と 6) には、窓口で見える表示で選んだ形（AC3b・AC3）も並べる（確定は窓口では見えないため）
+  9) JN4：地方の乗り替わりの区分ごとの単勝（一覧に区分が出た日から。2026-11-20〜の予定）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
@@ -144,6 +145,39 @@ for k, r in PK['地方'].items():
         if '来やすい' in t and b in sw and 4 <= sw[b][1] <= 6: ZN2w[0] += 1; ZN2w[1] += fin[b] == 1; ZN2w[2] += pay
 lines += [f'【地方】市場のずれの印（ZN1。11/18〜、{len(znr)}レース。1,000頭で判断）'] + [f'  {nm}：{v[0]}頭・1着 {v[1]}（{pct(v[1], v[0])}）・単勝の回収 {pct(v[2] / 100, v[0])}' for nm, v in ZN.items()] + \
          [f'  ZN2：来やすい型（かなり含む）で4〜6番人気：{ZN2[0]}頭・1着 {ZN2[1]}・回収 {pct(ZN2[2] / 100, ZN2[0])}', f'  AC3：同じ形を、窓口で見える人気（1分以上前のいちばんあとの表示）で4〜6番人気に選んだ時：{ZN2w[0]}頭・1着 {ZN2w[1]}・回収 {pct(ZN2w[2] / 100, ZN2w[0])}', '']
+# 9) JN4：地方の乗り替わりの区分ごとの単勝（検証計画 JN4。一覧に区分が出た日から。確定の人気・確定の払戻）
+def pband(p): return '1番人気' if p == 1 else '2〜3番人気' if p <= 3 else '4〜6番人気' if p <= 6 else '7番人気以下'
+JB = {}; jr = set(); JD = []; JU = [0, 0, 0.0]
+for k, r in PK['地方'].items():
+    if k not in RES['地方'] or not any(h.get('乗替区分') for h in r['馬']): continue
+    res = RES['地方'][k]; fin = res['fin']; pop = res['pop']
+    if not res['tan']: continue
+    jr.add(k)
+    for h in r['馬']:
+        b = h['馬番']; c = h.get('乗替区分') or '無'; p = pop.get(b)
+        if fin.get(b) != fin.get(b) or p is None or p != p: continue
+        pay = res['tan'].get(b, 0) if fin.get(b) == 1 else 0; x = JB.setdefault((c, pband(p)), [0, 0, 0.0]); x[0] += 1; x[1] += fin[b] == 1; x[2] += pay
+        if c in ('大きく格上げ', '同じ騎手'): JD.append((k[0], pband(p), c, pay))
+        if c == '大きく格上げ' and '来やすい' in (h.get('型') or ''): JU[0] += 1; JU[1] += fin[b] == 1; JU[2] += pay
+lines.append(f'【地方】JN4：乗り替わりの区分ごとの単勝（{len(jr)}レース。大きく格上げが1,000頭たまったら判断）')
+if JB:
+    for c in ('大きく格上げ', '格上げ', '同じくらい', '格下げ', '大きく格下げ', '同じ騎手', '無'):
+        n = sum(v[0] for (cc, _), v in JB.items() if cc == c); y = sum(v[2] for (cc, _), v in JB.items() if cc == c)
+        if n: lines.append(f'  {c}：{n}頭・回収 {pct(y / 100, n)}（' + '・'.join(f"{b} {JB[(c, b)][0]}頭 {pct(JB[(c, b)][2] / 100, JB[(c, b)][0])}" for b in ('1番人気', '2〜3番人気', '4〜6番人気', '7番人気以下') if (c, b) in JB) + '）')
+    J4 = pd.DataFrame(JD, columns=['日', '帯', '区分', '払戻'])
+    def diff(J):
+        up = J[J['区分'] == '大きく格上げ']; sm = J[J['区分'] == '同じ騎手']
+        if not len(up): return np.nan
+        w = up['帯'].value_counts(normalize=True); ru = up.groupby('帯')['払戻'].mean(); rs = sm.groupby('帯')['払戻'].mean()
+        return float(sum(w[b] * (ru[b] - rs.get(b, np.nan)) for b in w.index if b in rs.index))
+    nu = int((J4['区分'] == '大きく格上げ').sum()); pt = diff(J4); ds = J4['日'].unique(); rng = np.random.default_rng(0); bs = []
+    for _ in range(1000 if nu else 0):
+        pick = rng.choice(ds, len(ds)); bs.append(diff(pd.concat([J4[J4['日'] == d] for d in pick])))
+    ci = f'（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）' if len(bs) else ''
+    lines.append(f'  大きく格上げ − 同じ人気の帯の同じ騎手（回収の差）：{pt:+.1f}ポイント{ci}・大きく格上げ {nu}頭' + ('' if nu >= 1000 else '（まだ判断しない）'))
+    lines.append(f'  数字だけ：大きく格上げで来やすい型（かなり含む）：{JU[0]}頭・1着 {JU[1]}・回収 {pct(JU[2] / 100, JU[0])}')
+else: lines.append('  まだ無い')
+lines.append('')
 # 5) WD8
 T = []
 for d in sorted(glob.glob(f'{store}/data/daily/2*')):
