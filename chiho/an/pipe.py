@@ -225,6 +225,15 @@ if _zf:      # 市場のずれの型（検証計画 ZN1）：人気の順×頭�
     TE['f'] = jz1.predict(jz1.fit_resid(ZT, FZ, ['場c', '馬場c', '天候c', '性c'], log=log), TE, FZ); del ZT
     TE['型'] = np.where(TE['f'] >= _zf['かなりのしきい'], '市場よりかなり来やすい型', np.where(TE['f'] >= _zf['上のしきい'], '市場より来やすい型', np.where(TE['f'] <= _zf['下のしきい'], '市場より来にくい型', '')))
     log('市場のずれ', 'f の標準偏差', round(float(TE['f'].std()), 4), {k: round(float((TE['型'] == k).mean()) * 100, 1) for k in ('市場よりかなり来やすい型', '市場より来やすい型', '市場より来にくい型')})
+# 乗り替わりの区分（検証計画 JN2・JN4。数えるだけで、見込みには使わない）：今の騎手の騎勝率 − 前走の騎手の騎勝率（前走の騎手のいちばん新しい値。今日乗る騎手なら今日の値）
+try:
+    _hk = H.dropna(subset=['騎勝率']).sort_values(['日', 'レース番号']).groupby('騎')['騎勝率'].last()
+    _d = pd.to_numeric(TE['騎勝率'], errors='coerce') - TE['前騎'].map(_hk)
+    _c = np.select([TE['乗替'] == 0, _d >= 0.08, _d >= 0.03, _d > -0.03, _d > -0.08, _d <= -0.08], ['同じ騎手', '大きく格上げ', '格上げ', '同じくらい', '格下げ', '大きく格下げ'], '無')
+    TE['乗替区分'] = np.where(TE['乗替'].isna() | ((TE['乗替'] == 1) & _d.isna()), '無', _c)
+    log('乗り替わりの区分', TE['乗替区分'].value_counts().to_dict())
+except Exception as e:
+    TE['乗替区分'] = ''; log('乗り替わりの区分を作れなかった', repr(e)[:200])
 TE['逃げ順'] = TE.groupby(KEY)['p先頭'].rank(ascending=False, method='first')
 TE['脚質'] = np.where((TE['逃げ順'] == 1) & (TE['p先頭'] >= 0.3), '逃げ', np.where(TE['p先行'] >= 0.5, '先行',
               np.where((TE['p先行'] >= 0.25) | (TE['終角率3'] <= 0.6), '差し', np.where(TE['終角率3'].notna(), '追込', ''))))
@@ -281,7 +290,7 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
     hs = [dict(p1=round(float(r['p1']), 5), **({'f': round(float(r['f']), 4)} if 'f' in r and r['f'] == r['f'] else {}), 型=r['型'], 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
-               逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100)) for _, r in g.iterrows()]
+               逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100), 乗替区分=str(r['乗替区分'])) for _, r in g.iterrows()]
     tp = top_pairs(g)
     wp = jk_wide.top_wide(g['馬番'].astype(int).values, g['p1'].values, WCAL) if WCAL else []      # ワイドの組の見込み（検証計画 WD3）
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
