@@ -7,6 +7,7 @@
   ※ 3) と 6) には、窓口で見える表示で選んだ形（AC3b・AC3）も並べる（確定は窓口では見えないため）
   9) JN4：地方の乗り替わりの区分ごとの単勝（一覧に区分が出た日から。2026-11-20〜の予定）
   10) JN6：地方の新顔（初めて5場で走る馬）の1番人気と、それ以外の1番人気の単勝（2026-11-21〜）
+  11) UF4：地方の馬複。AIの1番手×かなり来やすい型（U3）と、同じレースのAIの組の1位（U0）（2026-11-21〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
@@ -33,12 +34,14 @@ def nar_results():
         if not (os.path.exists(hp) and os.path.exists(pp)): continue
         H, P = rd(hp), rd(pp)
         for k, g in H.groupby(['競走年月日', '競馬場', 'レース番号']):
-            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={}, tan={})
+            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={}, tan={}, Q={})
         for _, r in P.iterrows():
             k = (r['競走年月日'], r['競馬場'], int(r['レース番号']))
             if k not in out: continue
             a, y = num(r.get('単勝組番', '')), num(str(r.get('単勝払戻金（円）', '')).replace(',', ''))
             if a == a and y == y: out[k]['tan'][int(a)] = y
+            a, b, y = num(r.get('馬複組番1', '')), num(r.get('馬複組番2', '')), num(str(r.get('馬複払戻金（円）', '')).replace(',', ''))
+            if a == a and b == b and y == y: out[k]['Q'][frozenset((int(a), int(b)))] = y
             for i in (1, 2, 3):
                 a, b, y = num(r.get(f'ワイド組番{i}馬番1', '')), num(r.get(f'ワイド組番{i}馬番2', '')), num(str(r.get(f'ワイド払戻金{i}（円）', '')).replace(',', ''))
                 if a == a and b == b and y == y: out[k]['W'][frozenset((int(a), int(b)))] = y
@@ -199,6 +202,37 @@ if J6:
             X6 = pd.concat([J6[J6['日'] == d] for d in rng6.choice(ds, len(ds))]); bs.append(X6.loc[X6['新顔'], '払戻'].mean() - X6.loc[~X6['新顔'], '払戻'].mean())
         lines.append(f"  差 {a6['払戻'].mean() - b6['払戻'].mean():+.1f}ポイント（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）")
 else: lines.append('  まだ無い')
+lines.append('')
+# 11) UF4：地方の馬複（検証計画 UF4。2026-11-21〜）。U3＝AIの1番手（1着の見込みが一番）とかなり来やすい型の馬の組、U0＝一覧の馬連の1組目（同じレース）、U2＝1番人気×かなり来やすい型
+U4 = []; U2 = []
+for k, r in PK['地方'].items():
+    if k[0] < '20261121' or k not in RES['地方']: continue
+    res = RES['地方'][k]
+    if not res['Q']: continue
+    fin = res['fin']; run = {h['馬番'] for h in r['馬'] if fin.get(h['馬番']) == fin.get(h['馬番'])}
+    hs = [h for h in r['馬'] if h['馬番'] in run]
+    if len(hs) < 4: continue
+    top = max(hs, key=lambda h: h.get('p1', h['一着'] / 100))['馬番']; mk = [h['馬番'] for h in hs if h.get('型') == '市場よりかなり来やすい型' and h['馬番'] != top]
+    q0 = r.get('馬連') or []; u0 = frozenset(int(v) for v in q0[0]['組'].split('-')) if q0 else None
+    pay = lambda pr: res['Q'].get(pr, 0)
+    if mk and u0 is not None and u0 <= run:
+        for m in mk: U4.append((k[0], 'U3', pay(frozenset((top, m)))))
+        U4.append((k[0], 'U0', pay(u0)))
+    pop = res['pop']; fav = [b for b in run if pop.get(b) == 1]
+    if fav:
+        for h in hs:
+            if h.get('型') == '市場よりかなり来やすい型' and h['馬番'] != fav[0]: U2.append(pay(frozenset((fav[0], h['馬番']))))
+lines.append('【地方】UF4：馬複 U3（AIの1番手×かなり来やすい型）と同じレースの U0（AIの組の1位）（11/21〜。U3 が1,000点たまったら判断）')
+if U4:
+    U4 = pd.DataFrame(U4, columns=['日', '形', '払戻']); a4, b4 = U4[U4['形'] == 'U3'], U4[U4['形'] == 'U0']
+    lines.append(f"  U3：{len(a4)}点・的中 {int((a4['払戻'] > 0).sum())}・回収 {pct(a4['払戻'].sum() / 100, len(a4))} ／ U0：{len(b4)}点・的中 {int((b4['払戻'] > 0).sum())}・回収 {pct(b4['払戻'].sum() / 100, len(b4))}")
+    if len(a4) >= 1000:
+        ds = U4['日'].unique(); rng4 = np.random.default_rng(0); bs = []
+        for _ in range(1000):
+            X4 = pd.concat([U4[U4['日'] == d] for d in rng4.choice(ds, len(ds))]); bs.append(X4.loc[X4['形'] == 'U3', '払戻'].mean() - X4.loc[X4['形'] == 'U0', '払戻'].mean())
+        lines.append(f"  差 {a4['払戻'].mean() - b4['払戻'].mean():+.1f}ポイント（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）")
+else: lines.append('  まだ無い')
+lines.append(f"  数字だけ：U2（1番人気×かなり来やすい型）：{len(U2)}点・的中 {sum(1 for v in U2 if v > 0)}・回収 {pct(sum(U2) / 100, len(U2))}")
 lines.append('')
 # 5) WD8
 T = []
