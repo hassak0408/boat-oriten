@@ -218,8 +218,9 @@ if USE3:
     if (_v1 or _v3) and '前場' in TE:
         _first = ((TE['来かた'] == 'ほかの地方') & (TE['戦目'] == 1)).values; _fr = TE['前場'].astype(str)
         TE['p1'] = TE['p1'] * np.where(_first, _fr.map(_v1).fillna(1.0), 1.0)
-        TE['p3'] = TE['p3'] * np.where(_first, _fr.map(_v3).fillna(1.0), 1.0)
-        TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+        _k3 = np.where(_first, _fr.map(_v3).fillna(1.0), 1.0); TE['p3'] = TE['p3'] * _k3
+        _rc = pd.Series(_k3 != 1.0, index=TE.index).groupby([TE[k] for k in KEY]).transform('any').values      # 直した馬のいるレースだけ足し直す（ほかのレースは表示を変えない）
+        TE['p3'] = np.where(_rc, (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97), TE['p3'])
         log('来た場ごとの直し', {v: int(((_fr == v).values & _first).sum()) for v in sorted(set(_v1) | set(_v3))}, '頭')
 TAG = {'中央': '中央から初戦', 'ほかの地方': 'ほかの地方から初戦', '外（芝なし）': '転入初戦', 'デビュー': '初出走'}
 TE['印'] = [TAG.get(k, '') if (isinstance(k, str) and s == 1) else '' for k, s in zip(TE['来かた'], TE['戦目'])]
