@@ -6,6 +6,7 @@
   4) R1中央c：中央の連対の見込み（直す前の値に、先に決めた直しをかけたもの）の帯ごとの合い方（2026-11-14〜）
   ※ 3) と 6) には、窓口で見える表示で選んだ形（AC3b・AC3）も並べる（確定は窓口では見えないため）
   9) JN4：地方の乗り替わりの区分ごとの単勝（一覧に区分が出た日から。2026-11-20〜の予定）
+  10) JN6：地方の新顔（初めて5場で走る馬）の1番人気と、それ以外の1番人気の単勝（2026-11-21〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
@@ -176,6 +177,27 @@ if JB:
     ci = f'（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）' if len(bs) else ''
     lines.append(f'  大きく格上げ − 同じ人気の帯の同じ騎手（回収の差）：{pt:+.1f}ポイント{ci}・大きく格上げ {nu}頭' + ('' if nu >= 1000 else '（まだ判断しない）'))
     lines.append(f'  数字だけ：大きく格上げで来やすい型（かなり含む）：{JU[0]}頭・1着 {JU[1]}・回収 {pct(JU[2] / 100, JU[0])}')
+else: lines.append('  まだ無い')
+lines.append('')
+# 10) JN6：地方の新顔（初めて5場で走る馬）の1番人気（検証計画 JN6。2026-11-21〜。確定の人気・確定の払戻）
+NEWF = {'中央から初戦', 'ほかの地方から初戦', '転入初戦', '初出走'}; J6 = []
+for k, r in PK['地方'].items():
+    if k[0] < '20261121' or k not in RES['地方']: continue
+    res = RES['地方'][k]; fin = res['fin']; pop = res['pop']
+    if not res['tan']: continue
+    for h in r['馬']:
+        b = h['馬番']
+        if pop.get(b) != 1 or fin.get(b) != fin.get(b): continue
+        J6.append((k[0], h.get('印') in NEWF, res['tan'].get(b, 0) if fin.get(b) == 1 else 0))
+lines.append('【地方】JN6：新顔（初めて5場で走る馬）の1番人気（11/21〜。新顔の1番人気が300頭たまったら判断）')
+if J6:
+    J6 = pd.DataFrame(J6, columns=['日', '新顔', '払戻']); a6, b6 = J6[J6['新顔']], J6[~J6['新顔']]
+    lines.append(f"  新顔の1番人気：{len(a6)}頭・1着 {int((a6['払戻'] > 0).sum())}・回収 {pct(a6['払戻'].sum() / 100, len(a6))} ／ それ以外の1番人気：{len(b6)}頭・回収 {pct(b6['払戻'].sum() / 100, len(b6))}")
+    if len(a6) >= 300:
+        ds = J6['日'].unique(); rng6 = np.random.default_rng(0); bs = []
+        for _ in range(1000):
+            X6 = pd.concat([J6[J6['日'] == d] for d in rng6.choice(ds, len(ds))]); bs.append(X6.loc[X6['新顔'], '払戻'].mean() - X6.loc[~X6['新顔'], '払戻'].mean())
+        lines.append(f"  差 {a6['払戻'].mean() - b6['払戻'].mean():+.1f}ポイント（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）")
 else: lines.append('  まだ無い')
 lines.append('')
 # 5) WD8
