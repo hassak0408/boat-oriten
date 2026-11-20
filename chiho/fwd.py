@@ -9,6 +9,7 @@
   10) JN6：地方の新顔（初めて5場で走る馬）の1番人気と、それ以外の1番人気の単勝（2026-11-21〜）
   11) UF4：地方の馬複。AIの1番手×かなり来やすい型（U3）と、同じレースのAIの組の1位（U0）（2026-11-21〜）
   12) K2F：中央の「前走で出遅れなど」の印の馬の1着・回収（2026-11-21〜）
+  13) FR2：地方の、脚質が逃げ・先行×来やすい型×4〜6番人気の単勝（2026-11-22〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
@@ -256,6 +257,28 @@ if K2:
             X2 = pd.concat([K2[K2['日'] == d] for d in rk.choice(ds, len(ds))]); bs.append(X2['勝'].sum() / X2['見込み'].sum())
         lines.append(f"  実際÷見込みの95%幅 {np.nanpercentile(bs, 2.5):.2f}〜{np.nanpercentile(bs, 97.5):.2f}")
 else: lines.append('  まだ無い')
+lines.append('')
+# 13) FR2：地方の、脚質が逃げ・先行で来やすい型（かなり含む）の4〜6番人気の単勝（検証計画 FR2。2026-11-22〜）
+F2a, F2w, F2n = [], [], []
+for k, r in PK['地方'].items():
+    if k[0] < '20261122' or k not in RES['地方']: continue
+    res = RES['地方'][k]; fin, pop = res['fin'], res['pop']
+    if not res['tan']: continue
+    sw = snap_last('地方', k[0]).get((k[1], k[2]), {})
+    for h in r['馬']:
+        b = h['馬番']
+        if '来やすい' not in (h.get('型') or '') or fin.get(b) != fin.get(b): continue
+        pay = res['tan'].get(b, 0) if fin.get(b) == 1 else 0; front = h.get('脚質') in ('逃げ', '先行')
+        if 4 <= (pop.get(b) or 0) <= 6: (F2a if front else F2n).append((k[0], pay))
+        if front and b in sw and 4 <= sw[b][1] <= 6: F2w.append((k[0], pay))
+lines.append('【地方】FR2：脚質が逃げ・先行×来やすい型×4〜6番人気の単勝（11/22〜。500頭たまったら判断）')
+def _ln(L, nm): return f"  {nm}：{len(L)}頭・1着 {sum(1 for _, v in L if v > 0)}・回収 {pct(sum(v for _, v in L) / 100, len(L))}"
+lines += [_ln(F2a, '逃げ・先行（確定の人気）'), _ln(F2w, '逃げ・先行（窓口で見える人気）'), _ln(F2n, 'くらべる相手：逃げ・先行でない来やすい型（確定の人気）')]
+if len(F2a) >= 500:
+    F2d = pd.DataFrame(F2a, columns=['日', '払戻']); ds = F2d['日'].unique(); rf = np.random.default_rng(0); bs = []
+    for _ in range(1000):
+        X = pd.concat([F2d[F2d['日'] == d] for d in rf.choice(ds, len(ds))]); bs.append(X['払戻'].mean())
+    lines.append(f"  回収の95%幅 {np.nanpercentile(bs, 2.5):.0f}〜{np.nanpercentile(bs, 97.5):.0f}%")
 lines.append('')
 # 5) WD8
 T = []
