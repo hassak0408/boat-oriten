@@ -211,6 +211,16 @@ if USE3:
     fix = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'origin_fix.json'), encoding='utf-8'))['掛ける値']
     TE['p3'] = TE['p3'] * TE['組'].map(fix).fillna(1.0)
     TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+# 来た場（南関東の4場）ごとの直し（検証計画 TN2。値は2021〜2026年で決めた）：5場での1戦目で、ほかの地方から来た馬の前の場ごとに、1着・3着内の見込みに掛ける
+if USE3:
+    _ofv = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'origin_fix.json'), encoding='utf-8'))
+    _v1, _v3 = _ofv.get('1着の掛ける値（来た場）', {}), _ofv.get('3着内の掛ける値（来た場）', {})
+    if (_v1 or _v3) and '前場' in TE:
+        _first = ((TE['来かた'] == 'ほかの地方') & (TE['戦目'] == 1)).values; _fr = TE['前場'].astype(str)
+        TE['p1'] = TE['p1'] * np.where(_first, _fr.map(_v1).fillna(1.0), 1.0)
+        TE['p3'] = TE['p3'] * np.where(_first, _fr.map(_v3).fillna(1.0), 1.0)
+        TE['p3'] = (TE['p3'] * np.minimum(3, TE['n']) / TE.groupby(KEY)['p3'].transform('sum')).clip(upper=0.97)
+        log('来た場ごとの直し', {v: int(((_fr == v).values & _first).sum()) for v in sorted(set(_v1) | set(_v3))}, '頭')
 TAG = {'中央': '中央から初戦', 'ほかの地方': 'ほかの地方から初戦', '外（芝なし）': '転入初戦', 'デビュー': '初出走'}
 TE['印'] = [TAG.get(k, '') if (isinstance(k, str) and s == 1) else '' for k, s in zip(TE['来かた'], TE['戦目'])]
 TE['p1'] = TE['p1'] / TE.groupby(KEY)['p1'].transform('sum')
@@ -290,7 +300,7 @@ for (place, ymd, rno), g in sorted(TE.groupby(KEY), key=lambda kv: (order.get(kv
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
     hs = [dict(p1=round(float(r['p1']), 5), **({'f': round(float(r['f']), 4)} if 'f' in r and r['f'] == r['f'] else {}), 型=r['型'], 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 連対=round(float(r['p2']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'], 向き=r['向き'],
-               逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100), 乗替区分=str(r['乗替区分'])) for _, r in g.iterrows()]
+               逃げ見込み=round(float(r['p先頭']) * 100), 先行見込み=round(float(r['p先行']) * 100), 乗替区分=str(r['乗替区分']), 来た場=(r.get('前場') if (r['印'] == 'ほかの地方から初戦' and isinstance(r.get('前場'), str)) else '')) for _, r in g.iterrows()]
     tp = top_pairs(g)
     wp = jk_wide.top_wide(g['馬番'].astype(int).values, g['p1'].values, WCAL) if WCAL else []      # ワイドの組の見込み（検証計画 WD3）
     out['レース'].append(dict(場=place, R=int(rno), 発走=post, 距離=info.get('距離', ''), 頭数=len(g), 馬=hs,
