@@ -2,12 +2,13 @@
 5場の代わりに指定した場の f を学ぶ。データは data_all（全部の場）から、その場の分だけを一時の置き場に写して使う（2026年10月まで）。
 「今日」は 2026年11月の、その場の最初の開催日（その日の行は学ぶのにも確かめにも使わない）。全部の場の前の成績（hist_all）の「5場」は、指定した場に置きかえる。
 出力：STORE/data/exp/nk_z2o_タグ_年.csv.gz（f・pm・勝・人気・単勝の払戻・先頭率5・先行率5・他の逃げ型）。
-使い方：python chiho/an/nk_z2o.py STORE 場,場 タグ 年…"""
+使い方：python chiho/an/nk_z2o.py STORE まとまりの番号 年…（試しの仕組みの引数は数字だけなので、場は番号で選ぶ。タグは英字：保存の手順が日本語のファイル名を扱えないため）"""
 import os, sys, glob, shutil, tempfile, numpy as np, pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, '..', 'jra'))
-store, PL, TAG = sys.argv[1], sys.argv[2].split(','), sys.argv[3]
-YEARS = [int(v) for v in sys.argv[4:]] or list(range(2021, 2027))
+GROUPS = {1: (['名古屋', '金沢'], 'tokai'), 2: (['佐賀', '高知'], 'kyushikoku'), 3: (['門別'], 'monbetsu'), 4: (['大井'], 'ooi'), 5: (['川崎', '船橋', '浦和'], 'nankan')}
+store = sys.argv[1]; PL, TAG = GROUPS[int(sys.argv[2])]
+YEARS = [int(v) for v in sys.argv[3:]] or list(range(2021, 2027))
 tmp = tempfile.mkdtemp(); n_rows = 0
 for d in sorted(glob.glob(f'{store}/data_all/race/2*')):
     b = os.path.basename(d)
