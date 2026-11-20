@@ -8,6 +8,7 @@
   9) JN4：地方の乗り替わりの区分ごとの単勝（一覧に区分が出た日から。2026-11-20〜の予定）
   10) JN6：地方の新顔（初めて5場で走る馬）の1番人気と、それ以外の1番人気の単勝（2026-11-21〜）
   11) UF4：地方の馬複。AIの1番手×かなり来やすい型（U3）と、同じレースのAIの組の1位（U0）（2026-11-21〜）
+  12) K2F：中央の「前走で出遅れなど」の印の馬の1着・回収（2026-11-21〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
@@ -233,6 +234,28 @@ if U4:
         lines.append(f"  差 {a4['払戻'].mean() - b4['払戻'].mean():+.1f}ポイント（95%幅 {np.nanpercentile(bs, 2.5):+.1f}〜{np.nanpercentile(bs, 97.5):+.1f}）")
 else: lines.append('  まだ無い')
 lines.append(f"  数字だけ：U2（1番人気×かなり来やすい型）：{len(U2)}点・的中 {sum(1 for v in U2 if v > 0)}・回収 {pct(sum(U2) / 100, len(U2))}")
+lines.append('')
+# 12) K2F：中央の「前走で出遅れなど」の印の馬（検証計画 K2F。2026-11-21〜。確定の単勝オッズ）
+K2 = []
+for k, r in PK['中央'].items():
+    if k[0] < '20261121' or k not in RES['中央']: continue
+    res = RES['中央'][k]; fin, od = res['fin'], res['odds']
+    if not od or any(v != v or v <= 0 for v in od.values()): continue
+    z = sum(1 / v for v in od.values())
+    for h in r['馬']:
+        b = h['馬番']
+        if '出遅れ' not in (h.get('不利明け') or '') or b not in od or fin.get(b) != fin.get(b): continue
+        K2.append((k[0], int(fin[b] == 1), (1 / od[b]) / z, od[b] * 100 if fin[b] == 1 else 0.0))
+lines.append('【中央】K2F：「前走で出遅れなど」の印の馬（11/21〜。300頭たまったら判断）')
+if K2:
+    K2 = pd.DataFrame(K2, columns=['日', '勝', '見込み', '払戻'])
+    lines.append(f"  {len(K2)}頭・1着 {int(K2['勝'].sum())}（オッズの見込みの和 {K2['見込み'].sum():.1f}）・実際÷見込み {K2['勝'].sum() / K2['見込み'].sum():.2f}・回収 {pct(K2['払戻'].sum() / 100, len(K2))}")
+    if len(K2) >= 300:
+        ds = K2['日'].unique(); rk = np.random.default_rng(0); bs = []
+        for _ in range(1000):
+            X2 = pd.concat([K2[K2['日'] == d] for d in rk.choice(ds, len(ds))]); bs.append(X2['勝'].sum() / X2['見込み'].sum())
+        lines.append(f"  実際÷見込みの95%幅 {np.nanpercentile(bs, 2.5):.2f}〜{np.nanpercentile(bs, 97.5):.2f}")
+else: lines.append('  まだ無い')
 lines.append('')
 # 5) WD8
 T = []
