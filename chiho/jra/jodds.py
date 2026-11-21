@@ -71,17 +71,22 @@ def main():
     now = lambda: dt.datetime.now(JST)
     todo = lambda: [(k, tg) for k in post for tg in TARGETS if (k[0], k[1], str(tg)) not in done and now() < post[k]]
     if not test and not todo(): print('読むレースが残っていない'); return
-    # 各レースのページの名前
-    top = fetch('pw15oli00/6D'); names = {}
-    for cn in sorted(set(re.findall(r"'(pw15orl\d+%s/[0-9A-F]{2})'" % day, top or ''))):
-        rl = fetch(cn) or ''
-        for kind, c in re.findall(r"'(pw15[157]ou)(\d+%sZ(?:99)?/[0-9A-F]{2})'" % day, rl):
-            pl = PLACE.get(c[2:4]); rno = int(c[12:14]); names.setdefault((pl, rno), {})[kind] = kind + c
-    print('開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), flush=True)
+    # 各レースのページの名前。土曜の朝など、発売が始まる前はページが無いので、読む時に無ければ3分ごとに拾い直す（2026-11-21 の朝は0レースのまま読み続けた）
+    names = {}; last = [0.0]
+    def lookup():
+        last[0] = time.time()
+        top = fetch('pw15oli00/6D')
+        for cn in sorted(set(re.findall(r"'(pw15orl\d+%s/[0-9A-F]{2})'" % day, top or ''))):
+            rl = fetch(cn) or ''
+            for kind, c in re.findall(r"'(pw15[157]ou)(\d+%sZ(?:99)?/[0-9A-F]{2})'" % day, rl):
+                pl = PLACE.get(c[2:4]); rno = int(c[12:14]); names.setdefault((pl, rno), {})[kind] = kind + c
+        print(now().strftime('%H:%M'), '開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), flush=True)
+    lookup()
     rows = []
 
     def snap(k, tg):
         got = 0
+        if k not in names and time.time() - last[0] > 180: lookup()
         for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide), ('pw157ou', parse_trio)):
             cn = names.get(k, {}).get(kind)
             if not cn: continue
