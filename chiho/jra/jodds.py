@@ -72,21 +72,34 @@ def main():
     todo = lambda: [(k, tg) for k in post for tg in TARGETS if (k[0], k[1], str(tg)) not in done and now() < post[k]]
     if not test and not todo(): print('読むレースが残っていない'); return
     # 各レースのページの名前。土曜の朝など、発売が始まる前はページが無いので、読む時に無ければ3分ごとに拾い直す（2026-11-21 の朝は0レースのまま読み続けた）
-    names = {}; last = [0.0]
+    # 2026-11-21 は昼（12:53）に拾い直しても0レースだった（11/16・11/17 の試しは前の週の 11/15 で36レース拾えていた）。
+    # 名前の拾い方をゆるめる（引用符は ' と " のどちらも、開催のページの名前に日付が無くてもよい）。0レースのときは、ページの中身の手がかりを記録に出す。
+    names = {}; looked = [0.0]
+    Q = "[\x27\x22]"
     def lookup():
-        last[0] = time.time()
-        top = fetch('pw15oli00/6D')
-        for cn in sorted(set(re.findall(r"'(pw15orl\d+%s/[0-9A-F]{2})'" % day, top or ''))):
-            rl = fetch(cn) or ''
-            for kind, c in re.findall(r"'(pw15[157]ou)(\d+%sZ(?:99)?/[0-9A-F]{2})'" % day, rl):
-                pl = PLACE.get(c[2:4]); rno = int(c[12:14]); names.setdefault((pl, rno), {})[kind] = kind + c
-        print(now().strftime('%H:%M'), '開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), flush=True)
+        looked[0] = time.time()
+        top = fetch('pw15oli00/6D') or ''
+        orl = sorted(set(re.findall(Q + r"(pw15orl[0-9A-Za-z]+/[0-9A-F]{2})" + Q, top)))
+        use = orl if len(orl) <= 8 else ([c for c in orl if day in c] or orl)      # 少なければ全部読む（日付の無い名前の開催のページも拾う）
+        seen = []
+        for cn in use:
+            rl = fetch(cn) or ''; seen.append((cn, len(rl), sorted(set(re.findall(r"pw15\d\w{2}", rl)))[:8]))
+            for kind, c in re.findall(Q + r"(pw15[157]ou)([0-9A-Za-z]+/[0-9A-F]{2})" + Q, rl):
+                if day not in c or len(c) < 14 or not c[12:14].isdigit(): continue
+                pl = PLACE.get(c[2:4]); rno = int(c[12:14])
+                if pl: names.setdefault((pl, rno), {})[kind] = kind + c
+        print(now().strftime('%H:%M'), '開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), '／開催のページ', len(orl), '（日付の入ったもの', len([c for c in orl if day in c]), '）', flush=True)
+        if not names:
+            t = re.search(r'<title>(.*?)</title>', top, re.S)
+            print('  手がかり：上のページ', len(top), '字・題', (t.group(1).strip()[:60] if t else '無し'), '・pw15 の名前', sorted(set(re.findall(r"pw15o\w{2}[0-9A-Za-z]*/[0-9A-F]{2}", top)))[:12], flush=True)
+            for cn, n, ks in seen[:3]: print('  手がかり：', cn, n, '字', ks, flush=True)
+            i = top.find('pw15orl'); print('  手がかり：pw15orl のまわり', repr(top[max(0, i - 80):i + 120]) if i >= 0 else 'pw15orl が無い', flush=True)
     lookup()
     rows = []
 
     def snap(k, tg):
         got = 0
-        if k not in names and time.time() - last[0] > 180: lookup()
+        if k not in names and time.time() - looked[0] > 180: lookup()
         for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide), ('pw157ou', parse_trio)):
             cn = names.get(k, {}).get(kind)
             if not cn: continue
