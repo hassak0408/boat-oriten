@@ -103,16 +103,21 @@ def main():
     rows = []
 
     def snap(k, tg):
-        got = 0
         if k not in names and time.time() - looked[0] > 180: lookup()
-        for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide), ('pw157ou', parse_trio)):
-            cn = names.get(k, {}).get(kind)
-            if not cn: continue
-            page = fetch(cn); t = now()
-            for x in (parse(page) if page else []):
-                b, n1, n2 = x[0], x[1], x[2]
-                n3, o, mx = (x[3], x[4], '') if b == '3連複' else ('', x[3], x[4])
-                rows.append(dict(取得=t.strftime('%Y-%m-%d %H:%M:%S'), 発走まで分=round((post[k] - t).total_seconds() / 60, 1) if k in post else '', 場=k[0], 年月日=day, R=k[1], 回目=str(tg), 賭式=b, 番号1=n1, 番号2=n2, 番号3=n3, オッズ=o, 最大=mx)); got += 1
+        def once():
+            got = 0
+            for kind, parse in (('pw151ou', parse_tan), ('pw155ou', parse_wide), ('pw157ou', parse_trio)):
+                cn = names.get(k, {}).get(kind)
+                if not cn: continue
+                page = fetch(cn); t = now()
+                for x in (parse(page) if page else []):
+                    b, n1, n2 = x[0], x[1], x[2]
+                    n3, o, mx = (x[3], x[4], '') if b == '3連複' else ('', x[3], x[4])
+                    rows.append(dict(取得=t.strftime('%Y-%m-%d %H:%M:%S'), 発走まで分=round((post[k] - t).total_seconds() / 60, 1) if k in post else '', 場=k[0], 年月日=day, R=k[1], 回目=str(tg), 賭式=b, 番号1=n1, 番号2=n2, 番号3=n3, オッズ=o, 最大=mx)); got += 1
+            return got
+        got = once()
+        if got == 0 and k in names and time.time() - looked[0] > 60:      # 名前が古くなった（発売中と発売後で名前が変わる：S3… と 10…）かもしれないので、拾い直して1回だけ読み直す
+            lookup(); got = once()
         done.add((k[0], k[1], str(tg))); print(k[0], k[1], 'R', tg, '分前の回', '行', got, flush=True)
 
     def save():
