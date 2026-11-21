@@ -63,9 +63,11 @@ def main():
     t0 = time.time(); od = f'{store}/jra/odds'; os.makedirs(od, exist_ok=True); path = f'{od}/{day}.csv.gz'; more = f'{od}/{day}.more'
     if os.path.exists(more): os.remove(more)
     cp = f'{store}/jra/card/{day}.csv.gz'
-    if not os.path.exists(cp): print('出馬表が無い（開催なし）'); return
-    C = pd.read_csv(cp, dtype=str, keep_default_na=False)[['場', 'R', '発走']].drop_duplicates(['場', 'R'])
-    post = {(p, int(r)): dt.datetime.strptime(day + t.zfill(4), '%Y%m%d%H%M').replace(tzinfo=JST) for p, r, t in zip(C['場'], C['R'], C['発走']) if t}
+    if not os.path.exists(cp) and not test: print('出馬表が無い（開催なし）'); return
+    if os.path.exists(cp):
+        C = pd.read_csv(cp, dtype=str, keep_default_na=False)[['場', 'R', '発走']].drop_duplicates(['場', 'R'])
+        post = {(p, int(r)): dt.datetime.strptime(day + t.zfill(4), '%Y%m%d%H%M').replace(tzinfo=JST) for p, r, t in zip(C['場'], C['R'], C['発走']) if t}
+    else: post = {}; print('出馬表がまだ無い（試しなので、名前の拾い方だけ見る）')
     old = pd.read_csv(path, dtype=str, keep_default_na=False) if os.path.exists(path) else None
     done = set(zip(old['場'], old['R'].astype(int), old['回目'])) if old is not None else set()
     now = lambda: dt.datetime.now(JST)
@@ -89,6 +91,9 @@ def main():
                 pl = PLACE.get(c[2:4]); rno = int(c[12:14])
                 if pl: names.setdefault((pl, rno), {})[kind] = kind + c
         print(now().strftime('%H:%M'), '開催のページから拾ったレース', len(names), '／出馬表のレース', len(post), '／開催のページ', len(orl), '（日付の入ったもの', len([c for c in orl if day in c]), '）', flush=True)
+        if test:      # 11/21 の昼までの拾い方（引用符は ' だけ、名前は数字＋日付＋Z）でなら何レース拾えたか（どこが合わなかったかを見る）
+            o1 = re.findall(r"'(pw15orl\d+%s/[0-9A-F]{2})'" % day, top); o2 = sum(len(re.findall(r"'(pw15[157]ou)(\d+%sZ(?:99)?/[0-9A-F]{2})'" % day, fetch(c) or '')) for c in o1[:1])
+            print('  前の拾い方なら：開催のページ', len(o1), '・はじめのページの中のオッズのページ', o2, '／今のページの例', sorted({k + c for v in list(names.values())[:1] for k, c in [(kk, vv[len(kk):]) for kk, vv in v.items()]})[:3], flush=True)
         if not names:
             t = re.search(r'<title>(.*?)</title>', top, re.S)
             print('  手がかり：上のページ', len(top), '字・題', (t.group(1).strip()[:60] if t else '無し'), '・pw15 の名前', sorted(set(re.findall(r"pw15o\w{2}[0-9A-Za-z]*/[0-9A-F]{2}", top)))[:12], flush=True)
