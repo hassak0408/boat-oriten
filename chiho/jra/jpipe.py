@@ -61,7 +61,7 @@ if AIT:
     if AIT.get('V'): H, _vf = jk_elo.add_after(H, KEY); ADDF += _vf
     log('相手の材料', len(ADDF), '今日の馬で点数のある割合', round(float(H.loc[H['予測'], 'E馬'].notna().mean()), 3) if 'E馬' in H else '')
 ZF = _FX0.get('市場のずれ') or (_FX0.get('市場のずれ（試し）') if os.environ.get('PICKS_DIR') else None) or {}      # 検証計画「Z1の印」：しきいがあるときだけ型を出す（「試し」の値は jk_pipetest.py のときだけ）
-NEED = set(FE + FES + RELF + ADDF + ['齢', '間隔', '芝ダ変更', '距離差', '着率1', 'クラス差', '走数', '新馬'] + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離']
+NEED = set(FE + FES + RELF + ADDF + ['齢', '間隔', '芝ダ変更', '距離差', '着率1', 'クラス差', '走数', '新馬'] + KEY + ['年', '予測', '合わない', '3着内', '勝', '着', '先頭', '先行', '初角', 'n', '馬番', '馬名', '走数', '新馬', '前不利発走', '前不利疾病', '差', '距離', '先頭率5', '前ペース比', '初角率1', '着率1', '発走不利5', '前走数']
            + (['単勝オッズ'] if ZF else []))
 H = H[[c for c in H.columns if c in NEED]]; gc.collect()      # 使わない列を落としてメモリを空ける
 Y = int(today[:4])
@@ -220,8 +220,14 @@ for (place, rno), g in sorted(TE.groupby(['場', 'Ri']), key=lambda kv: (order.g
     _ix = lambda p: int(round(min(100.0, max(0.0, 50 + 10 / np.log(2) * np.log(max(float(p), 1e-4) * len(g))))))
     # タイムの指数（過去3走の平均と最高。その場・距離・馬場の勝ち馬の基準より1000mあたり何秒速いか）。ページで見やすい数に直す
     _tv = lambda r, c: None if c not in r or pd.isna(r[c]) else round(float(r[c]), 2)
+    def _tags(r):      # ページの足し（検証計画 JP2 を本番へ。見込みには使わない）：逃げ型・出遅れくせ・前走の展開の型
+        v = lambda c: (float(r[c]) if c in r and pd.notna(r[c]) else None)
+        pc, sh, ch = v('前ペース比'), v('初角率1'), v('着率1'); tp = ''
+        if pc is not None and sh is not None and ch is not None and ch <= 0.25:
+            tp = '前走は速い流れを差した' if (pc <= 0.953 and sh >= 0.7) else ('前走は遅い流れを前で粘った' if (pc >= 1.021 and sh <= 0.3) else '')
+        return dict(逃げ型=bool((v('先頭率5') or 0) >= 0.4), 出遅れくせ=bool((v('前走数') or 0) >= 5 and (v('発走不利5') or 0) >= 2), 展開型=tp)
     hs = [dict(p1=round(float(r['p1']), 5), **({'f': round(float(r['f']), 4)} if 'f' in r and r['f'] == r['f'] else {}), 順位=int(r['順位']), 馬番=int(r['馬番']), 馬名=r['馬名'], 指数=_ix(r['p1']), タイム平均=_tv(r, '指数平均3'), タイム最高=_tv(r, '指数最高3'), 三着内=round(float(r['p3']) * 100), 一着=round(float(r['p1']) * 100), 脚質=r['脚質'], 印=r['印'],
-               不利明け=r['不利明け'], 向き=r['向き'], 型=r['型'], 連対の素=round(float(r['p2素']) * 100, 1), **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
+               不利明け=r['不利明け'], 向き=r['向き'], 型=r['型'], **_tags(r), 連対の素=round(float(r['p2素']) * 100, 1), **({'連対': round(float(r['p2']) * 100)} if RCAL else {})) for _, r in g.iterrows()]
     _pc = lambda h: f"（連対{h['連対']}%・1着{h['一着']}%）" if '連対' in h else f"（{h['一着']}%）"
     tp = top_pairs(g)
     wp = jk_wide.top_wide(g['馬番'].astype(int).values, g['p1'].values, WCAL) if WCAL else []      # ワイドの組の見込み（検証計画 WD3）

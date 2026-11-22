@@ -352,6 +352,9 @@ def build(root, card=None, verbose=True, years=None, ses=None, ped=False):
     # （K1）前走・過去3走の不利
     for c in ('被害', '発走', '疾病', '加害', 'あり'):
         H['前不利' + c] = g['不利' + c].shift(1)
+    # ページの足し（出遅れくせ。検証計画 JP2 を本番へ。見込みには使わない）：前の5走の発走の不利の注記の数と、前の走数
+    H['発走不利5'] = g['不利発走'].transform(lambda s: s.fillna(0).shift(1).rolling(5, min_periods=1).sum())
+    H['前走数'] = g.cumcount()
     H['過去3不利'] = pd.concat([g['不利あり'].shift(k) for k in (1, 2, 3)], axis=1).sum(axis=1, min_count=1)
     # （PASTM）前のレースの市場の評価（終わったレースのオッズ。そのレースのオッズは使わない）
     H['_lo'] = np.log(H['単勝オッズ'].clip(lower=1.0)); H['_pr'] = H['人気'] / H['n']
