@@ -1,0 +1,334 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 競馬場で片手で見る出馬表。レースごとのカード、馬は評価の順。数字は等幅で縦にそろえる */
+:root {
+  --bg: #f3f5f1; --card: #ffffff; --ink: #18211d; --muted: #5b6862; --line: #dce3de;
+  --turf: #2a6e4c; --turf-soft: #dcebe2; --dirt: #8b5a2b; --dirt-soft: #f1e4d6;
+  --flag: #a3570f; --flag-soft: #fbe9d2; --bar: #2a6e4c; --bar-bg: #e7ece8; --past: 0.45;
+  --ace: #c62828; --ace-soft: #fdecea; --cut: #18211d;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --card: #17201b; --ink: #e4ebe7; --muted: #98a69f; --line: #26322c;
+  --turf: #6cc796; --turf-soft: #1d3428; --dirt: #d9a26b; --dirt-soft: #3a2a1b;
+  --flag: #f0b062; --flag-soft: #3a2a14; --bar: #57b583; --bar-bg: #222d27; --ace: #ff7a70; --ace-soft: #3a1d1b; --cut: #e4ebe7; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --card: #17201b; --ink: #e4ebe7; --muted: #98a69f; --line: #26322c;
+  --turf: #6cc796; --turf-soft: #1d3428; --dirt: #d9a26b; --dirt-soft: #3a2a1b;
+  --flag: #f0b062; --flag-soft: #3a2a14; --bar: #57b583; --bar-bg: #222d27; --ace: #ff7a70; --ace-soft: #3a1d1b; --cut: #e4ebe7; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.wrap { max-width: 760px; margin: 0 auto }
+header.top { padding-block: 18px 6px }
+h1 { font-size: 1.25rem; margin: 0; text-wrap: balance; letter-spacing: .02em }
+.sub { color: var(--muted); font-size: .82rem; margin-top: 2px }
+details.how { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px }
+details.how summary { cursor: pointer; font-weight: 700; font-size: .9rem }
+details.how ul { margin: 8px 0 2px; padding-left: 1.2em; color: var(--muted); font-size: .85rem }
+details.how li + li { margin-top: 4px }
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; gap: 6px; padding-block: 10px; overflow-x: auto }
+nav.tabs button { font: inherit; font-weight: 700; font-size: .9rem; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 14px; cursor: pointer; white-space: nowrap }
+nav.tabs button[aria-pressed="true"] { background: var(--turf); border-color: var(--turf); color: var(--card) }
+nav.tabs button:focus-visible, .race summary:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px }
+.list { display: flex; flex-direction: column; gap: 12px }
+.race { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; scroll-margin-top: 64px }
+/* 右下の「次のレースへ」（いまの時刻のレースまで飛ぶ） */
+.gonow { position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  font: inherit; font-weight: 700; font-size: .9rem; background: var(--turf); color: var(--card); border: 0; border-radius: 999px;
+  padding: 11px 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, .28); cursor: pointer; white-space: nowrap }
+.gonow:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
+.race.past { opacity: var(--past) }
+.race.next { border-color: var(--turf); box-shadow: 0 0 0 1px var(--turf) }
+.rh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--line) }
+.rh .no { font-family: var(--f-num); font-weight: 600; font-size: 1.05rem }
+.rh .t { font-family: var(--f-num); color: var(--muted); font-size: .9rem }
+.rh .nm { font-weight: 700; min-width: 0 }
+.rh .cond { font-size: .78rem; padding: 1px 7px; border-radius: 6px; font-weight: 700 }
+.cond.turf { background: var(--turf-soft); color: var(--turf) }
+.cond.dirt { background: var(--dirt-soft); color: var(--dirt) }
+.rh .warn { font-size: .76rem; color: var(--flag); font-weight: 700 }
+.rh .nextlabel { font-size: .74rem; font-weight: 700; color: var(--turf); letter-spacing: .04em }
+/* 馬の行：スマホでは1行目に馬名と印、2行目に棒と数字（馬名が細切れにならないように）。広い画面では1行に並べる */
+.hr { display: grid; grid-template-columns: 1.7rem 2.1rem minmax(0, 1fr); column-gap: 8px; row-gap: 3px; align-items: center;
+  padding: 7px 12px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums }
+.hr .rk { grid-row: 1 / span 2; font-family: var(--f-num); color: var(--muted); text-align: right }
+.hr .um { grid-row: 1 / span 2; font-family: var(--f-num); font-weight: 600; text-align: right }
+.hr .hn { grid-column: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0 }
+.hr .hn .n { font-weight: 700; overflow-wrap: anywhere }
+.hr .st { grid-column: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 6px; align-items: center }
+.hr .bar i { display: none }
+.hr .bar { justify-content: flex-end }
+.hr .tv { font-family: var(--f-num); text-align: right; font-weight: 600 }
+.hr .p1 { font-family: var(--f-num); text-align: right; color: var(--muted) }
+.hr.hd { padding-block: 5px 3px; font-size: .7rem; color: var(--muted); letter-spacing: .04em; border-top: 0; white-space: nowrap }
+.hr.hd .rk, .hr.hd .um, .hr.hd .p1 { font-family: inherit; font-weight: 400; grid-row: auto }
+.hr.hd .hn { display: none }
+.hr.hd .st { grid-row: 1 }
+.hr.hd .st > span { text-align: right; font-size: .64rem; letter-spacing: 0 }
+.hr.top3 .um, .hr.top3 .hn .n { color: var(--ink) }
+.hr.low { color: var(--muted) }
+.hr.low .hn .n { font-weight: 400 }
+@media (max-width: 360px) {      /* 小さいスマホ：列と字を詰める */
+  .hr { grid-template-columns: 1.4rem 2rem minmax(0, 1fr); column-gap: 6px; padding-inline: 8px }
+  .hr .st { column-gap: 4px }
+  .hr .p1, .hr .tv, .bar span { font-size: .84rem }
+}
+@media (min-width: 600px) {
+  .hr { grid-template-columns: 1.7rem 2.1rem minmax(9rem, 1fr) minmax(330px, 1.5fr) }
+  .hr .rk, .hr .um { grid-row: auto }
+  .hr .st { grid-column: 4; grid-template-columns: minmax(96px, 1.6fr) repeat(4, 3.4rem) }
+  .hr .bar i { display: block }
+  .hr .bar { justify-content: flex-start }
+  .hr.hd .st > span:first-child { text-align: left }
+  .hr.hd .hn { display: block; grid-column: 3 }
+}
+.bar { display: flex; align-items: center; gap: 6px }
+.bar i { display: block; height: 8px; border-radius: 4px; background: var(--bar-bg); flex: 1; position: relative; overflow: hidden }
+.bar i b { position: absolute; inset: 0 auto 0 0; background: var(--bar); border-radius: 4px }
+.bar span { font-family: var(--f-num); font-size: .95rem; font-weight: 600; width: 2em; text-align: right }
+/* 数字の切りかえ（割り振り／来る見込み） */
+.mode { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); padding-bottom: 8px }
+.mode button { font: inherit; font-size: .8rem; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: 3px 10px; cursor: pointer }
+.mode button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--card) }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px }
+.tag { font-size: .7rem; padding: 0 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap }
+.tag.run { border-color: var(--turf); color: var(--turf) }
+.tag.flag { background: var(--flag-soft); border-color: var(--flag); color: var(--flag); font-weight: 700 }
+.tag.up { background: var(--turf-soft); border-color: var(--turf); color: var(--turf); font-weight: 700 }
+.tag.down { border-style: dashed }
+.pairs { padding: 8px 12px 10px; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 4px 12px }
+.pairs b { font-family: var(--f-num); color: var(--ink); font-weight: 600 }
+.empty { color: var(--muted); padding: 20px 4px }
+/* 抜けて強い馬：赤い帯と印。線：3着内の見込みが20ポイント以上離れた所。おすすめ：当たりやすい組（得をする組ではない） */
+.hr.ace { background: var(--ace-soft); box-shadow: inset 4px 0 0 var(--ace) }
+.hr.ace .hn .n { color: var(--ace) }
+.tag.ace { background: var(--ace); border-color: var(--ace); color: var(--card); font-weight: 700 }
+.rh .acelabel { font-size: .76rem; font-weight: 700; color: var(--card); background: var(--ace); border-radius: 6px; padding: 1px 7px }
+.cutline { display: flex; align-items: center; gap: 8px; padding: 1px 12px 2px; border-top: 3px solid var(--cut); font-size: .7rem; font-weight: 700; color: var(--ink); letter-spacing: .04em }
+.cutline + .hr { border-top: 0 }
+.rec { margin: 8px 12px 2px; padding: 7px 10px; border: 1.5px solid var(--turf); border-radius: 8px; background: var(--turf-soft); font-size: .88rem; display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline }
+.rec .lb { font-weight: 700; color: var(--turf) }
+.rec b { font-family: var(--f-num); font-weight: 600 }
+.pairs .osu { font-size: .66rem; font-weight: 700; color: var(--turf); border: 1px solid var(--turf); border-radius: 4px; padding: 0 4px; margin-left: 4px; vertical-align: 1px }
+.ov { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px }
+.ov .ovh { font-weight: 700; font-size: .9rem; margin-bottom: 4px }
+.ov .ovl { display: flex; flex-direction: column; gap: 4px }
+.ov button { font: inherit; font-size: .84rem; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 5px 0 2px; color: var(--ink); cursor: pointer; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline }
+.ov button:first-child { border-top: 0 }
+.ov button .k { font-family: var(--f-num); font-weight: 600 }
+.ov button .a { color: var(--ace); font-weight: 700 }
+.ov button .w { color: var(--turf); font-weight: 700 }
+.ov button:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px }
+/* 前走の展開の型・展開予想・短評（検証計画 JP2） */
+.tag.pg { border-color: var(--turf); color: var(--turf) }
+.tag.pl { border-color: var(--flag); color: var(--flag); border-style: dashed }
+.memo { padding: 8px 12px 10px; border-top: 1px solid var(--line); font-size: .86rem; line-height: 1.6 }
+.memo p { margin: 0 }
+.memo p + p { margin-top: 4px }
+.memo b { color: var(--turf); margin-right: 6px }
+@media (prefers-reduced-motion: no-preference) { nav.tabs button { transition: background .15s, color .15s } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>__TITLE__</h1>
+    <div class="sub" id="made"></div>
+    <details class="how">
+      <summary>見方</summary>
+      <ul>
+        <li><b>11/14から新しいAIです。</b>材料に血統（父・母の父・兄弟の成績）と、レースの中での相手との差を足し、3着内には「着差を学ぶモデル」も足しました。2021〜26年の確かめで、1着・3着内とも両方の期間で当たり方が良くなっています（それでも人気のほうがよく当たります）。あわせて、オッズとくらべた「市場より来やすい型／来にくい型」の印を付けました（下の説明）。</li>
+        <li><b>11/21から材料を足しました。</b>「どんな相手に勝ったか・負けたか」から作る強さの点数と、「前走でいっしょに走った馬が、そのあとどうだったか」です。2021〜26年の確かめで、1着・3着内とも両方の期間で当たり方が良くなりました（1番手の1着率 30.6%・29.2%→30.8%・29.7%。1番人気は33〜34%）。</li>
+        <li><b>騎手の話</b>（2021〜26年の確かめ）：三浦皇成騎手の芝は、3着内は人気どおりでも、1着は人気の8割ほどです（1着に置くより2〜3着に置く向き）。北村友一騎手の新馬戦は、1着が人気の1.6倍ほどでした（6年で242騎乗と少ないので目安）。SNSで言われる騎手の得意・不得意を51個確かめて、人気より当たっていたのは、この2つと西村淳也騎手の京都の芝（3着内が人気の1.2倍ほど、ぎりぎり）だけでした。</li>
+        <li>馬の走りと成績だけの評価です。人気・オッズは前走の分も見ていません。朝の出馬表で計算（馬体重・当日の馬場は入れていない）。</li>
+        <li><b>平均タイム</b>＝前の3走のタイム指数の平均。こちらはレースをまたいでくらべられる数。80＝その場・その距離の勝ち馬のふつうの速さで、1000mあたり0.1秒速いごとに＋1（1600mで1馬身ほど）。その日の馬場の速さも直してある。中央の、その場・芝ダ・距離・馬場の勝ち馬（2016〜2018年）が基準なので、同じ場の馬どうしでくらべるのがいちばん確か。数字が無い馬は、前の走りの記録がありません。</li>
+        <li><b>指数</b>＝AIの評価を1つの数にしたもの（棒の長さも同じ）。50がこのレースの平均の馬で、10上がるごとに1着の見込みが2倍（60＝平均の2倍、70＝4倍、40＝半分）。このレースの中でくらべる数で、ほかのレースの指数とはくらべられません。並びは3着内の見込みの順なので、1着の見込みから出す指数とは順が入れかわることがあります（頭向きの馬は指数が高め）。</li>
+        <li><span class="tag ace">抜けて強い</span>（赤い帯）＝1着の見込みが40%以上で、2位の馬の2倍以上の馬。これまで（2021〜26年）だいたい7レースに1回あり、実際の1着は47〜50%、3着内は79〜80%でした（見込みどおり）。</li>
+        <li><b>太い線</b>＝3着内の見込み（来る見込み）が、上の馬と20ポイント以上離れている所。これまで、線のすぐ上の馬は3着内に65%ほど来て、すぐ下の馬は38%ほどでした。3位の下に線があるレースで、上の3頭で1〜3着が決まったのは2割ほどです。</li>
+        <li><b>おすすめ</b>（緑の枠）＝ワイドの1組目の見込みが50%以上か、馬連の1組目が30%以上のとき。これまで、ワイドは的中58〜59%・回収87〜90%、馬連は的中39%・回収88〜90%でした。<b>当たりやすい組で、得をする組ではありません</b>（回収は100%に届いていない）。</li>
+        <li><span class="tag pl">前走は速い流れを差した</span>＝前走で、前半が速い流れ（これまでの速いほう4分の1）を後ろ（最初のコーナーで後ろ3割）から運び、上位（頭数の4分の1以内）に来た馬。これまで（2021〜26年）次のレースの1着は、AIの見込みの0.87〜0.91倍、オッズの0.82〜0.88倍でした（展開に恵まれた分、来にくかった）。<span class="tag pg">前走は遅い流れを前で粘った</span>＝前半がゆっくりの流れ（遅いほう4分の1）を前（前3割）で運んで上位に来た馬。次の1着はAIの1.06〜1.13倍、オッズの1.05〜1.09倍でした（恵まれただけではなかった）。どちらも数字を見たあとに見つけた型なので、これからのレースで確かめています。AIの数字には、まだ入れていません。</li>
+        <li><span class="tag pl">出遅れが続いている</span>＝前の5走のうち2回以上、JRAの注記に出遅れなど発走の不利が書かれた馬。これまで（2021〜26年）252頭で、単勝の回収は61%（95%の幅 33〜94%）でした。人気薄でも買いにくい型です。前走だけ出遅れた馬（<span class="tag flag">前走で出遅れなど</span>）は逆に、次は人気以上に来ていました（1着がオッズの見込みの1.2〜1.3倍。回収114%だが幅が65〜181%と広く、得とは言えない）。</li>
+        <li><b>展開予想・短評</b>は、朝の材料から自動で作った文です。展開予想は「よく逃げる馬」（前の5走のうち4割以上で、最初のコーナーを先頭で回った馬）の数から出し、これまでの実際の流れの割合を付けています。AIの数字は、この流れの見込みをもう入れています（前に行く馬・後ろの馬の来方は、どの流れでもAIの見込みどおりでした）。短評は、抜けて強い馬・線・型などをまとめたものです。</li>
+        <li>右下のボタンで、まだ発走していない次のレースまで飛びます（会場のタブを選んでいるときは、その場の次のレース）。</li>
+        <li><b>1着・連対・3着内</b>（「割り振り」のとき）＝レースの全部の馬で足すと、どれも100%になるように割り振った数。1着の席、1〜2着の2つの席、1〜3着の3つの席を、どの馬がどれだけ取りそうか。その馬が来る見込みそのものは「来る見込み」に切りかえると出ます（割り振りの連対のほぼ2倍、3着内のほぼ3倍）。連対の数字が「—」のときは、まだ出していません。</li>
+        <li>来る馬・勝つ馬は人気のほうがよく当たります。1番手が1番人気と同じなら信頼でき、違うときは1番人気を重く。</li>
+        <li>逃げ・先行＝前に行く見込み（人気薄でも前で運べる馬は残りやすい）。頭向き＝来れば半分以上は1着、ヒモ向き＝来ても2・3着が多い見込み。</li>
+        <li><span class="tag flag">前走で出遅れなど</span> <span class="tag flag">前走で疾病</span> は、これまで市場もAIも低く見がちだった馬（実際の1着は市場の見込みの1.3〜1.5倍）。買えば勝てるという決まりではありません。</li>
+        <li id="z1how" hidden><span class="tag up">市場より来やすい型</span> <span class="tag up">市場よりかなり来やすい型</span> <span class="tag down">市場より来にくい型</span>＝朝の材料だけで見た、オッズ（市場の見込み）とのずれの型（全部の馬の上位1割・上位5%・下位1割）。これまで（2021〜2026年）来やすい型は市場の見込みの1.2倍ほど1着に来て、来にくい型は0.76倍ほどでした。単勝の戻りは来やすい型で9割前後、来にくい型で4割弱で、買えば得という印ではありません（来にくい型を買う前にもう一度考える目印）。単勝が3〜6倍のときの来やすい型は、これまでいちばん戻りが良い所でした（これからのレースで数えています）。ワイドも同じで、AIの3着内の上位の馬どうしを組むとき、来にくい型の馬を軸にしても相手にしても戻りが下がりました（同じ順位のふつうの馬より約8〜9ポイント低い）。来やすい型を軸や相手にすると、ふつうより戻りが良くなりました（それでも9割前後）。AIの評価（指数・1着・3着内）には入れていません。</li>
+        <li>新馬戦はAIがいちばん弱いレース（走った記録が無く、血統と厩舎・騎手だけで見ている）。人気を重く見てください。</li>
+        <li>ワイド＝2頭とも3着内に来る見込みの高い組（2021〜2023年で合わせ、2024〜2026年で確かめた）。1位から相手へ流すときの的中の目安：相手1点で約28%、2点で約43%、3点で約51%、4点で約55%（1位の3着内が70%以上のレースなら 42%・59%・68%・72%）。相手は一覧の順（3着内の見込みの順）でよい。人気の順で同じ形に買うと的中は3〜5ポイント高く、払戻の割合はどちらもほぼ同じ（買えば得という意味ではない）。</li>
+        <li>馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた）。</li>
+      </ul>
+    </details>
+  </header>
+  <section class="ov" id="ov" hidden><div class="ovh">目立つレース（抜けて強い馬・おすすめの組）</div><div class="ovl" id="ovl"></div></section>
+  <nav class="tabs" id="tabs" aria-label="表示の切りかえ"></nav>
+  <div class="mode" id="mode">数字：<button type="button" data-m="share">割り振り（足して100%）</button><button type="button" data-m="prob">来る見込み</button></div>
+  <main class="list" id="list"></main>
+  <button type="button" class="gonow" id="gonow">次のレースへ</button>
+</div>
+
+<script>
+const DATA = __DATA__;
+const ORDER = ['札幌', '函館', '福島', '新潟', '東京', '中山', '中京', '京都', '阪神', '小倉'];
+const places = [...new Set(DATA['レース'].map(r => r['場']))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+const views = ['発走順', ...places];
+let view = '発走順';
+try { const v = localStorage.getItem('jra-rank-view'); if (v && views.includes(v)) view = v; } catch (e) {}
+if (DATA['レース'].some(r => r['馬'].some(h => h['型']))) document.getElementById('z1how').hidden = false;
+document.getElementById('made').textContent = '計算した時刻 ' + DATA['作った時刻'] + '・' + DATA['レース'].length + 'レース（障害は除く）';
+
+let mode = 'share';
+try { const m = localStorage.getItem('jra-rank-mode'); if (m === 'share' || m === 'prob') mode = m; } catch (e) {}
+document.querySelectorAll('#mode button').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; try { localStorage.setItem('jra-rank-mode', mode); } catch (e) {} render(); }));
+// 足して100にそろえる（大きい余りから1ずつ足す）。どれかが無いときは null
+function to100(vals) {
+  if (vals.some(v => v == null)) return vals.map(() => null);
+  const t = vals.reduce((a, b) => a + b, 0); if (!t) return vals.map(() => 0);
+  const raw = vals.map(v => v * 100 / t), fl = raw.map(Math.floor); let left = 100 - fl.reduce((a, b) => a + b, 0);
+  raw.map((v, i) => [v - fl[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { fl[i]++; left--; } });
+  return fl;
+}
+// 指数（ファイルに無いときは1着の見込みから出す。50＝平均の馬、10で2倍）
+function idxOf(h, n) { if (h['指数'] != null) return h['指数']; const p = Math.max(h['一着'], 0.5) / 100; return Math.round(Math.min(100, Math.max(0, 50 + 10 / Math.LN2 * Math.log(p * n)))); }
+const tabs = document.getElementById('tabs');
+views.forEach(v => {
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'tab-' + v; b.textContent = v;
+  b.addEventListener('click', () => { view = v; try { localStorage.setItem('jra-rank-view', v); } catch (e) {} render(); });
+  tabs.appendChild(b);
+});
+
+// 抜けて強い・線・おすすめ（検証計画 JP1）。抜けて強い＝1着の見込み40%以上で2位の2倍以上。線＝3着内の見込みの順で、上と20ポイント以上の差（5位の下まで）。
+// おすすめ＝ワイドの1組目の見込み50%以上・馬連の1組目30%以上
+function feats(r) {
+  const hs = r['馬'], p1 = hs.map(h => h['p1'] != null ? h['p1'] : h['一着'] / 100);
+  const o1 = p1.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
+  const ace = (o1.length >= 2 && o1[0][0] >= 0.40 && o1[0][0] >= 2 * o1[1][0]) ? o1[0][1] : -1;
+  const ord = hs.map((h, i) => i).sort((a, b) => hs[a]['順位'] - hs[b]['順位']); const cuts = new Map();
+  for (let k = 0; k < Math.min(5, ord.length - 1); k++) { const d = hs[ord[k]]['三着内'] - hs[ord[k + 1]]['三着内']; if (d >= 20) cuts.set(ord[k + 1], d); }
+  const w1 = (r['ワイド'] || [])[0], u1 = (r['馬連'] || [])[0];
+  return { ace, cuts, recW: !!(w1 && w1['見込み'] >= 50), recU: !!(u1 && u1['見込み'] >= 30) };
+}
+function overview() {
+  const items = DATA['レース'].map(r => [r, feats(r)]).filter(([r, F]) => F.ace >= 0 || F.recW || F.recU)
+    .sort((a, b) => (minutes(a[0]['発走']) ?? 9999) - (minutes(b[0]['発走']) ?? 9999));
+  const box = document.getElementById('ov'); if (!items.length) { box.hidden = true; return; }
+  box.hidden = false;
+  document.getElementById('ovl').innerHTML = items.map(([r, F]) => `<button type="button" data-go="r-${esc(r['場'])}-${r['R']}"><span class="k">${esc(r['場'])}${r['R']}R ${esc(r['発走'])}</span>` +
+    (F.ace >= 0 ? `<span class="a">抜けて強い ${r['馬'][F.ace]['馬番']}番 ${esc(r['馬'][F.ace]['馬名'])}</span>` : '') +
+    (F.recW ? `<span class="w">ワイド ${esc(r['ワイド'][0]['組'])}（${r['ワイド'][0]['見込み']}%）</span>` : '') +
+    (F.recU ? `<span class="w">馬連 ${esc(r['馬連'][0]['組'])}（${r['馬連'][0]['見込み']}%）</span>` : '') + `</button>`).join('');
+  document.querySelectorAll('#ovl button').forEach(b => b.addEventListener('click', () => {
+    if (view !== '発走順') { view = '発走順'; try { localStorage.setItem('jra-rank-view', view); } catch (e) {} render(); }
+    const el = document.getElementById(b.dataset.go); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+}
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function minutes(hhmm) { const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; }
+function nowMinutesJST() {
+  const d = new Date(); const jst = new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000);
+  const ymd = jst.getFullYear() * 10000 + (jst.getMonth() + 1) * 100 + jst.getDate();
+  return { ymd: String(ymd), min: jst.getHours() * 60 + jst.getMinutes() };
+}
+
+function raceCard(r, state) {
+  const sd = r['芝ダ'] === '芝' ? 'turf' : 'dirt';
+  const isNew = /新馬/.test(r['レース名'] || '');
+  const n = r['馬'].length;
+  const sh1 = to100(r['馬'].map(h => h['一着'])), sh2 = to100(r['馬'].map(h => h['連対'] ?? null)), sh3 = to100(r['馬'].map(h => h['三着内']));
+  const F = feats(r);
+  const ordIx = r['馬'].map((h, k) => k).sort((a, b) => r['馬'][a]['順位'] - r['馬'][b]['順位']);
+  const rows = ordIx.map(k => {
+    const h = r['馬'][k];
+    const tags = [];
+    // 平均タイム指数（過去3走）：80＝その場・距離の勝ち馬のふつうの速さ、1000mあたり0.1秒速いごとに＋1
+    const tv = h['タイム平均'] == null ? '—' : Math.round(80 + 10 * h['タイム平均']);
+    if (h['脚質']) tags.push(`<span class="tag run">${esc(h['脚質'])}</span>`);
+    if (h['向き']) tags.push(`<span class="tag">${esc(h['向き'])}</span>`);
+    if (h['印']) tags.push(`<span class="tag">${esc(h['印'])}</span>`);
+    if (h['不利明け']) h['不利明け'].split('・').forEach(t => tags.push(`<span class="tag flag">${esc(t)}</span>`));
+    if (h['型']) tags.push(`<span class="tag ${h['型'].includes('来やすい') ? 'up' : 'down'}">${esc(h['型'])}</span>`);
+    if (h['展開型']) tags.push(`<span class="tag ${h['展開型'].includes('粘った') ? 'pg' : 'pl'}">${esc(h['展開型'])}</span>`);
+    if (h['出遅れくせ']) tags.push('<span class="tag pl">出遅れが続いている</span>');
+    if (k === F.ace) tags.unshift('<span class="tag ace">抜けて強い</span>');
+    const cls = (h['順位'] <= 3 ? 'top3' : (h['三着内'] < 10 ? 'low' : '')) + (k === F.ace ? ' ace' : '');
+    const ix = idxOf(h, n);
+    const pct = v => v == null ? '—' : v + '%';
+    const [v1, v2, v3] = mode === 'share' ? [sh1[k], sh2[k], sh3[k]] : [h['一着'], h['連対'] ?? null, h['三着内']];
+    const cut = F.cuts.has(k) ? `<div class="cutline" role="separator">ここで差（3着内の来る見込み −${F.cuts.get(k)}）</div>` : '';
+    return cut + `<div class="hr ${cls}"><span class="rk">${h['順位']}</span><span class="um">${h['馬番']}</span>` +
+      `<div class="hn"><span class="n">${esc(h['馬名'])}</span>${tags.join('')}</div>` +
+      `<div class="st"><div class="bar"><i><b style="width:${ix}%"></b></i><span>${ix}</span></div>` +
+      `<span class="tv">${tv}</span><span class="p1">${pct(v1)}</span><span class="p1">${pct(v2)}</span><span class="p1">${pct(v3)}</span></div></div>`;
+  }).join('');
+  const wides = (r['ワイド'] || []).map((p, i) => `<span>${esc(p['組'])} <b>${p['見込み']}%</b>${i === 0 && F.recW ? '<span class="osu">おすすめ</span>' : ''}</span>`).join('');
+  const pairs = (r['馬連'] || []).map((p, i) => `<span>${esc(p['組'])} <b>${p['見込み']}%</b>${i === 0 && F.recU ? '<span class="osu">おすすめ</span>' : ''}</span>`).join('');
+  const rec = (F.recW || F.recU) ? `<div class="rec"><span class="lb">おすすめ</span>` +
+    (F.recW ? `<span>ワイド <b>${esc(r['ワイド'][0]['組'])}</b>（見込み ${r['ワイド'][0]['見込み']}%）</span>` : '') +
+    (F.recU ? `<span>馬連 <b>${esc(r['馬連'][0]['組'])}</b>（見込み ${r['馬連'][0]['見込み']}%）</span>` : '') + `</div>` : '';
+  const any3 = r['三組'] != null ? `<span>3組のどれか <b>${r['三組']}%</b></span>` : '';
+  return `<article class="race ${state}" id="r-${esc(r['場'])}-${r['R']}">` +
+    `<div class="rh"><span class="no">${esc(r['場'])}${r['R']}R</span><span class="t">${esc(r['発走'])}</span>` +
+    `<span class="nm">${esc(r['レース名'])}${r['格'] ? '（' + esc(r['格']) + '）' : ''}</span>` +
+    `<span class="cond ${sd}">${esc(r['芝ダ'])}${esc(r['距離'])}m</span><span class="t">${r['頭数']}頭</span>` +
+    (isNew ? '<span class="warn">新馬：人気を重く</span>' : '') +
+    (F.ace >= 0 ? `<span class="acelabel">抜けて強い ${r['馬'][F.ace]['馬番']}番</span>` : '') +
+    (state === 'next' ? '<span class="nextlabel">次のレース</span>' : '') + `</div>` +
+    rec + `<div class="hr hd"><span class="rk">順</span><span class="um">馬番</span><div class="hn">馬名</div>` +
+    `<div class="st"><span>指数</span><span>平均タイム</span><span class="p1">1着</span><span class="p1">連対</span><span class="p1">3着内</span></div></div>${rows}` +
+    (pairs ? `<div class="pairs"><span>馬連</span>${pairs}${any3}</div>` : '') +
+    (wides ? `<div class="pairs"><span>ワイド</span>${wides}</div>` : '') +
+    ((r['展開予想'] || r['短評']) ? `<div class="memo">` + (r['展開予想'] ? `<p><b>展開予想</b>${esc(r['展開予想'])}</p>` : '') + (r['短評'] ? `<p><b>短評</b>${esc(r['短評'])}</p>` : '') + `</div>` : '') + `</article>`;
+}
+
+function render() {
+  views.forEach(v => document.getElementById('tab-' + v).setAttribute('aria-pressed', String(v === view)));
+  document.querySelectorAll('#mode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === mode)));
+  let rs = DATA['レース'].slice();
+  if (view === '発走順') rs.sort((a, b) => (minutes(a['発走']) ?? 9999) - (minutes(b['発走']) ?? 9999));
+  else rs = rs.filter(r => r['場'] === view).sort((a, b) => a['R'] - b['R']);
+  const now = nowMinutesJST(); const today = now.ymd === DATA['日付'];
+  let nextKey = null;
+  if (today) { const up = DATA['レース'].filter(r => (minutes(r['発走']) ?? -1) >= now.min).sort((a, b) => minutes(a['発走']) - minutes(b['発走'])); if (up.length) nextKey = up[0]['場'] + up[0]['R']; }
+  const list = document.getElementById('list');
+  list.innerHTML = rs.length ? rs.map(r => {
+    const t = minutes(r['発走']); let st = '';
+    if (today && t != null && t < now.min) st = 'past';
+    if (nextKey === r['場'] + r['R']) st = 'next';
+    return raceCard(r, st);
+  }).join('') : '<p class="empty">レースがありません。</p>';
+  goLabel();
+}
+let lastNext = null;
+function nextKeyNow() {
+  const now = nowMinutesJST(); if (now.ymd !== DATA['日付']) return 'x';
+  const up = DATA['レース'].filter(r => (minutes(r['発走']) ?? -1) >= now.min).sort((a, b) => minutes(a['発走']) - minutes(b['発走']));
+  return up.length ? up[0]['場'] + up[0]['R'] : 'done';
+}
+// 右下のボタン：今の表示の中で、まだ発走していない最初のレースまで飛ぶ（全部終わったら最後のレース）
+function goLabel() {      // 今の表示（発走順か、その場のタブ）の中の次のレース
+  const b = document.getElementById('gonow'); if (!b) return;
+  const now = nowMinutesJST();
+  if (now.ymd !== DATA['日付']) { b.textContent = 'はじめのレースへ'; return; }
+  const up = DATA['レース'].filter(r => (view === '発走順' || r['場'] === view) && (minutes(r['発走']) ?? -1) >= now.min)
+    .sort((a, c) => minutes(a['発走']) - minutes(c['発走']));
+  b.textContent = up.length ? `次 ${up[0]['場']}${up[0]['R']}R ${up[0]['発走']} ↓` : '最後のレースへ';
+}
+document.getElementById('gonow').addEventListener('click', () => {
+  const k = nextKeyNow(); if (k !== lastNext) { lastNext = k; render(); goLabel(); }
+  const cards = [...document.querySelectorAll('#list .race')];
+  const target = cards.find(c => !c.classList.contains('past')) || cards[cards.length - 1];
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+overview(); render(); lastNext = nextKeyNow(); goLabel();
+setInterval(() => { const k = nextKeyNow(); if (k !== lastNext) { lastNext = k; render(); goLabel(); } }, 60000);      // 次のレースが変わったときだけ描き直す
+</script>
+
+</body></html>
