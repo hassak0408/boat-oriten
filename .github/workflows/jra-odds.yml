@@ -53,13 +53,19 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           MORE=0; if [ -f "jra/odds/$DAY.more" ]; then MORE=1; rm -f "jra/odds/$DAY.more"; fi
           echo "MORE=$MORE" >> "$GITHUB_ENV"
-          git add jra/odds 2>/dev/null || true
-          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
-          git commit -q -m "中央競馬の締切前のオッズ $DAY"
-          for i in 1 2 3 4 5; do
-            if git push origin HEAD:main; then exit 0; fi
-            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
-            sleep 5
+          # 2026-11-22：浅く取ったまま5時間読むあいだに、記録の置き場に6回以上の更新があると、rebase が元をたどれず失敗し、朝の分を失った。
+          # → 記録のファイルだけを取っておき、毎回いちばん新しい置き場に重ねて、そのファイルだけを載せる（ほかの人の更新は消さない）
+          F="jra/odds/$DAY.csv.gz"
+          if [ ! -f "$F" ]; then echo "記録なし"; exit 0; fi
+          cp "$F" /tmp/odds_keep.csv.gz
+          for i in 1 2 3 4 5 6; do
+            git fetch -q --depth 1 origin main && git reset -q --hard origin/main
+            mkdir -p jra/odds && cp /tmp/odds_keep.csv.gz "$F"
+            git add "$F"
+            if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+            git commit -q -m "中央競馬の締切前のオッズ $DAY"
+            if git push -q origin HEAD:main; then echo "保存した"; exit 0; fi
+            sleep $((5 * i))
           done
           echo "保存できなかった"; exit 1
       - name: 続きを動かす
