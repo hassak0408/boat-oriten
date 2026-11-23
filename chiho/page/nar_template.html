@@ -1,0 +1,283 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 競馬場で片手で見る出馬表。レースごとのカード、馬は評価の順。数字は等幅で縦にそろえる */
+:root {
+  --bg: #f3f5f1; --card: #ffffff; --ink: #18211d; --muted: #5b6862; --line: #dce3de;
+  --turf: #2a6e4c; --turf-soft: #dcebe2; --dirt: #8b5a2b; --dirt-soft: #f1e4d6;
+  --flag: #a3570f; --flag-soft: #fbe9d2; --bar: #2a6e4c; --bar-bg: #e7ece8; --past: 0.45;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --card: #17201b; --ink: #e4ebe7; --muted: #98a69f; --line: #26322c;
+  --turf: #6cc796; --turf-soft: #1d3428; --dirt: #d9a26b; --dirt-soft: #3a2a1b;
+  --flag: #f0b062; --flag-soft: #3a2a14; --bar: #57b583; --bar-bg: #222d27; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --card: #17201b; --ink: #e4ebe7; --muted: #98a69f; --line: #26322c;
+  --turf: #6cc796; --turf-soft: #1d3428; --dirt: #d9a26b; --dirt-soft: #3a2a1b;
+  --flag: #f0b062; --flag-soft: #3a2a14; --bar: #57b583; --bar-bg: #222d27; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.wrap { max-width: 760px; margin: 0 auto }
+header.top { padding-block: 18px 6px }
+h1 { font-size: 1.25rem; margin: 0; text-wrap: balance; letter-spacing: .02em }
+.sub { color: var(--muted); font-size: .82rem; margin-top: 2px }
+details.how { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px }
+details.how summary { cursor: pointer; font-weight: 700; font-size: .9rem }
+details.how ul { margin: 8px 0 2px; padding-left: 1.2em; color: var(--muted); font-size: .85rem }
+details.how li + li { margin-top: 4px }
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; gap: 6px; padding-block: 10px; overflow-x: auto }
+nav.tabs button { font: inherit; font-weight: 700; font-size: .9rem; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 14px; cursor: pointer; white-space: nowrap }
+nav.tabs button[aria-pressed="true"] { background: var(--turf); border-color: var(--turf); color: var(--card) }
+nav.tabs button:focus-visible, .race summary:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px }
+.list { display: flex; flex-direction: column; gap: 12px }
+.race { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; scroll-margin-top: 64px }
+/* 右下の「次のレースへ」（いまの時刻のレースまで飛ぶ） */
+.gonow { position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  font: inherit; font-weight: 700; font-size: .9rem; background: var(--turf); color: var(--card); border: 0; border-radius: 999px;
+  padding: 11px 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, .28); cursor: pointer; white-space: nowrap }
+.gonow:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
+.race.past { opacity: var(--past) }
+.race.next { border-color: var(--turf); box-shadow: 0 0 0 1px var(--turf) }
+.rh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--line) }
+.rh .no { font-family: var(--f-num); font-weight: 600; font-size: 1.05rem }
+.rh .t { font-family: var(--f-num); color: var(--muted); font-size: .9rem }
+.rh .nm { font-weight: 700; min-width: 0 }
+.rh .cond { font-size: .78rem; padding: 1px 7px; border-radius: 6px; font-weight: 700 }
+.cond.turf { background: var(--turf-soft); color: var(--turf) }
+.cond.dirt { background: var(--dirt-soft); color: var(--dirt) }
+.rh .warn { font-size: .76rem; color: var(--flag); font-weight: 700 }
+.rh .nextlabel { font-size: .74rem; font-weight: 700; color: var(--turf); letter-spacing: .04em }
+/* 馬の行：スマホでは1行目に馬名と印、2行目に棒と数字（馬名が細切れにならないように）。広い画面では1行に並べる */
+.hr { display: grid; grid-template-columns: 1.7rem 2.1rem minmax(0, 1fr); column-gap: 8px; row-gap: 3px; align-items: center;
+  padding: 7px 12px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums }
+.hr .rk { grid-row: 1 / span 2; font-family: var(--f-num); color: var(--muted); text-align: right }
+.hr .um { grid-row: 1 / span 2; font-family: var(--f-num); font-weight: 600; text-align: right }
+.hr .hn { grid-column: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0 }
+.hr .hn .n { font-weight: 700; overflow-wrap: anywhere }
+.hr .st { grid-column: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 6px; align-items: center }
+.hr .bar i { display: none }
+.hr .bar { justify-content: flex-end }
+.hr .tv { font-family: var(--f-num); text-align: right; font-weight: 600 }
+.hr .p1 { font-family: var(--f-num); text-align: right; color: var(--muted) }
+.hr.hd { padding-block: 5px 3px; font-size: .7rem; color: var(--muted); letter-spacing: .04em; border-top: 0; white-space: nowrap }
+.hr.hd .rk, .hr.hd .um, .hr.hd .p1 { font-family: inherit; font-weight: 400; grid-row: auto }
+.hr.hd .hn { display: none }
+.hr.hd .st { grid-row: 1 }
+.hr.hd .st > span { text-align: right; font-size: .64rem; letter-spacing: 0 }
+.hr.top3 .um, .hr.top3 .hn .n { color: var(--ink) }
+.hr.low { color: var(--muted) }
+.hr.low .hn .n { font-weight: 400 }
+@media (max-width: 360px) {      /* 小さいスマホ：列と字を詰める */
+  .hr { grid-template-columns: 1.4rem 2rem minmax(0, 1fr); column-gap: 6px; padding-inline: 8px }
+  .hr .st { column-gap: 4px }
+  .hr .p1, .hr .tv, .bar span { font-size: .84rem }
+}
+@media (min-width: 600px) {
+  .hr { grid-template-columns: 1.7rem 2.1rem minmax(9rem, 1fr) minmax(330px, 1.5fr) }
+  .hr .rk, .hr .um { grid-row: auto }
+  .hr .st { grid-column: 4; grid-template-columns: minmax(96px, 1.6fr) repeat(4, 3.4rem) }
+  .hr .bar i { display: block }
+  .hr .bar { justify-content: flex-start }
+  .hr.hd .st > span:first-child { text-align: left }
+  .hr.hd .hn { display: block; grid-column: 3 }
+}
+.bar { display: flex; align-items: center; gap: 6px }
+.bar i { display: block; height: 8px; border-radius: 4px; background: var(--bar-bg); flex: 1; position: relative; overflow: hidden }
+.bar i b { position: absolute; inset: 0 auto 0 0; background: var(--bar); border-radius: 4px }
+.bar span { font-family: var(--f-num); font-size: .95rem; font-weight: 600; width: 2em; text-align: right }
+/* 数字の切りかえ（割り振り／来る見込み） */
+.mode { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); padding-bottom: 8px }
+.mode button { font: inherit; font-size: .8rem; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: 3px 10px; cursor: pointer }
+.mode button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--card) }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px }
+.tag { font-size: .7rem; padding: 0 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap }
+.tag.run { border-color: var(--turf); color: var(--turf) }
+.tag.s-nige { background: var(--turf); border-color: var(--turf); color: var(--card); font-weight: 700 }
+.tag.s-senko { border-color: var(--turf); color: var(--turf); font-weight: 700 }
+.tag.s-sashi { border-color: var(--dirt); color: var(--dirt) }
+.tag.s-oikomi { border-color: var(--line); color: var(--muted) }
+.rh .pace { font-size: .76rem; color: var(--muted) }
+.tag.flag { background: var(--flag-soft); border-color: var(--flag); color: var(--flag); font-weight: 700 }
+.tag.up { background: var(--turf-soft); border-color: var(--turf); color: var(--turf); font-weight: 700 }
+.tag.down { border-style: dashed }
+.pairs { padding: 8px 12px 10px; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 4px 12px }
+.pairs b { font-family: var(--f-num); color: var(--ink); font-weight: 600 }
+.empty { color: var(--muted); padding: 20px 4px }
+/* 昼の見直し（検証計画 EM1）：直したレースの印、馬体重の増減、朝からの変わり */
+.rh .mid { font-size: .74rem; font-weight: 700; color: var(--card); background: var(--turf); border-radius: 6px; padding: 1px 7px }
+.tag.wt { font-family: var(--f-num) }
+.tag.wt.plus { border-color: var(--flag); color: var(--flag) }
+.tag.wt.minus { border-color: var(--turf); color: var(--turf) }
+.hr .chg { font-size: .66rem; color: var(--muted); font-family: var(--f-num) }
+@media (prefers-reduced-motion: no-preference) { nav.tabs button { transition: background .15s, color .15s } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>__TITLE__</h1>
+    <div class="sub" id="made"></div>
+    <details class="how">
+      <summary>見方</summary>
+      <ul>
+        <li id="midhow" hidden><b>昼の見直し（11/23から）</b>：レースの1時間ほど前に出る馬体重と、その日の前のレースの結果から出す「内の有利さ」を入れて、まだ走っていないレースの数字を直しています（直したレースには「昼に見直し」と出ます）。2021〜26年の確かめで、2つの期間とも1着の当たり方が良くなりました。前走から4〜9kg増えた馬は1着の見込みを0.92倍、4〜9kg減った馬は1.11倍、その日の前のレースで内の馬がよく来ていれば内の馬を上げています。数字の下の小さい字は朝の数字からの変わりです。</li>
+        <li><b>11/16から材料を足しました。</b>「どんな相手に勝ったか・負けたか」から作る強さの点数と、「前走でいっしょに走った馬が、そのあとどうだったか」です。2021〜26年の確かめで、見込みの数字の確かさと上位3頭の3着内（59.4〜59.9%→59.9〜60.3%）が両方の期間で良くなりました。1番手の1着率（約40〜41%）はほとんど変わりません（1番人気は44〜45%）。</li>
+        <li>5場（盛岡・水沢・園田・姫路・笠松）の走りと成績から作った評価です。人気・オッズは見ていません。朝の出馬表で計算し、昼の見直しで馬体重と、その日の前のレースの結果を足しています。</li>
+        <li><b>平均タイム</b>＝前の3走のタイム指数の平均。こちらはレースをまたいでくらべられる数。80＝その場・その距離の勝ち馬のふつうの速さで、1000mあたり0.1秒速いごとに＋1（1600mで1馬身ほど）。その日の馬場の速さも直してある。地方は、5場とほかの地方の場の、その場・距離・馬場の勝ち馬（2016〜2019年）が基準なので、同じ場の馬どうしでくらべるのがいちばん確か。数字が無い馬は、前の走りの記録がありません。</li>
+        <li><b>指数</b>＝AIの評価を1つの数にしたもの（棒の長さも同じ）。50がこのレースの平均の馬で、10上がるごとに1着の見込みが2倍（60＝平均の2倍、70＝4倍、40＝半分）。このレースの中でくらべる数で、ほかのレースの指数とはくらべられません。並びは3着内の見込みの順なので、1着の見込みから出す指数とは順が入れかわることがあります（頭向きの馬は指数が高め）。</li>
+        <li>右下のボタンで、まだ発走していない次のレースまで飛びます（会場のタブを選んでいるときは、その場の次のレース）。</li>
+        <li><b>1着・連対・3着内</b>（「割り振り」のとき）＝レースの全部の馬で足すと、どれも100%になるように割り振った数。1着の席、1〜2着の2つの席、1〜3着の3つの席を、どの馬がどれだけ取りそうか。その馬が2着以内・3着以内に来る見込みそのものは「来る見込み」に切りかえると出ます（割り振りの連対のほぼ2倍、3着内のほぼ3倍）。</li>
+        <li>脚質：<span class="tag s-nige">逃げ</span> 先頭に立つ見込みがレースで一番（3割以上）、<span class="tag s-senko">先行</span> 最初の角で3番手以内の見込みが5割以上、<span class="tag s-sashi">差し</span> その見込みが2.5割以上か、前の3走の4角の位置が前から6割以内、<span class="tag s-oikomi">追込</span> それより後ろ。何もない馬は前の走りの記録がありません。逃げ馬は3着内によく来ますが、同じ人気の馬とくらべると残りやすいわけではありません（2021〜26年）。逃げ馬を軸にするなら、来やすい型の逃げ馬に絞ると、同じ人気より3着内に1.1倍ほど来ていました。</li>
+        <li>頭向き＝来れば半分以上は1着、ヒモ向き＝来ても2・3着が多い見込み。</li>
+        <li>「中央から初戦」などは5場で初めて走る馬。前の成績が少なく、見込みがぶれやすい馬です。「ほかの地方から初戦（大井）」のカッコは、来る前に走っていた場です。南関東などほかの場の成績も毎日取り込んで、評価に使っています。これまで（2021〜26年）、大井から来た馬はAIが低く見がちで（1着が見込みの1.2〜1.3倍）、浦和から来た馬は高く見がちでした（0.7〜0.9倍）。11/21から、その分を直しています（大井は1着×1.22・3着内×1.06、浦和は1着×0.83、船橋は3着内×1.07）。</li>
+        <li id="zhow" hidden><span class="tag up">市場より来やすい型</span> <span class="tag up">市場よりかなり来やすい型</span> <span class="tag down">市場より来にくい型</span>＝朝の材料だけで見た「人気とのずれ」の型（全部の馬の上位1割・上位5%・下位1割）。これまで（2021〜2026年）、同じ人気の順の馬にくらべて、来やすい型は1.3倍ほど1着に来て、来にくい型は0.35倍ほどでした。単勝の戻りは来やすい型で9割前後、来にくい型で3割弱で、買えば得という印ではありません（来にくい型を買う前にもう一度考える目印）。4〜6番人気の来やすい型は、これまでいちばん戻りが良い所でした（これからのレースで数えています）。断然の1番人気にも付きやすく、そのときは戻りは9割ほどです。ワイドでは、AIの上位の馬どうしを組むとき、相手に来にくい型の馬を入れると戻りが下がりました（同じ順位のふつうの馬より約14ポイント低い）。逆に来やすい型を軸や相手にすると、ふつうより戻りが良くなりました（それでも8〜9割）。AIの評価（指数・1着・3着内）には入れていません。10/25〜11/16 の締切前の単勝オッズとくらべても、印はオッズに無い分を持っていました（206レース）。</li>
+        <li><b>当日の馬体重</b>（窓口やパドックの掲示）：これまで（2021〜26年）、前走から4〜9kg増えた馬は、同じ人気の馬より来にくく、単勝の戻りは69%ほどでした（4〜9kg減った馬は81%ほど、増減3kg以内は76%ほど。どの期間でも同じ向き）。</li>
+        <li><b>締切前の表示から確定までのオッズ</b>（10/25〜11/17、195レース）：2分前ごろの表示から確定までに、当たった馬の単勝は平均7%ほど、馬複は11%ほど下がっていました。AIの見込みが上位の組の馬複は14%ほど、2〜3番人気で勝った馬の単勝は16%ほど下がり、1番人気で勝った馬はほとんど下がりません。最後の数分で、AIに近い見方の馬へお金が寄っていました。この一覧の回収の数字は、どれも確定の払戻で数えています。</li>
+        <li>ワイド＝2頭とも3着内に来る見込みの高い組（2021〜2023年で合わせ、2024〜2026年で確かめた）。1位から相手へ流すときの的中の目安：相手1点で約41%、2点で約58%、3点で約66%、4点で約70%（1位の3着内が70%以上のレースなら 49%・67%・75%・79%）。相手は一覧の順（3着内の見込みの順）でよい。人気の順で同じ形に買うと的中は3〜5ポイント高く、払戻の割合はどちらもほぼ同じ（買えば得という意味ではない）。</li>
+        <li>馬連＝1・2着に来る見込みの高い組（見込みは2021〜2023年で合わせ、2024〜2026年で確かめた）。</li>
+        <li>馬連の相手を2位と3位で迷ったら、連対の数字が高い方。たいていは2位のまま（逆になるのは20レースに1つほど）。逆のときは当たりが少し増える（14%→17%くらい）。回収率はほぼ同じで、買えば得という意味ではありません。</li>
+      </ul>
+    </details>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="表示の切りかえ"></nav>
+  <div class="mode" id="mode">数字：<button type="button" data-m="share">割り振り（足して100%）</button><button type="button" data-m="prob">来る見込み</button></div>
+  <main class="list" id="list"></main>
+  <button type="button" class="gonow" id="gonow">次のレースへ</button>
+</div>
+
+<script>
+const DATA = __DATA__;
+const ORDER = ['盛岡', '水沢', '園田', '姫路', '笠松', '名古屋', '佐賀'];
+const places = [...new Set(DATA['レース'].map(r => r['場']))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+const views = ['発走順', ...places];
+let view = '発走順';
+try { const v = localStorage.getItem('nar-rank-view'); if (v && views.includes(v)) view = v; } catch (e) {}
+if (DATA['レース'].some(r => r['馬'].some(h => h['型']))) document.getElementById('zhow').hidden = false;
+if (DATA['昼の見直し']) document.getElementById('midhow').hidden = false;
+document.getElementById('made').textContent = '計算した時刻 ' + DATA['作った時刻'] + (DATA['昼の見直し'] ? '・昼の見直し ' + DATA['昼の見直し']['時刻'] : '') + '・' + DATA['レース'].length + 'レース';
+
+let mode = 'share';
+try { const m = localStorage.getItem('nar-rank-mode'); if (m === 'share' || m === 'prob') mode = m; } catch (e) {}
+document.querySelectorAll('#mode button').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; try { localStorage.setItem('nar-rank-mode', mode); } catch (e) {} render(); }));
+// 足して100にそろえる（大きい余りから1ずつ足す）。どれかが無いときは null
+function to100(vals) {
+  if (vals.some(v => v == null)) return vals.map(() => null);
+  const t = vals.reduce((a, b) => a + b, 0); if (!t) return vals.map(() => 0);
+  const raw = vals.map(v => v * 100 / t), fl = raw.map(Math.floor); let left = 100 - fl.reduce((a, b) => a + b, 0);
+  raw.map((v, i) => [v - fl[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { fl[i]++; left--; } });
+  return fl;
+}
+// 指数（ファイルに無いときは1着の見込みから出す。50＝平均の馬、10で2倍）
+function idxOf(h, n) { if (h['指数'] != null) return h['指数']; const p = Math.max(h['一着'], 0.5) / 100; return Math.round(Math.min(100, Math.max(0, 50 + 10 / Math.LN2 * Math.log(p * n)))); }
+const tabs = document.getElementById('tabs');
+views.forEach(v => {
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'tab-' + v; b.textContent = v;
+  b.addEventListener('click', () => { view = v; try { localStorage.setItem('nar-rank-view', v); } catch (e) {} render(); });
+  tabs.appendChild(b);
+});
+
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function minutes(hhmm) { const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; }
+function nowMinutesJST() {
+  const d = new Date(); const jst = new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000);
+  const ymd = jst.getFullYear() * 10000 + (jst.getMonth() + 1) * 100 + jst.getDate();
+  return { ymd: String(ymd), min: jst.getHours() * 60 + jst.getMinutes() };
+}
+
+function raceCard(r, state) {
+  const sd = r['芝ダ'] === '芝' ? 'turf' : 'dirt';
+  const isNew = /新馬/.test(r['レース名'] || '');
+  const front = r['馬'].filter(h => h['脚質'] === '逃げ' || h['脚質'] === '先行').length;
+  const n = r['馬'].length;
+  const mid = /^直した/.test(r['昼の見直し'] || '');
+  const sh1 = to100(r['馬'].map(h => h['一着'])), sh2 = to100(r['馬'].map(h => h['連対'] ?? null)), sh3 = to100(r['馬'].map(h => h['三着内']));
+  const m1 = mid ? to100(r['馬'].map(h => h['朝の一着'] ?? null)) : [], m3 = mid ? to100(r['馬'].map(h => h['朝の三着内'] ?? null)) : [];      // 朝の数字も同じ割り振りで出す
+  const rows = r['馬'].map((h, k) => {
+    const tags = [];
+    // 平均タイム指数（過去3走）：80＝その場・距離の勝ち馬のふつうの速さ、1000mあたり0.1秒速いごとに＋1
+    const tv = h['タイム平均'] == null ? '—' : Math.round(80 + 10 * h['タイム平均']);
+    const SC = { '逃げ': 's-nige', '先行': 's-senko', '差し': 's-sashi', '追込': 's-oikomi' };
+    if (h['脚質']) tags.push(`<span class="tag ${SC[h['脚質']] || 'run'}" title="先頭の見込み ${h['逃げ見込み']}%・3番手以内の見込み ${h['先行見込み']}%">${esc(h['脚質'])}</span>`);
+    if (h['向き']) tags.push(`<span class="tag">${esc(h['向き'])}</span>`);
+    if (h['印']) tags.push(`<span class="tag">${esc(h['印'])}${h['来た場'] ? '（' + esc(h['来た場']) + '）' : ''}</span>`);
+    if (h['不利明け']) h['不利明け'].split('・').forEach(t => tags.push(`<span class="tag flag">${esc(t)}</span>`));
+    if (h['型']) tags.push(`<span class="tag ${h['型'].includes('来やすい') ? 'up' : 'down'}">${esc(h['型'])}</span>`);
+    if (h['体重増減'] != null) { const z = h['体重増減']; tags.push(`<span class="tag wt ${z >= 4 ? 'plus' : (z <= -4 ? 'minus' : '')}">馬体重 ${z > 0 ? '+' : ''}${z}kg</span>`); }
+    const cls = h['順位'] <= 3 ? 'top3' : (h['三着内'] < 10 ? 'low' : '');
+    const ix = idxOf(h, n);
+    const pct = v => v == null ? '—' : v + '%';
+    const [v1, v2, v3] = mode === 'share' ? [sh1[k], sh2[k], sh3[k]] : [h['一着'], h['連対'] ?? null, h['三着内']];
+    const [a1, a3] = mode === 'share' ? [m1[k], m3[k]] : [h['朝の一着'], h['朝の三着内']];
+    const chg = (mid && a1 != null && (a1 !== v1 || a3 !== v3)) ? `<span class="chg">朝は 1着${a1}%・3着内${a3}%</span>` : '';
+    return `<div class="hr ${cls}"><span class="rk">${h['順位']}</span><span class="um">${h['馬番']}</span>` +
+      `<div class="hn"><span class="n">${esc(h['馬名'])}</span>${tags.join('')}${chg}</div>` +
+      `<div class="st"><div class="bar"><i><b style="width:${ix}%"></b></i><span>${ix}</span></div>` +
+      `<span class="tv">${tv}</span><span class="p1">${pct(v1)}</span><span class="p1">${pct(v2)}</span><span class="p1">${pct(v3)}</span></div></div>`;
+  }).join('');
+  const wides = (r['ワイド'] || []).map(p => `<span>${esc(p['組'])} <b>${p['見込み']}%</b></span>`).join('');
+  const pairs = (r['馬連'] || []).map(p => `<span>${esc(p['組'])} <b>${p['見込み']}%</b></span>`).join('');
+  const any3 = r['三組'] != null ? `<span>3組のどれか <b>${r['三組']}%</b></span>` : '';
+  return `<article class="race ${state}" id="r-${esc(r['場'])}-${r['R']}">` +
+    `<div class="rh"><span class="no">${esc(r['場'])}${r['R']}R</span><span class="t">${esc(r['発走'])}</span>` +
+    `<span class="nm">${esc(r['レース名'])}${r['格'] ? '（' + esc(r['格']) + '）' : ''}</span>` +
+    `<span class="cond ${sd}">${esc(r['芝ダ'])}${esc(r['距離'])}m</span><span class="t">${r['頭数']}頭</span>` +
+    (r['馬場'] ? `<span class="t">馬場 ${esc(r['馬場'])}</span>` : '') + `<span class="pace">前に行く馬 ${front}頭</span>` +
+    (isNew ? '<span class="warn">新馬：人気を重く</span>' : '') + (mid ? '<span class="mid">昼に見直し</span>' : '') +
+    (state === 'next' ? '<span class="nextlabel">次のレース</span>' : '') + `</div>` +
+    `<div class="hr hd"><span class="rk">順</span><span class="um">馬番</span><div class="hn">馬名</div>` +
+    `<div class="st"><span>指数</span><span>平均タイム</span><span class="p1">1着</span><span class="p1">連対</span><span class="p1">3着内</span></div></div>${rows}` +
+    (pairs ? `<div class="pairs"><span>馬連</span>${pairs}${any3}</div>` : '') +
+    (wides ? `<div class="pairs"><span>ワイド</span>${wides}</div>` : '') + `</article>`;
+}
+
+function render() {
+  views.forEach(v => document.getElementById('tab-' + v).setAttribute('aria-pressed', String(v === view)));
+  document.querySelectorAll('#mode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === mode)));
+  let rs = DATA['レース'].slice();
+  if (view === '発走順') rs.sort((a, b) => (minutes(a['発走']) ?? 9999) - (minutes(b['発走']) ?? 9999));
+  else rs = rs.filter(r => r['場'] === view).sort((a, b) => a['R'] - b['R']);
+  const now = nowMinutesJST(); const today = now.ymd === DATA['日付'];
+  let nextKey = null;
+  if (today) { const up = DATA['レース'].filter(r => (minutes(r['発走']) ?? -1) >= now.min).sort((a, b) => minutes(a['発走']) - minutes(b['発走'])); if (up.length) nextKey = up[0]['場'] + up[0]['R']; }
+  const list = document.getElementById('list');
+  list.innerHTML = rs.length ? rs.map(r => {
+    const t = minutes(r['発走']); let st = '';
+    if (today && t != null && t < now.min) st = 'past';
+    if (nextKey === r['場'] + r['R']) st = 'next';
+    return raceCard(r, st);
+  }).join('') : '<p class="empty">レースがありません。</p>';
+  goLabel();
+}
+let lastNext = null;
+function nextKeyNow() {
+  const now = nowMinutesJST(); if (now.ymd !== DATA['日付']) return 'x';
+  const up = DATA['レース'].filter(r => (minutes(r['発走']) ?? -1) >= now.min).sort((a, b) => minutes(a['発走']) - minutes(b['発走']));
+  return up.length ? up[0]['場'] + up[0]['R'] : 'done';
+}
+// 右下のボタン：今の表示の中で、まだ発走していない最初のレースまで飛ぶ（全部終わったら最後のレース）
+function goLabel() {      // 今の表示（発走順か、その場のタブ）の中の次のレース
+  const b = document.getElementById('gonow'); if (!b) return;
+  const now = nowMinutesJST();
+  if (now.ymd !== DATA['日付']) { b.textContent = 'はじめのレースへ'; return; }
+  const up = DATA['レース'].filter(r => (view === '発走順' || r['場'] === view) && (minutes(r['発走']) ?? -1) >= now.min)
+    .sort((a, c) => minutes(a['発走']) - minutes(c['発走']));
+  b.textContent = up.length ? `次 ${up[0]['場']}${up[0]['R']}R ${up[0]['発走']} ↓` : '最後のレースへ';
+}
+document.getElementById('gonow').addEventListener('click', () => {
+  const k = nextKeyNow(); if (k !== lastNext) { lastNext = k; render(); goLabel(); }
+  const cards = [...document.querySelectorAll('#list .race')];
+  const target = cards.find(c => !c.classList.contains('past')) || cards[cards.length - 1];
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+render(); lastNext = nextKeyNow(); goLabel();
+setInterval(() => { const k = nextKeyNow(); if (k !== lastNext) { lastNext = k; render(); goLabel(); } }, 60000);      // 次のレースが変わったときだけ描き直す
+</script>
+
+</body></html>

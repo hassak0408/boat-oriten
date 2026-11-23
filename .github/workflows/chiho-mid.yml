@@ -1,0 +1,60 @@
+# 地方の昼の見直し（検証計画 EM1）：朝の一覧に、当日の馬体重とその日の前のレースの結果を足して、まだ走っていないレースの見込みを直す。
+#   手で動かす（day 空なら今日）。出力は非公開のリポジトリ hassak0408/chiho-keiba の data/picks/日付_mid.json。
+name: chiho-mid
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付 YYYYMMDD（空なら今日）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: chiho-mid
+  cancel-in-progress: false
+jobs:
+  mid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: 見直す
+        env:
+          DAY: ${{ inputs.day }}
+        run: |
+          if [ -z "$DAY" ]; then DAY=$(TZ=Asia/Tokyo date +%Y%m%d); fi
+          if ! [[ "$DAY" =~ ^[0-9]{8}$ ]]; then echo "日付が違う"; exit 1; fi
+          echo "DAY=$DAY" >> "$GITHUB_ENV"
+          if [ ! -f "store/data/picks/$DAY.json" ]; then echo "朝の一覧が無い"; exit 0; fi
+          python chiho/an/mid.py store "$DAY"
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          F="data/picks/$DAY""_mid.json"
+          if [ ! -f "$F" ]; then echo "見直しなし"; exit 0; fi
+          cp "$F" /tmp/mid_keep.json
+          for i in 1 2 3 4 5; do
+            git fetch -q --depth 1 origin main && git reset -q --hard origin/main
+            cp /tmp/mid_keep.json "$F"; git add "$F"
+            if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+            git commit -q -m "地方 昼の見直し $DAY"
+            if git push -q origin HEAD:main; then echo "保存した"; exit 0; fi
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1
