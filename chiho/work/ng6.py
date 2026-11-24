@@ -31,10 +31,11 @@ J['騎手'] = J['騎手'].map(jfeat.clean_person)
 Hd = Hd.merge(J.drop_duplicates(K + ['馬番']), on=K + ['馬番'], how='left').sort_values(['馬', '年月日', '場', 'R'])
 Hd['前騎手'] = Hd.groupby('馬')['騎手'].shift(1)
 Hd['替'] = Hd['前騎手'].notna() & Hd['騎手'].notna() & (Hd['騎手'] != Hd['前騎手'])
-Hd = Hd[Hd['芝ダ'].isin(['芝', 'ダ'])]
+Hd = Hd[Hd['芝ダ'].isin(['芝', 'ダート'])]   # 過去の表の書き方は「芝」「ダート」（最初は「ダ」と取り違えて芝だけになっていた）
 E = Hd[(Hd['先頭率5'] >= 0.4) & Hd['騎手'].notna() & (Hd['騎手'] != '')].copy()
 E['期'] = np.where(E['年月日'] <= '20231231', 1, 2)
-E = E.merge(P, on=K + ['馬番'], how='left')
+E = E.merge(P, on=K + ['馬番'], how='inner')   # 平地で本番の形の見込みがあるレースだけ（癖を作る所も確かめる所も）
+print('芝ダ', E['芝ダ'].value_counts().to_dict())
 print('逃げ型の騎乗', len(E), '／最初のコーナーが分かる', int(E['先頭'].notna().sum()), '／AIの見込みあり', int(E['p3'].notna().sum()), '／乗り替わり', int(E['替'].sum()))
 
 def tend(S):
