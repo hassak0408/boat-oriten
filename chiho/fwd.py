@@ -12,6 +12,7 @@
   13) FR2：地方の、脚質が逃げ・先行×来やすい型×4〜6番人気の単勝（2026-11-22〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
+  14) BL3：地方の、AIと窓口のオッズを合わせた見込みで割安な馬の単勝（2026-11-26〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
   5) WD8：地方の締切前（発走の1分以上前でいちばんあとの回）のワイドのオッズと、AIの見込みを合わせた見込みの値打ち別（2026-11-12〜。重みは 11/11 までの167レースで決めて固定）
 使い方：python chiho/fwd.py STORE [nosave]"""
@@ -352,6 +353,39 @@ for d in sorted(glob.glob(f'{store}/data/daily/2*')):
 lines.append('【地方】E1：当日の馬体重の増減と単勝（1〜6番人気。11/18〜。−9〜−4kg と +4〜+9kg がそれぞれ1,000頭たまったら判断）')
 for pg in ('1〜3番人気', '4〜6番人気'):
     lines.append(f'  {pg}：' + '・'.join(f"{b} {WB[(pg, b)][0]}頭 回収{pct(WB[(pg, b)][2] / 100, WB[(pg, b)][0])}" for b in ('−10以下', '−9〜−4', '±3', '+4〜+9', '+10以上') if (pg, b) in WB) if any((pg, b) in WB for b in ('−10以下', '−9〜−4', '±3', '+4〜+9', '+10以上')) else f'  {pg}：まだ無い')
+lines.append('')
+# 14) BL3：地方の、AIと窓口のオッズを合わせた見込みで割安な馬の単勝（検証計画 BL3。2026-11-26〜。α・β は BL2 の全部の日の値に固定）
+BL3 = dict(a=0.447, b=0.757, r=1.3, lo=3.0, hi=20.0, FROM='20261126')
+def bl3_rows(frm, to='99999999'):
+    """[(日, 選んだ時の人気の見込み, 1着か, 払戻)]：q ∝ 一着^a × 人気^b（足して1）、q÷人気 ≥ r・表示の単勝 lo〜hi 倍"""
+    out = []
+    for k, r in PK['地方'].items():
+        if not (frm <= k[0] <= to) or k not in RES['地方']: continue
+        res = RES['地方'][k]; fin = res['fin']
+        if not res['tan']: continue
+        sw = snap_last('地方', k[0]).get((k[1], k[2]), {})
+        hs = [h for h in r['馬'] if h['馬番'] in sw and fin.get(h['馬番']) == fin.get(h['馬番'])]
+        if len(hs) < 2: continue
+        ai = np.array([max(float(h.get('一着') or 0), 0.5) / 100 for h in hs]); mk = np.array([1 / sw[h['馬番']][0] for h in hs])
+        ai, mk = ai / ai.sum(), mk / mk.sum(); q = ai ** BL3['a'] * mk ** BL3['b']; q = q / q.sum()
+        for h, qq, mm in zip(hs, q, mk):
+            o = sw[h['馬番']][0]
+            if qq / mm >= BL3['r'] and BL3['lo'] <= o <= BL3['hi']:
+                win = fin.get(h['馬番']) == 1; out.append((k[0], float(mm), bool(win), res['tan'].get(h['馬番'], 0) if win else 0))
+    return out
+def bl3_line(R, nm):
+    if not R: return f'  {nm}：まだ無い'
+    n = len(R); w = sum(x[2] for x in R); e = sum(x[1] for x in R); pay = sum(x[3] for x in R)
+    return f'  {nm}：{n}頭・1着 {w}・実際÷人気 {w / e:.2f}・単勝の回収 {pct(pay / 100, n)}'
+B3 = bl3_rows(BL3['FROM'])
+lines.append('【地方】BL3：AIと窓口のオッズを合わせた見込みで割安な馬（合わせた÷人気 1.3以上・表示の単勝3〜20倍）の単勝（11/26〜。300頭で判断）')
+lines.append(bl3_line(B3, 'これからのレース'))
+if len(B3) >= 300:
+    B3d = pd.DataFrame(B3, columns=['日', 'm', 'w', '払戻']); ds = B3d['日'].unique(); rf = np.random.default_rng(0); bs = []
+    for _ in range(1000):
+        X = pd.concat([B3d[B3d['日'] == d] for d in rf.choice(ds, len(ds))]); bs.append(X['払戻'].mean())
+    lines.append(f"  回収の95%幅 {np.nanpercentile(bs, 2.5):.0f}〜{np.nanpercentile(bs, 97.5):.0f}%（下の端が100%を超えれば割安）")
+lines.append(bl3_line(bl3_rows('20261025', '20261124'), '数字だけ：α・β を決めた26日（10/25〜11/24。甘く出る）'))
 lines.append('')
 txt = '\n'.join(lines) + '\n'; print(txt)
 if not NOSAVE:
