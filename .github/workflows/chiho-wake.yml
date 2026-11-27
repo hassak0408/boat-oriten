@@ -1,5 +1,5 @@
 # 朝の仕事の目覚まし。GitHub の予約（cron）は、このリポジトリでは毎朝6〜9時間遅れて、朝の一覧に間に合わない（2026-11-25〜27 に続けて起きた）。
-#   なので予約に頼らず、この仕事が自分で眠って、決まった時刻（日本時間 6:30）に朝の仕事（chiho-rec・chiho-pick・jra-pick）を動かす。
+#   なので予約に頼らず、この仕事が自分で眠って、決まった時刻（日本時間 6:30）に朝の仕事（chiho-rec・chiho-pick・jra-pick）を動かす。jra-pick は日付を渡さずに動かす（今日の分。これで jra-odds も動く）。
 #   1回は5時間20分まで眠る。起きる時刻がそれより先なら、眠ったあと自分を動かし直す（鎖）。朝の仕事を動かしたら、次の日の 6:30 を起きる時刻にして自分を動かす。
 #   動いているのはいつも1本（concurrency。新しく動かした分は、今の分が終わるまで待つ）。予約（cron）の分も残してあり、先に一覧ができていればそちらはとばす。
 #   試し：dry=yes なら朝の仕事は動かさず、何をするかを書いて、1分後に dry=stop で自分を1回だけ動かす（自分を動かせるかの確かめ）。
@@ -63,6 +63,7 @@ jobs:
           fi
           gh workflow run chiho-rec.yml -R "$REPO" && echo "chiho-rec を動かした" || echo "chiho-rec を動かせなかった"
           gh workflow run chiho-pick.yml -R "$REPO" && echo "chiho-pick を動かした" || echo "chiho-pick を動かせなかった"
-          gh workflow run jra-pick.yml -R "$REPO" -f day="$DAY" && echo "jra-pick を動かした（day=$DAY）" || echo "jra-pick を動かせなかった"
+          # jra-pick は日付を渡さない（空＝今日）。日付を渡すと、締切前のオッズの記録（jra-odds）を動かす段がとばされる（11/28 に気づいた）
+          gh workflow run jra-pick.yml -R "$REPO" && echo "jra-pick を動かした（今日 $DAY）" || echo "jra-pick を動かせなかった"
           gh workflow run chiho-wake.yml -R "$REPO" -f at="$NEXT"
           echo "次の起きる時刻 $NEXT"
