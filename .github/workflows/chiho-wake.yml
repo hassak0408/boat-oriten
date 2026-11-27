@@ -1,0 +1,68 @@
+# 朝の仕事の目覚まし。GitHub の予約（cron）は、このリポジトリでは毎朝6〜9時間遅れて、朝の一覧に間に合わない（2026-11-25〜27 に続けて起きた）。
+#   なので予約に頼らず、この仕事が自分で眠って、決まった時刻（日本時間 6:30）に朝の仕事（chiho-rec・chiho-pick・jra-pick）を動かす。
+#   1回は5時間20分まで眠る。起きる時刻がそれより先なら、眠ったあと自分を動かし直す（鎖）。朝の仕事を動かしたら、次の日の 6:30 を起きる時刻にして自分を動かす。
+#   動いているのはいつも1本（concurrency。新しく動かした分は、今の分が終わるまで待つ）。予約（cron）の分も残してあり、先に一覧ができていればそちらはとばす。
+#   試し：dry=yes なら朝の仕事は動かさず、何をするかを書いて、1分後に dry=stop で自分を1回だけ動かす（自分を動かせるかの確かめ）。
+name: chiho-wake
+on:
+  workflow_dispatch:
+    inputs:
+      at:
+        description: '起きる時刻（日本時間 YYYYMMDDHHMM）。空なら次の 6:30'
+        required: false
+        default: ''
+      dry:
+        description: 'yes なら試し（朝の仕事は動かさない）'
+        required: false
+        default: ''
+permissions:
+  actions: write
+  contents: read
+concurrency:
+  group: chiho-wake
+  cancel-in-progress: false
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: 眠って、時刻になったら朝の仕事を動かす
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          AT: ${{ github.event.inputs.at }}
+          DRY: ${{ github.event.inputs.dry }}
+        run: |
+          set -e
+          if [ "$DRY" = "stop" ]; then echo "（試し）自分を動かせた。ここで終わる"; exit 0; fi
+          now=$(date +%s)
+          if [ -z "$AT" ]; then
+            t=$(TZ=Asia/Tokyo date -d "$(TZ=Asia/Tokyo date +%Y-%m-%d) 06:30" +%s)
+            [ "$t" -le "$now" ] && t=$(( t + 86400 ))
+          else
+            t=$(TZ=Asia/Tokyo date -d "${AT:0:4}-${AT:4:2}-${AT:6:2} ${AT:8:2}:${AT:10:2}" +%s)
+          fi
+          AT=$(TZ=Asia/Tokyo date -d "@$t" +%Y%m%d%H%M)
+          left=$(( t - now ))
+          echo "起きる時刻 $AT（日本時間）。あと $(( left / 60 )) 分"
+          MAX=$(( 320 * 60 ))
+          if [ "$left" -gt "$MAX" ]; then
+            sleep "$MAX"
+            gh workflow run chiho-wake.yml -R "$REPO" -f at="$AT" -f dry="$DRY"
+            echo "まだ早いので、自分を動かし直した（起きる時刻 $AT）"
+            exit 0
+          fi
+          if [ "$left" -gt 0 ]; then sleep "$left"; fi
+          DAY=$(TZ=Asia/Tokyo date +%Y%m%d)
+          NEXT=$(TZ=Asia/Tokyo date -d "@$(( t + 86400 ))" +%Y%m%d%H%M)
+          if [ "$DRY" = "yes" ]; then
+            echo "（試し）ここで chiho-rec・chiho-pick・jra-pick（day=$DAY）を動かす。次の起きる時刻は $NEXT"
+            sleep 60
+            gh workflow run chiho-wake.yml -R "$REPO" -f dry=stop
+            exit 0
+          fi
+          gh workflow run chiho-rec.yml -R "$REPO" && echo "chiho-rec を動かした" || echo "chiho-rec を動かせなかった"
+          gh workflow run chiho-pick.yml -R "$REPO" && echo "chiho-pick を動かした" || echo "chiho-pick を動かせなかった"
+          gh workflow run jra-pick.yml -R "$REPO" -f day="$DAY" && echo "jra-pick を動かした（day=$DAY）" || echo "jra-pick を動かせなかった"
+          gh workflow run chiho-wake.yml -R "$REPO" -f at="$NEXT"
+          echo "次の起きる時刻 $NEXT"
