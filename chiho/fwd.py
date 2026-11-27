@@ -12,6 +12,7 @@
   13) FR2：地方の、脚質が逃げ・先行×来やすい型×4〜6番人気の単勝（2026-11-22〜）
   7) WD9：地方のワイドを、AI・ワイドのオッズ・3連複のオッズを合わせた見込みの値打ち別（2026-11-18〜）
   8) E1：地方の当日の馬体重の増減の帯ごとの単勝（1〜6番人気。2026-11-18〜）
+  15) ZN4：地方の、かなり来やすい型×7番人気以下の複勝（2026-11-27〜）
   14) BL3：地方の、AIと窓口のオッズを合わせた見込みで割安な馬の単勝（2026-11-26〜）
   6) ZN1・ZN2：地方の市場のずれの印（型ごとの頭数・1着・単勝の回収）と、来やすい型（かなり含む）で4〜6番人気（確定）の単勝（2026-11-18〜）
   5) WD8：地方の締切前（発走の1分以上前でいちばんあとの回）のワイドのオッズと、AIの見込みを合わせた見込みの値打ち別（2026-11-12〜。重みは 11/11 までの167レースで決めて固定）
@@ -37,12 +38,15 @@ def nar_results():
         if not (os.path.exists(hp) and os.path.exists(pp)): continue
         H, P = rd(hp), rd(pp)
         for k, g in H.groupby(['競走年月日', '競馬場', 'レース番号']):
-            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={}, tan={}, Q={})
+            out[(k[0], k[1], int(k[2]))] = dict(fin=dict(zip(num(g['馬番']), num(g['着順']))), pop=dict(zip(num(g['馬番']), num(g['人気']))), odds={}, W={}, tan={}, Q={}, fuku={})
         for _, r in P.iterrows():
             k = (r['競走年月日'], r['競馬場'], int(r['レース番号']))
             if k not in out: continue
             a, y = num(r.get('単勝組番', '')), num(str(r.get('単勝払戻金（円）', '')).replace(',', ''))
             if a == a and y == y: out[k]['tan'][int(a)] = y
+            for i in (1, 2, 3):
+                a, y = num(r.get(f'複勝組番{i}', '')), num(str(r.get(f'複勝払戻金{i}（円）', '')).replace(',', ''))
+                if a == a and y == y: out[k]['fuku'][int(a)] = y
             a, b, y = num(r.get('馬複組番1', '')), num(r.get('馬複組番2', '')), num(str(r.get('馬複払戻金（円）', '')).replace(',', ''))
             if a == a and b == b and y == y: out[k]['Q'][frozenset((int(a), int(b)))] = y
             for i in (1, 2, 3):
@@ -386,6 +390,27 @@ if len(B3) >= 300:
         X = pd.concat([B3d[B3d['日'] == d] for d in rf.choice(ds, len(ds))]); bs.append(X['払戻'].mean())
     lines.append(f"  回収の95%幅 {np.nanpercentile(bs, 2.5):.0f}〜{np.nanpercentile(bs, 97.5):.0f}%（下の端が100%を超えれば割安）")
 lines.append(bl3_line(bl3_rows('20261025', '20261124'), '数字だけ：α・β を決めた26日（10/25〜11/24。甘く出る）'))
+lines.append('')
+# 15) ZN4：地方の、かなり来やすい型×窓口の人気7番人気以下の複勝（検証計画 ZN4。2026-11-27〜）
+Z4w, Z4a = [], []
+for k, r in PK['地方'].items():
+    if k[0] < '20261127' or k not in RES['地方']: continue
+    res = RES['地方'][k]; fin, pop = res['fin'], res['pop']
+    if not res['fuku']: continue
+    sw = snap_last('地方', k[0]).get((k[1], k[2]), {})
+    for h in r['馬']:
+        b = h['馬番']
+        if (h.get('型') or '') != '市場よりかなり来やすい型' or fin.get(b) != fin.get(b): continue
+        v = res['fuku'].get(b, 0)
+        if b in sw and sw[b][1] >= 7: Z4w.append((k[0], v))
+        if (pop.get(b) or 0) >= 7: Z4a.append((k[0], v))
+lines.append('【地方】ZN4：かなり来やすい型×7番人気以下の複勝（11/27〜。1,000頭で判断）')
+lines += [_ln(Z4w, '窓口で見える人気で7番人気以下').replace('1着', '3着内（払戻あり）'), _ln(Z4a, '数字だけ：確定の人気で7番人気以下').replace('1着', '3着内（払戻あり）')]
+if len(Z4w) >= 1000:
+    Z4d = pd.DataFrame(Z4w, columns=['日', '払戻']); ds = Z4d['日'].unique(); rf = np.random.default_rng(0); bs = []
+    for _ in range(1000):
+        X = pd.concat([Z4d[Z4d['日'] == d] for d in rf.choice(ds, len(ds))]); bs.append(X['払戻'].mean())
+    lines.append(f"  回収の95%幅 {np.nanpercentile(bs, 2.5):.0f}〜{np.nanpercentile(bs, 97.5):.0f}%（下の端が100%を超えれば割安）")
 lines.append('')
 txt = '\n'.join(lines) + '\n'; print(txt)
 if not NOSAVE:
