@@ -4,6 +4,9 @@
 - 当日のオッズ（中間オッズ）は、発走の16分前〜1分後のレースがある時だけ5分ごとに読み、そのレースの分だけを
   ファイルの作成時刻・発走まで分つきで odds_snap.csv.gz に足していく。
   残す賭式は 単勝・複勝・枠複・馬複・馬単・ワイド・3連複（3連単は量が多いので残さない）。
+- 2026-11-28 から、5場の外の場（ばんえいを除く）の中間オッズも、同じ読み込み（全部の場が1つのファイルに入っている）から、
+  発走の16分前〜1分後の分だけ odds_snap_other.csv.gz に足す（はっさくさんの「頼む」。研究の記録だけで、読み込みの回数は増えない）。
+  レース情報のファイル（race_*.csv.gz）は今までどおり5場の分だけ。外の場の発走予定はレース一覧の全部の行から作る。
 - サイトへの読み込みは、どれも2分以上あける（説明書の目安：当日ファイルは約2分に1回まで）。
 - 30分ごとと最後に STORE へ保存する。最終レースの20分後に結果入りのレース情報を読んで終わる。
 使い方：python chiho/rec.py STORE 最大の分 [--once]
@@ -13,6 +16,8 @@ import requests
 
 BASE = 'https://www.keiba.go.jp/KeibaWeb/DataDownload/'
 TRACKS = ['盛岡', '水沢', '園田', '姫路', '笠松']
+EXCLUDE_OTHER = ('帯広',)     # ばんえいは別の競技なので、外の場のオッズにも残さない
+SCHED_OTHER = {}              # 5場の外の場の今日の発走予定 {(場, 日付, R): 時刻}
 KEEP_BETS = ('単勝', '複勝', '枠複', '馬複', '馬単', 'ワイド', '３連複', '3連複')
 UA = 'Mozilla/5.0 (personal research; daily files, odds every 5 min only around post time, race info every 30 min)'
 JST = dt.timezone(dt.timedelta(hours=9))
@@ -104,6 +109,16 @@ def fetch_race(day_dir, day):
         write_gz(f'{day_dir}/race_{kind}.csv.gz', head, body)
         if not os.path.exists(f'{day_dir}/race_{kind}_am.csv.gz'):
             write_gz(f'{day_dir}/race_{kind}_am.csv.gz', head, body)
+        if kind == 'racelist' and '競馬場' in rows[0]:
+            h0 = rows[0]; jh, jr, jt, jd = h0.index('競馬場'), h0.index('レース番号'), h0.index('発走時刻'), h0.index('競走年月日')
+            SCHED_OTHER.clear()
+            for x in rows[1:]:
+                try:
+                    if x[jd] != day or any(t in x[jh] for t in TRACKS) or any(e in x[jh] for e in EXCLUDE_OTHER): continue
+                    hhmm = int(re.sub(r'\D', '', x[jt])); d = dt.datetime.strptime(x[jd], '%Y%m%d').replace(tzinfo=JST)
+                    SCHED_OTHER[(x[jh], x[jd], x[jr])] = d.replace(hour=hhmm // 100, minute=hhmm % 100)
+                except (ValueError, IndexError):
+                    pass
         if kind == 'racelist':
             ih, ir, it, idt = head.index('競馬場'), head.index('レース番号'), head.index('発走時刻'), head.index('競走年月日')
             for x in body:
@@ -113,9 +128,9 @@ def fetch_race(day_dir, day):
                     sched[(x[ih], x[idt], x[ir])] = d.replace(hour=hhmm // 100, minute=hhmm % 100)
                 except (ValueError, IndexError):
                     pass
-    meta = {'取得': ts.isoformat(), '読んだ時刻': now().isoformat(), '今日のレース': len(sched), 'ファイル': info}
+    meta = {'取得': ts.isoformat(), '読んだ時刻': now().isoformat(), '今日のレース': len(sched), '外の場の今日のレース': len(SCHED_OTHER), 'ファイル': info}
     json.dump(meta, open(f'{day_dir}/race_meta.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print(now().strftime('%H:%M'), 'レース情報', ts.strftime('%H:%M:%S'), '今日のレース', len(sched),
+    print(now().strftime('%H:%M'), 'レース情報', ts.strftime('%H:%M:%S'), '今日のレース', len(sched), '外の場', len(SCHED_OTHER),
           {k: v['行'] for k, v in info.items()}, flush=True)
     return sched
 
@@ -124,11 +139,26 @@ def fetch_odds(day_dir, sched, force=False):
     """発走の16分前〜1分後のレースがあれば中間オッズを読み、その分を足す。読み込みをしたら True。"""
     t = now()
     active = {k for k, post in sched.items() if -WIN_AFTER <= (post - t).total_seconds() / 60 <= WIN_BEFORE}
-    if not active and not force: return False
+    active_o = {k for k, post in SCHED_OTHER.items() if -WIN_AFTER <= (post - t).total_seconds() / 60 <= WIN_BEFORE}
+    if not active and not active_o and not force: return False
     zf, ts = get(BASE + 'OddsDataDownload?type=daily')
     if zf is None: return True
-    n, seen = 0, {}
+    n, seen, n_o = 0, {}, 0
     for name, rows in read_csvs(zf):
+        if rows and '賭式' in rows[0] and '競馬場' in rows[0] and (active_o or force):     # 5場の外の場の分（研究の記録）
+            h0 = rows[0]; jh, jr, jd, jb = h0.index('競馬場'), h0.index('レース番号'), h0.index('競走年月日'), h0.index('賭式')
+            po = f'{day_dir}/odds_snap_other.csv.gz'; new_o = not os.path.exists(po)
+            with gzip.open(po, 'at', encoding='utf-8', newline='') as f:
+                w = csv.writer(f)
+                if new_o: w.writerow(['取得', '発走まで分'] + h0)
+                for x in rows[1:]:
+                    if len(x) <= max(jh, jr, jd, jb): continue
+                    k = (x[jh], x[jd], x[jr])
+                    if any(tt in x[jh] for tt in TRACKS) or any(e in x[jh] for e in EXCLUDE_OTHER): continue
+                    if not force and k not in active_o: continue
+                    if not any(b == x[jb].strip() for b in KEEP_BETS): continue
+                    post = SCHED_OTHER.get(k)
+                    w.writerow([ts.strftime('%Y-%m-%d %H:%M:%S'), round((post - ts).total_seconds() / 60, 1) if post else ''] + x); n_o += 1
         head, body = keep_tracks(rows)
         if '賭式' not in head:
             print('オッズの見出しが違う', name, head[:12], flush=True); continue
@@ -151,7 +181,7 @@ def fetch_odds(day_dir, sched, force=False):
                 mins = round((post - ts).total_seconds() / 60, 1) if post else ''
                 w.writerow([ts.strftime('%Y-%m-%d %H:%M:%S'), mins] + x); n += 1
                 seen[x[ib]] = seen.get(x[ib], 0) + 1
-    print(now().strftime('%H:%M'), 'オッズ', ts.strftime('%H:%M:%S'), '対象のレース', len(active), '行', n, seen, flush=True)
+    print(now().strftime('%H:%M'), 'オッズ', ts.strftime('%H:%M:%S'), '対象のレース', len(active), '行', n, seen, '／外の場のレース', len(active_o), '行', n_o, flush=True)
     return True
 
 
@@ -214,26 +244,28 @@ def main():
             s = fetch_race(day_dir, day); last_race = time.time()
             if s is not None: sched = s
             elif sched is None: last_race = time.time() - RACE_EVERY + RETRY   # 読めなければ10分後にもう一度
-            if sched == {}:
+            if sched == {} and not SCHED_OTHER:
                 print('今日は対象の場のレースが無い', flush=True); finished = True; break
             if first and sched:          # 朝の出馬表はすぐ保存する（来そうな馬の一覧が使う）
                 save(store, rel, f'毎日の記録 {day}（朝の出馬表）'); last_save = time.time()
                 if not had_am: start_pick(day)      # この回で初めて朝の出馬表を置いたときだけ
-        if sched:
-            if now() > max(sched.values()) + dt.timedelta(minutes=AFTER_LAST):
+        allp = dict(sched or {}); allp.update(SCHED_OTHER)        # 5場と外の場の発走予定（終わりとオッズは全部で見る）
+        if allp:
+            if now() > max(allp.values()) + dt.timedelta(minutes=AFTER_LAST):
                 fetch_race(day_dir, day); finished = True; break     # 結果入りを読んで終わる
-            if time.time() - last_odds >= ODDS_EVERY and fetch_odds(day_dir, sched):
+            if time.time() - last_odds >= ODDS_EVERY and fetch_odds(day_dir, sched or {}):
                 last_odds = time.time()
         if time.time() - last_save >= SAVE_EVERY:
             save(store, rel, f'毎日の記録 {day}（途中）'); last_save = time.time()
         time.sleep(15)
-    if not finished and now() >= end and sched:
+    if not finished and now() >= end and (sched or SCHED_OTHER):
         fetch_race(day_dir, day)
     save(store, rel, f'毎日の記録 {day}')
     if finished or now() >= end:
         left = 0
     else:
-        left = max(1, sum(1 for p in (sched or {}).values() if p > now()))
+        allp = dict(sched or {}); allp.update(SCHED_OTHER)
+        left = max(1, sum(1 for p in allp.values() if p > now()))
     output(left=left, ymd=day)
 
 
