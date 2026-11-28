@@ -1,0 +1,90 @@
+# 地方：5場の外の場の、今日の AI の一覧（研究の記録。名古屋はページにも参考で載せる）。
+#   chiho/an/nk_pipeo.py を、まとまり 1〜5（名古屋・金沢・佐賀と高知・門別・南関東）で動かし、STORE の data/picks_extra/日付_名前.json・.txt に置く。
+#   全部の場のデータ（data_all）は、5場の一覧（chiho-pick）が今朝読み直したあとに使う。5場の開催が無い日は chiho-pick が読まないので、ここで1回だけ読む（1日1回の目安を守る）。
+#   目覚まし（chiho-wake）が毎朝 6:30 に動かす。はっさくさんの「頼む」（2026-11-28：5場の外の場もオッズとAIの記録を取る）。
+name: chiho-extra
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付 YYYYMMDD（空なら今日）'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: chiho-extra
+  cancel-in-progress: false
+jobs:
+  extra:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          repository: hassak0408/chiho-keiba
+          token: ${{ secrets.CHIHO_TOKEN }}
+          path: store
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pandas scikit-learn scipy lightgbm
+      - name: 5場の一覧（今朝の全部の場のデータ）を待つ
+        env:
+          DAY: ${{ inputs.day }}
+        run: |
+          D="${DAY:-$(TZ=Asia/Tokyo date +%Y%m%d)}"; echo "DAY=$D" >> "$GITHUB_ENV"
+          for i in $(seq 1 75); do
+            git -C store fetch -q --depth 1 origin main && git -C store reset -q --hard origin/main
+            if [ -f "store/data/picks/$D.json" ]; then echo "5場の一覧あり（全部の場のデータは今朝の分）"; exit 0; fi
+            f="store/data/daily/$D/race_meta.json"
+            if [ -f "$f" ] && grep -q '"今日のレース": 0' "$f"; then echo "5場の開催なし。全部の場のデータはここで読む"; echo "READ=1" >> "$GITHUB_ENV"; exit 0; fi
+            sleep 120
+          done
+          echo "待ちきれなかったので、今ある全部の場のデータで作る"
+      - name: 全部の場のデータを読む（5場の開催が無い日だけ。1日1回）
+        if: env.READ == '1'
+        env:
+          OUT: store/data_all
+          OUT5: store/data
+          VENUES: all
+          ODDS_MONTHS: ''
+        run: |
+          export RACE_MONTHS=$(python -c "
+          import time; t=time.localtime(time.time()+9*3600); y,m=t.tm_year,t.tm_mon
+          p=(y*100+m-1) if m>1 else (y-1)*100+12
+          print(f'{y}{m:02d}' + ('' if t.tm_mday>=10 else f' {p}'))")
+          python chiho/dl.py
+      - name: まとまりごとの一覧
+        run: |
+          mkdir -p store/data/picks_extra
+          NAMES=(x 名古屋 金沢 佐賀高知 門別 南関東)
+          for g in 1 2 3 4 5; do
+            out="/tmp/extra_$g"; rm -rf "$out"
+            if python chiho/an/nk_pipeo.py store "$g" "$DAY" "$out" > "/tmp/extra_$g.log" 2>&1; then
+              cp "$out/data/picks/$DAY.json" "store/data/picks_extra/${DAY}_${NAMES[$g]}.json"
+              cp "$out/data/picks/$DAY.txt" "store/data/picks_extra/${DAY}_${NAMES[$g]}.txt"
+              echo "まとまり $g（${NAMES[$g]}）できた"
+            else
+              echo "まとまり $g（${NAMES[$g]}）：作らなかった"; tail -2 "/tmp/extra_$g.log"
+            fi
+          done
+      - name: 保存
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/picks_extra data_all/race data_all/report.json data/race 2>/dev/null || true
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "5場の外の場の一覧 $DAY"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch -q --depth 5 origin main && (git rebase -q origin/main || git rebase --abort)
+            sleep 5
+          done
+          echo "保存できなかった"; exit 1

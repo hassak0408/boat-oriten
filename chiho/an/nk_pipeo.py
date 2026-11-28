@@ -1,11 +1,15 @@
 """地方：5場の外の場の今日の一覧（参考）。本番の pipe.py を、data_all（全部の場）から写したその場のまとまりのデータで動かす。
 学ぶデータ：まとまりの場（例：名古屋・金沢）の、今日より前のレース（data_all/race の月ごとの表）。今日の出馬表：data_all/race の今月の表の、今日・予想する場の行。
 5場で決めた直し（nar_fix.json など）はそのまま掛かるが、その場では確かめていない。出力：OUT/data/picks/日付.json・.txt（OUT は一時の置き場）。
-使い方：python chiho/an/nk_pipeo.py STORE まとまりの番号 日付YYYYMMDD OUT   （まとまり：1＝名古屋を予想・名古屋と金沢で学ぶ）"""
+使い方：python chiho/an/nk_pipeo.py STORE まとまりの番号 日付YYYYMMDD OUT   （まとまり：1＝名古屋、2＝金沢（どちらも名古屋と金沢で学ぶ）、3＝佐賀・高知、4＝門別、5＝南関東の4場）"""
 import os, sys, glob, shutil, tempfile, runpy, pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, '..', 'jra'))
-GROUPS = {1: (['名古屋'], ['名古屋', '金沢'])}
+GROUPS = {1: (['名古屋'], ['名古屋', '金沢']),                       # 名古屋（ページに参考で載せる）
+          2: (['金沢'], ['名古屋', '金沢']),
+          3: (['佐賀', '高知'], ['佐賀', '高知']),
+          4: (['門別'], ['門別']),
+          5: (['大井', '川崎', '船橋', '浦和'], ['大井', '川崎', '船橋', '浦和'])}   # 2〜5 は研究の記録（AIが窓口のオッズに足せるか）。ばんえいは入れない
 store, gno, day, out = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
 PRED, LEARN = GROUPS[gno]
 tmp = tempfile.mkdtemp(); n = 0
